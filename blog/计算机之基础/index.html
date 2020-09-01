@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>计算机之基础 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="计算机">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="计算机之基础" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%9F%BA%E7%A1%80//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="系统的硬件组成 总线 贯穿整个系统的是一组电子管道，称作总线，它携带信息字节并负责在各个部件间传递。总线通常被设计成传送定长的字节块，也就是字(">
+  <meta property="og:description" content="系统的硬件组成 总线 贯穿整个系统的是一组电子管道，称作总线，它携带信息字节并负责在各个部件间传递。总线通常被设计成传送定长的字节块，也就是字(">
+  <meta name="twitter:description" content="系统的硬件组成 总线 贯穿整个系统的是一组电子管道，称作总线，它携带信息字节并负责在各个部件间传递。总线通常被设计成传送定长的字节块，也就是字(">
+  <meta property="og:description" content="系统的硬件组成 总线 贯穿整个系统的是一组电子管道，称作总线，它携带信息字节并负责在各个部件间传递。总线通常被设计成传送定长的字节块，也就是字(" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之基础 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之基础 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之基础 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之基础 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之基础 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之基础 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之基础 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之基础 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之基础 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>计算机之基础</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月13日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            2000字 | 阅读大约需要4分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba">计算机</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/"><i>#计算机</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="系统的硬件组成">系统的硬件组成</h3>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/73693491.png" alt=""></p>
+<hr>
+<h4 id="总线">总线</h4>
+<blockquote>
+<p>贯穿整个系统的是一组电子管道，称作<code>总线</code>，它携带信息字节并负责在各个部件间传递。总线通常被设计成传送定长的字节块，也就是字(word)。字中的字节数(即字长)是一个基本的参数根据具体的系统而定(大部分4字节或者8字节)。解决不同设备之间的<code>通信</code></p>
+</blockquote>
+<p><strong>总线的分类：</strong></p>
+<p><strong>1. 片内总线：芯片内部的总线，寄存器与寄存器之间，寄存器与控制器、运算器之间。高集成度芯片内部的信息传输线</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/80766406.png" alt=""><br>
+<strong>2. 系统总线包含以下几个部分:</strong></p>
+<ul>
+<li><code>数据总线</code>(一般与CPU位数相同(32位，64位))：双向传输各个部件的数据信息、 数据总线的位数(总线宽度) 是数据中线的重要参数</li>
+<li><code>地址总线</code>(地址总线位数=n):指定源数据或目的数据在内存中的地址、地址总线的位数与存储单元有关</li>
+<li><code>控制总线</code>：用来发出各种控制信号的传输线、由控制总线从一个组件发给另外一个组件、可以监视不同组件之间的状态(就绪/未就绪)</li>
+</ul>
+<blockquote>
+<p>CPU、主内存、IO设备、各组件之间的信息传输线</p>
+</blockquote>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/80820868.png" alt=""></p>
+<p><code>总线的仲裁</code>：比如主存需要和硬盘或者IO设备交换数据，那么总线应该是由硬盘使用还是IO设备使用还是主存使用，为了解决不同设备使用的优先权的问题。</p>
+<p><strong>仲裁的方式：</strong></p>
+<ul>
+<li><code>链式查询</code>：电路复杂低，仲裁方式简单；优先级低的设备难以获得总线使用权；对电路故障比较敏感
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/82053996.png" alt=""></li>
+<li><code>计时器定时查询</code>：仲裁控制器会对设备编号并使用计数器累计计数；接受到仲裁信号后，往所有设备发出计数值；计数值与设备编号一致则获得总线使用权
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/82316248.png" alt=""></li>
+<li><code>独立请求</code>：每个设备均有总线独立连接仲裁器；设备可单独向仲裁器发送请求和接受请求；当同时收到多个请求信号，仲裁器有权按优先级分配使用权；响应速度快，有线顺序可动态改变；设备连线多，总线控制复杂。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/82624163.png" alt=""></li>
+</ul>
+<hr>
+<h4 id="io设备">I/O设备</h4>
+<p>系统与外部世界的联系通道。上图中有4个I/O设备：鼠标、键盘、显示器、长期存储数据和程序的磁盘驱动器(<code>磁盘</code>)。每个I/O设备都通过一个控制器或适配器与I/O总线相连。控制器和适配器之间的区别主要在于它们的封装方式。<code>控制器</code>是I/O设备本身或者系统的主印制电路板(主板)上的芯片组。而<code>适配器</code>则是一块插在主板插槽上的卡。</p>
+<p><strong>CPU与I/O设备的通信：</strong></p>
+<ul>
+<li><code>程序中断</code>：当外围I/O设备就绪时，向CPU发出中断信号；CPU有专门的电路响应中断信号；提供低速设备通知CPU的一种异步方式；CPU可以高速运转同时兼顾低速设备的响应
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/40576324.png" alt=""></li>
+<li><code>DMA</code>(直接存储器访问)：
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/40717847.png" alt=""></li>
+</ul>
+<hr>
+<h4 id="存储器">存储器</h4>
+<p>为什么计算机断电，内存数据丢失？磁盘数据不会丢失？</p>
+<ul>
+<li><code>主存储器</code>：是一个临时存储设备，在处理器执行程序时，用来存放程序和程序处理的数据。从物理上说，主存是由一组动态随机存取存储器(DRAM)芯片组成的。从逻辑上说，存储器是一个线程的字节数组，每个字节都有其唯一的地址(数组索引)，这些地址是从零开始的。
+内存：RAM(随机存取存储器：Random Access Memory)；通过电容存储数据，必须隔一段时间刷新一次；如果断电，那么一段时间后将丢失所有数据
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/61659859.png" alt=""></li>
+<li><code>辅存储器磁盘</code></li>
+</ul>
+<hr>
+<h4 id="处理器">处理器</h4>
+<p><code>CPU</code>简称处理器，核心是一个大小为一个字的存储设备(或寄存器)，称为程序计数器(PC)，任何时候PC都指向主存中某条机器语言指令。</p>
+<p><code>处理器</code>从程序计数器指向的内存处<code>读取</code>指令，<code>解释</code>指令中的位，<code>执行</code>该指令的简单操作，然后<code>更新</code>pc(程序计数器)，使其指向下一条指令，而这条指令并不一定和主内存中刚刚执行的指令相邻。</p>
+<p><code>寄存器文件</code>是一个小的存储设备，由一些单个字长的的寄存器组成，每个寄存器都有唯一的名字。</p>
+<p><code>ALU</code>(算数/逻辑单元)计算新的数据和地址值。</p>
+<p>下面使一些简单的例子，CPU在指令的要求下可能会执行这些操作：</p>
+<ul>
+<li><code>加载</code>：从主存中复制一个字节或者一个字到寄存器，以覆盖寄存器原来的内容。</li>
+<li><code>存储</code>：从寄存器复制一个字节或者一个字到主存中的某个位置，覆盖这个位置上原来的内容。</li>
+<li><code>操作</code>：把两个寄存器的内存复制到ALU，进行算数运算，并将结果放到一个寄存器中，覆盖原来的值。</li>
+<li><code>跳转</code>：从指令本身中抽取一个字，并将这个字复制到程序计数器(PC)中，以覆盖PC中原来的值</li>
+</ul>
+<p><strong>执行一个可运行程序的过程</strong></p>
+<blockquote>
+<p>我们在键盘上输入字符串，程序将字符逐一读入寄存器，在把它放到内存中。</p>
+</blockquote>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/76935283.png" alt=""></p>
+<blockquote>
+<p>可以直接使用存储器存储(DMA)技术，数据可以不通过处理器而直接从磁盘到主存</p>
+</blockquote>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/77108010.png" alt=""></p>
+<blockquote>
+<p>一旦文件中的代码和数据被加载到主存中，处理器就开始执行程序。这些指令产生的结果从内存复制到寄存器文件，在从寄存文件中复制到显示设备，最终显示。</p>
+</blockquote>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/77216462.png" alt=""></p>
+<p><strong>高速缓存工作原理</strong></p>
+<ul>
+<li><code>字</code>：是指存放在一个存储单元中的二进制代码组合</li>
+<li><code>字块</code>：存储在连续的存储单元中而被看作是一个单元的一组字</li>
+</ul>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/77269732.png" alt=""></p>
+<p><strong>高速缓存的替换策略：</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/63739573.png" alt=""></p>
+<ul>
+<li><code>随机算法</code></li>
+<li><code>先进先出算法(FIFO)</code>：把高速缓存看做是一个先进先出的队列；优先替换最先进入队列的字块</li>
+<li><code>最不经常使用算法(LFU)</code>：优先淘汰最不经常使用的字块；需要额外的空间记录使用频率</li>
+<li><code>最近最少使用算法(LRU)</code>: 优先淘汰一段时间内没有使用的字段；一般使用双向链表；把当前访问节点置于链表前面(保证链表头部节点是最近使用的)</li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/%E8%87%AA%E5%AD%A6%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%8C%87%E5%8D%97/" data-toggle="tooltip" data-placement="top" title="自学计算机科学指南">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu/" data-toggle="tooltip" data-placement="top" title="计算机之CPU">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/%E8%87%AA%E5%AD%A6%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%8C%87%E5%8D%97/"><i class="fa fa-link"></i>自学计算机科学指南</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

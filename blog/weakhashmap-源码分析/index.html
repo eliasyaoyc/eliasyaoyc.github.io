@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WeakHashMap 源码分析 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Java, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="WeakHashMap 源码分析" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/weakhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="WeakHashMap是一种弱引用map，内部的key会存储为弱引用，当jvm gc的时候，如果这些key没有强引用存在的话，会被gc回收掉，下一次当我们操作map的时候会把对应的Entry整个删除掉，基于这种特性，WeakHashMap特别适用于缓存处理。">
+  <meta property="og:description" content="WeakHashMap是一种弱引用map，内部的key会存储为弱引用，当jvm gc的时候，如果这些key没有强引用存在的话，会被gc回收掉，下一次当我们操作map的时候会把对应的Entry整个删除掉，基于这种特性，WeakHashMap特别适用于缓存处理。">
+  <meta name="twitter:description" content="WeakHashMap是一种弱引用map，内部的key会存储为弱引用，当jvm gc的时候，如果这些key没有强引用存在的话，会被gc回收掉，下一次当我们操作map的时候会把对应的Entry整个删除掉，基于这种特性，WeakHashMap特别适用于缓存处理。">
+  <meta property="og:description" content="WeakHashMap是一种弱引用map，内部的key会存储为弱引用，当jvm gc的时候，如果这些key没有强引用存在的话，会被gc回收掉，下一次当我们操作map的时候会把对应的Entry整个删除掉，基于这种特性，WeakHashMap特别适用于缓存处理。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="WeakHashMap 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="WeakHashMap 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">WeakHashMap 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="WeakHashMap 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="WeakHashMap 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">WeakHashMap 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="WeakHashMap 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="WeakHashMap 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">WeakHashMap 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>WeakHashMap 源码分析</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月8日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            3400字 | 阅读大约需要7分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/java">Java</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/map/"><i>#Map</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="问题">问题</h3>
+<ul>
+<li>
+<p>WeakHashMap使用的数据结构？</p>
+</li>
+<li>
+<p>WeakHashMap具有什么特性？</p>
+</li>
+<li>
+<p>WeakHashMap的用处？</p>
+</li>
+<li>
+<p>WeakHashMap使用String作为key是需要注意些什么？为什么？</p>
+</li>
+<li>
+<p>什么是弱引用？</p>
+</li>
+</ul>
+<hr>
+<h3 id="简述">简述</h3>
+<p><code>WeakHashMap</code>是一种<code>弱引用</code>map，内部的key会存储为弱引用，当jvm <code>gc</code>的时候，如果这些key没有<code>强引用</code>存在的话，会被gc回收掉，
+下一次当我们操作map的时候会把对应的Entry整个删除掉，基于这种特性，WeakHashMap特别适用于<code>缓存处理</code>。</p>
+<ul>
+<li>
+<p><code>强引用(Strong Reference)</code>：普通的的引用类型，new一个对象默认得到的引用就是<code>强引用</code>，只要对象存在强引用，就不会被GC。<code>(A a = new A())</code></p>
+</li>
+<li>
+<p><code>软引用(Soft Reference)</code>：相对较弱的引用，垃圾回收器会在<code>内存不足</code>时回收弱引用指向的对象。JVM会在抛出OOME前清理所有弱引用指向的对象，如果清理完还是内存不足， 才会抛出OOME。所以软引用一般用于实现<code>内存敏感缓存</code>。</p>
+</li>
+<li>
+<p><code>弱引用(Weak Reference)</code>：更弱的引用类型，垃圾回收器在GC时会回收此对象，也可以用于实现缓存，比如JDK提供的<code>WeakHashMap</code>。</p>
+</li>
+<li>
+<p><code>虚引用(Phantom Reference)</code>：一种特殊的引用类型，不能通过虚引用获取到关联对象，只是用于获取对象被<code>回收的通知</code>。</p>
+</li>
+</ul>
+<hr>
+<h3 id="源码分析">源码分析</h3>
+<h4 id="map-类图">Map 类图</h4>
+<p><img src="/img/blog/Java%E5%9F%BA%E7%A1%80/%E7%AE%80%E5%8D%95%E9%9B%86%E5%90%88/HashMap/WeChat6f2450b6c1bfded47ca2d79a4b44ddc3.png" alt=""></p>
+<hr>
+<h4 id="属性">属性</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#75715e">//默认初始容量为16
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_INITIAL_CAPACITY <span style="color:#f92672">=</span> 16<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">//最大容量1073741824
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> MAXIMUM_CAPACITY <span style="color:#f92672">=</span> 1 <span style="color:#f92672">&lt;&lt;</span> 30<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">//默认的加载因子(扩容因子)
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">float</span> DEFAULT_LOAD_FACTOR <span style="color:#f92672">=</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">75f</span><span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">//桶
+</span><span style="color:#75715e"></span>    Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> table<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">//元素个数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> size<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">//当桶的使用数量达到多少时进行扩容，threshold = capacity * loadFactor 默认是 12 = 16 * 0.75
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> threshold<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">//加载因子
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">float</span> loadFactor<span style="color:#f92672">;</span>
+    
+    <span style="color:#75715e">//引用队列
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ReferenceQueue<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> queue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReferenceQueue<span style="color:#f92672">&lt;&gt;();</span>
+</code></pre></div><p>上面的属性基本上和HashMap是一样。</p>
+<p><code>WeakHashMap</code>是一种<code>弱引用</code>map，则是通过<code>ReferenceQueue</code> 来实现的当弱键失效的时候会把Entry添加到这个队列中，当下次访问map的时候会把失效的Entry清除掉。</p>
+<hr>
+<h4 id="entry内部类">Entry内部类</h4>
+<p>WeakHashMap内部的存储节点, 没有key属性。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">extends</span> WeakReference<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">implements</span> Map<span style="color:#f92672">.</span><span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//可以发现没有key, 因为key是作为弱引用存到Reference类中
+</span><span style="color:#75715e"></span>        V value<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> hash<span style="color:#f92672">;</span>
+        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next<span style="color:#f92672">;</span>
+
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * Creates new entry.
+</span><span style="color:#75715e">         */</span>
+        Entry<span style="color:#f92672">(</span>Object key<span style="color:#f92672">,</span> V value<span style="color:#f92672">,</span>
+              ReferenceQueue<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> queue<span style="color:#f92672">,</span>
+              <span style="color:#66d9ef">int</span> hash<span style="color:#f92672">,</span> Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//调用WeakReference的构造方法初始化key和引用队列
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>key<span style="color:#f92672">,</span> queue<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> value<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span>  <span style="color:#f92672">=</span> hash<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">next</span>  <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//java.lang.ref.WeakReference
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">WeakReference</span><span style="color:#f92672">(</span>T referent<span style="color:#f92672">,</span> ReferenceQueue<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> T<span style="color:#f92672">&gt;</span> q<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>referent<span style="color:#f92672">,</span> q<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//java.lang.ref.reference
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Reference</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//实际存储key的地方
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> T referent<span style="color:#f92672">;</span>         <span style="color:#75715e">/* Treated specially by GC */</span>
+    <span style="color:#75715e">//引用队列
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">volatile</span> ReferenceQueue<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> T<span style="color:#f92672">&gt;</span> queue<span style="color:#f92672">;</span>
+    Reference<span style="color:#f92672">(</span>T referent<span style="color:#f92672">,</span> ReferenceQueue<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> T<span style="color:#f92672">&gt;</span> queue<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">referent</span> <span style="color:#f92672">=</span> referent<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span> <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>queue <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">?</span> ReferenceQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">NULL</span> <span style="color:#f92672">:</span> queue<span style="color:#f92672">;</span>
+     <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>从Entry的构造方法我们知道，key和queue最终会传到到Reference的构造方法中，这里的key就是Reference的referent属性，
+它会被gc特殊对待，即当没有强引用存在时，当下一次<code>gc</code>的时候会被<code>清除。</code></p>
+<hr>
+<h4 id="构造方法">构造方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">WeakHashMap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> initialCapacity<span style="color:#f92672">,</span> <span style="color:#66d9ef">float</span> loadFactor<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>initialCapacity <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Illegal Initial Capacity: &#34;</span><span style="color:#f92672">+</span>
+                                               initialCapacity<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>initialCapacity <span style="color:#f92672">&gt;</span> MAXIMUM_CAPACITY<span style="color:#f92672">)</span>
+            initialCapacity <span style="color:#f92672">=</span> MAXIMUM_CAPACITY<span style="color:#f92672">;</span>
+
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>loadFactor <span style="color:#f92672">&lt;=</span> 0 <span style="color:#f92672">||</span> Float<span style="color:#f92672">.</span><span style="color:#a6e22e">isNaN</span><span style="color:#f92672">(</span>loadFactor<span style="color:#f92672">))</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Illegal Load factor: &#34;</span><span style="color:#f92672">+</span>
+                                               loadFactor<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">int</span> capacity <span style="color:#f92672">=</span> 1<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>capacity <span style="color:#f92672">&lt;</span> initialCapacity<span style="color:#f92672">)</span>
+            capacity <span style="color:#f92672">&lt;&lt;=</span> 1<span style="color:#f92672">;</span>
+        table <span style="color:#f92672">=</span> newTable<span style="color:#f92672">(</span>capacity<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">loadFactor</span> <span style="color:#f92672">=</span> loadFactor<span style="color:#f92672">;</span>
+        threshold <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)(</span>capacity <span style="color:#f92672">*</span> loadFactor<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">WeakHashMap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> initialCapacity<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">(</span>initialCapacity<span style="color:#f92672">,</span> DEFAULT_LOAD_FACTOR<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">WeakHashMap</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">(</span>DEFAULT_INITIAL_CAPACITY<span style="color:#f92672">,</span> DEFAULT_LOAD_FACTOR<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">WeakHashMap</span><span style="color:#f92672">(</span>Map<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> K<span style="color:#f92672">,</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">extends</span> V<span style="color:#f92672">&gt;</span> m<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">(</span>Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">((</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> <span style="color:#f92672">(</span>m<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">/</span> DEFAULT_LOAD_FACTOR<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">,</span>
+                DEFAULT_INITIAL_CAPACITY<span style="color:#f92672">),</span>
+             DEFAULT_LOAD_FACTOR<span style="color:#f92672">);</span>
+        putAll<span style="color:#f92672">(</span>m<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>构造方法与<code>HashMap</code>基本类似，初始容量为大于等于传入容量最近的2的n次方，扩容门槛threshold等于<strong>capacity * loadFactor。</strong></p>
+<hr>
+<h4 id="putk-key-v-value方法">put(K key, V value)方法</h4>
+<p><code>添加元素</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> V <span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>K key<span style="color:#f92672">,</span> V value<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//如果key为空，用空对象代替
+</span><span style="color:#75715e"></span>        Object k <span style="color:#f92672">=</span> maskNull<span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//计算key 的hash值
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> h <span style="color:#f92672">=</span> hash<span style="color:#f92672">(</span>k<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//获取桶
+</span><span style="color:#75715e"></span>        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab <span style="color:#f92672">=</span> getTable<span style="color:#f92672">();</span>
+        <span style="color:#75715e">//&lt;1&gt; 计算元素在哪个桶中，h &amp; (length-1)
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> indexFor<span style="color:#f92672">(</span>h<span style="color:#f92672">,</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">//&lt;2&gt; 遍历桶对应的链表
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> tab<span style="color:#f92672">[</span>i<span style="color:#f92672">];</span> e <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> e <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//&lt;2.1&gt; 如果找到了元素就使用新值替换旧值，并返回旧值
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>h <span style="color:#f92672">==</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">&amp;&amp;</span> eq<span style="color:#f92672">(</span>k<span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">()))</span> <span style="color:#f92672">{</span>
+                V oldValue <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>value <span style="color:#f92672">!=</span> oldValue<span style="color:#f92672">)</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> value<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span> oldValue<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        modCount<span style="color:#f92672">++;</span>
+        <span style="color:#75715e">//&lt;2.2&gt; 如果没找到就把新值插入到链表的头部
+</span><span style="color:#75715e"></span>        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> tab<span style="color:#f92672">[</span>i<span style="color:#f92672">];</span>
+        tab<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Entry<span style="color:#f92672">&lt;&gt;(</span>k<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> queue<span style="color:#f92672">,</span> h<span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//&lt;3&gt; 如果插入元素后数量达到了扩容门槛就把桶的数量扩容为2倍大小
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(++</span>size <span style="color:#f92672">&gt;=</span> threshold<span style="color:#f92672">)</span>
+            resize<span style="color:#f92672">(</span>tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">*</span> 2<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>(1) 计算hash</p>
+<ul>
+<li>这里与HashMap有所不同，HashMap中如果key为空直接返回0，这里是用空对象来计算的。</li>
+<li>另外打散方式也不同，HashMap只用了一次异或，这里用了四次，HashMap给出的解释是一次够了，而且就算冲突了也会转换成红黑树，对效率没什么影响。</li>
+</ul>
+<p>(2) 计算在哪个桶中</p>
+<p>(3) 遍历桶对应的链表；</p>
+<p>(4) 如果找到元素就用新值替换旧值，并返回旧值</p>
+<p>(5) 如果没找到就在链表<code>头部</code>插入新元素，HashMap就插入到<code>链表尾部</code>。</p>
+<p>(6) 如果元素数量达到了扩容门槛，就把容量扩大到2倍大小；HashMap中是<code>大于</code>threshold才扩容，这里<code>等于</code>threshold就开始扩容了。</p>
+<hr>
+<h4 id="resizeint-newcapacity方法">resize(int newCapacity)方法</h4>
+<p><code>扩容</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">resize</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> newCapacity<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//&lt;1&gt; 获取旧桶，getTable()的时候会剔除失效的Entry
+</span><span style="color:#75715e"></span>        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> oldTable <span style="color:#f92672">=</span> getTable<span style="color:#f92672">();</span>
+        <span style="color:#75715e">//旧容量
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> oldCapacity <span style="color:#f92672">=</span> oldTable<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>oldCapacity <span style="color:#f92672">==</span> MAXIMUM_CAPACITY<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            threshold <span style="color:#f92672">=</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">// 新桶
+</span><span style="color:#75715e"></span>        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> newTable <span style="color:#f92672">=</span> newTable<span style="color:#f92672">(</span>newCapacity<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//&lt;2&gt; 把元素从旧桶转移到新桶
+</span><span style="color:#75715e"></span>        transfer<span style="color:#f92672">(</span>oldTable<span style="color:#f92672">,</span> newTable<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//&lt;3&gt; 把新桶赋值桶变量
+</span><span style="color:#75715e"></span>        table <span style="color:#f92672">=</span> newTable<span style="color:#f92672">;</span>
+
+        <span style="color:#75715e">/*
+</span><span style="color:#75715e">         * If ignoring null elements and processing ref queue caused massive
+</span><span style="color:#75715e">         * shrinkage, then restore old table.  This should be rare, but avoids
+</span><span style="color:#75715e">         * unbounded expansion of garbage-filled tables.
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#75715e">//&lt;4&gt; 如果元素个数大于扩容门槛的一半，则使用新桶和新容量，并计算新的扩容门槛
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>size <span style="color:#f92672">&gt;=</span> threshold <span style="color:#f92672">/</span> 2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            threshold <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)(</span>newCapacity <span style="color:#f92672">*</span> loadFactor<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 否则把元素再转移回旧桶，还是使用旧桶
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// 因为在transfer的时候会清除失效的Entry，所以元素个数可能没有那么大了，就不需要扩容了
+</span><span style="color:#75715e"></span>            expungeStaleEntries<span style="color:#f92672">();</span>
+            transfer<span style="color:#f92672">(</span>newTable<span style="color:#f92672">,</span> oldTable<span style="color:#f92672">);</span>
+            table <span style="color:#f92672">=</span> oldTable<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//在resize &lt;2&gt;中 把元素从旧桶转移到新桶
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">transfer</span><span style="color:#f92672">(</span>Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> src<span style="color:#f92672">,</span> Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> dest<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//遍历旧桶
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> j <span style="color:#f92672">&lt;</span> src<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">;</span> <span style="color:#f92672">++</span>j<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> src<span style="color:#f92672">[</span>j<span style="color:#f92672">];</span>
+            src<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>e <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+                Object key <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+                <span style="color:#75715e">//如果key等于了null就清除，说明key被gc清理掉了，则把整个Entry清除
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>  <span style="color:#75715e">// Help GC
+</span><span style="color:#75715e"></span>                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> <span style="color:#75715e">//  &#34;   &#34;
+</span><span style="color:#75715e"></span>                    size<span style="color:#f92672">--;</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//否则就计算在新桶中的位置并把这个元素放在新桶对应链表的头部
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> indexFor<span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">,</span> dest<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> dest<span style="color:#f92672">[</span>i<span style="color:#f92672">];</span>
+                    dest<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> e<span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                e <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>(1) 判断旧容量是否达到最大容量；</p>
+<p>(2) 新建新桶并把元素全部转移到新桶中；</p>
+<p>(3) 如果转移后元素个数不到扩容门槛的一半，则把元素再转移回旧桶，继续使用旧桶，说明不需要扩容；</p>
+<p>(4) 否则使用新桶，并计算新的扩容门槛；</p>
+<p>(5) 转移元素的过程中会把key为null的元素清除掉，所以size会变小；</p>
+<hr>
+<h4 id="getobject-key方法">get(Object key)方法</h4>
+<p><code>获取元素</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> V <span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Object k <span style="color:#f92672">=</span> maskNull<span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 计算hash
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> h <span style="color:#f92672">=</span> hash<span style="color:#f92672">(</span>k<span style="color:#f92672">);</span>
+        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab <span style="color:#f92672">=</span> getTable<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">int</span> index <span style="color:#f92672">=</span> indexFor<span style="color:#f92672">(</span>h<span style="color:#f92672">,</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> tab<span style="color:#f92672">[</span>index<span style="color:#f92672">];</span>
+        
+        <span style="color:#75715e">// 遍历链表，找到了就返回
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>e <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">==</span> h <span style="color:#f92672">&amp;&amp;</span> eq<span style="color:#f92672">(</span>k<span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">()))</span>
+                <span style="color:#66d9ef">return</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span><span style="color:#f92672">;</span>
+            e <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>(1) 计算hash值；</p>
+<p>(2) 遍历所在桶对应的链表；</p>
+<p>(3) 如果找到了就返回元素的value值；</p>
+<p>(4) 如果没找到就返回空；</p>
+<hr>
+<h4 id="removeobject-key方法">remove(Object key)方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> V <span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Object k <span style="color:#f92672">=</span> maskNull<span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 计算hash
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> h <span style="color:#f92672">=</span> hash<span style="color:#f92672">(</span>k<span style="color:#f92672">);</span>
+        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab <span style="color:#f92672">=</span> getTable<span style="color:#f92672">();</span>
+        <span style="color:#75715e">//元素所在的桶的第一个元素
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> indexFor<span style="color:#f92672">(</span>h<span style="color:#f92672">,</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> prev <span style="color:#f92672">=</span> tab<span style="color:#f92672">[</span>i<span style="color:#f92672">];</span>
+        Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> prev<span style="color:#f92672">;</span>
+
+        <span style="color:#75715e">//遍历链表
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>e <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+            <span style="color:#75715e">//如果找到了就删除元素
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>h <span style="color:#f92672">==</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">&amp;&amp;</span> eq<span style="color:#f92672">(</span>k<span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">()))</span> <span style="color:#f92672">{</span>
+                modCount<span style="color:#f92672">++;</span>
+                size<span style="color:#f92672">--;</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>prev <span style="color:#f92672">==</span> e<span style="color:#f92672">)</span>
+                    <span style="color:#75715e">//如果是头节点，就把头节点指向下一个节点
+</span><span style="color:#75715e"></span>                    tab<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">else</span>
+                    <span style="color:#75715e">//如果不是头节点，删除该节点
+</span><span style="color:#75715e"></span>                    prev<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            prev <span style="color:#f92672">=</span> e<span style="color:#f92672">;</span>
+            e <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>(1) 计算hash；</p>
+<p>(2) 找到所在的桶；</p>
+<p>(3) 遍历桶对应的链表；</p>
+<p>(4) 如果找到了就删除该节点，并返回该节点的value值；</p>
+<p>(5) 如果没找到就返回null；</p>
+<hr>
+<h4 id="expungestaleentries方法">expungeStaleEntries()方法</h4>
+<p>剔除失效的Entry</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">expungeStaleEntries</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//遍历引用队列
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Object x<span style="color:#f92672">;</span> <span style="color:#f92672">(</span>x <span style="color:#f92672">=</span> queue<span style="color:#f92672">.</span><span style="color:#a6e22e">poll</span><span style="color:#f92672">())</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> <span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>queue<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#a6e22e">@SuppressWarnings</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;unchecked&#34;</span><span style="color:#f92672">)</span>
+                    Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;)</span> x<span style="color:#f92672">;</span>
+                <span style="color:#75715e">//找到所在的桶
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> indexFor<span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">,</span> table<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+
+                Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> prev <span style="color:#f92672">=</span> table<span style="color:#f92672">[</span>i<span style="color:#f92672">];</span>
+                Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> p <span style="color:#f92672">=</span> prev<span style="color:#f92672">;</span>
+                <span style="color:#75715e">//遍历链表
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>p <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+                    <span style="color:#75715e">//找到该元素
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>p <span style="color:#f92672">==</span> e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//删除该元素
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>prev <span style="color:#f92672">==</span> e<span style="color:#f92672">)</span>
+                            table<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                        <span style="color:#66d9ef">else</span>
+                            prev<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                        <span style="color:#75715e">// Must not null out e.next;
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">// stale entries may be in use by a HashIterator
+</span><span style="color:#75715e"></span>                        e<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> <span style="color:#75715e">// Help GC
+</span><span style="color:#75715e"></span>                        size<span style="color:#f92672">--;</span>
+                        <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span>
+                    prev <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                    p <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>(1) 当key失效的时候gc会自动把对应的Entry添加到这个引用队列中；</p>
+<p>(2) 所有对map的操作都会直接或间接地调用到这个方法先移除失效的Entry，比如getTable()、size()、resize()；</p>
+<p>(3) 这个方法的目的就是遍历引用队列，并把其中保存的Entry从map中移除掉，具体的过程请看类注释；</p>
+<p>(4) 从这里可以看到移除Entry的同时把value也一并置为null帮助gc清理元素，防御性编程。</p>
+<hr>
+<h3 id="总结">总结</h3>
+<ul>
+<li>
+<p><strong>WeakHashMap使用（数组 + 链表）存储结构</strong></p>
+</li>
+<li>
+<p><strong>WeakHashMap中的key是弱引用，gc的时候会被清除</strong></p>
+</li>
+<li>
+<p><strong>每次对map的操作都会剔除失效key对应的Entry</strong></p>
+</li>
+<li>
+<p><strong>使用String作为key时，一定要使用new String()这样的方式声明key，才会失效，其它的基本类型的包装类型是一样的</strong></p>
+<ul>
+<li>字符串<code>&quot;weak&quot; </code>如果使用这样作为key会被加入到<code>字符串常量池</code>中，不会被清理</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="参考">参考</h4>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=Mzg2ODA0ODM0Nw==&amp;mid=2247483718&amp;idx=2&amp;sn=5bbca02db60847581f1df6740e0bad62&amp;scene=21#wechat_redirect">死磕 java集合之WeakHashMap源码分析</a></li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98-%E8%82%A1%E7%A5%A8%E4%B9%B0%E5%8D%96/" data-toggle="tooltip" data-placement="top" title="动态规划经典问题- 股票买卖">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" data-toggle="tooltip" data-placement="top" title="LinkedHashMap 源码分析">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>LinkedHashMap 源码分析</a></li>
+         
+        <li><a href="/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/"><i class="fa fa-link"></i>Java内存模型详解</a></li>
+         
+        <li><a href="/blog/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98-%E8%82%A1%E7%A5%A8%E4%B9%B0%E5%8D%96/"><i class="fa fa-link"></i>动态规划经典问题- 股票买卖</a></li>
+         
+        <li><a href="/blog/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0lfu%E7%AE%97%E6%B3%95/"><i class="fa fa-link"></i>如何实现LFU算法</a></li>
+         
+        <li><a href="/blog/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0lru%E7%AE%97%E6%B3%95/"><i class="fa fa-link"></i>如何实现LRU算法</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

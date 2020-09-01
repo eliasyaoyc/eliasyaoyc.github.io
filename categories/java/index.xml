@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java on 拳拳到肉</title>
+    <link>/categories/java/</link>
+    <description>Recent content in Java on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Thu, 09 Apr 2020 16:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/java/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java8—新特性汇总.md</title>
+      <link>/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/</link>
+      <pubDate>Thu, 09 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/</guid>
+      <description>书籍《Java实战》一些操作的汇总</description>
+    </item>
+    
+    <item>
+      <title>Java8—日期时间API</title>
+      <link>/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/</link>
+      <pubDate>Thu, 09 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/</guid>
+      <description>书籍《Java实战》一些操作的汇总</description>
+    </item>
+    
+    <item>
+      <title>HashMap 源码分析</title>
+      <link>/blog/hashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Thu, 19 Mar 2020 10:20:42 +0800</pubDate>
+      
+      <guid>/blog/hashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>HashMap 采用key/value存储结构，每个key 对应唯一的value，查询和修改的速度都很快，能达到O(1)的平均时间复杂度。它是非线程安全的，且不保证元素存储的顺序。</description>
+    </item>
+    
+    <item>
+      <title>深入理解 String</title>
+      <link>/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/</link>
+      <pubDate>Thu, 19 Mar 2020 09:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/</guid>
+      <description>由于String 使用过于频繁，Java为了避免在一个系统中产生大量的String对象引入了字符串常量池</description>
+    </item>
+    
+    <item>
+      <title>LinkedHashMap 源码分析</title>
+      <link>/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>LinkedHashMap 继承HashMap，拥有HashMap的所有特性，并且添加了顺序访问的特点，HashMap是无序的内部维护一个双向链表， 能保证元素的插入是顺序访问的，也能以访问顺序访问，可以用来实现LRU缓存策略。</description>
+    </item>
+    
+    <item>
+      <title>WeakHashMap 源码分析</title>
+      <link>/blog/weakhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/weakhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>WeakHashMap是一种弱引用map，内部的key会存储为弱引用，当jvm gc的时候，如果这些key没有强引用存在的话，会被gc回收掉，下一次当我们操作map的时候会把对应的Entry整个删除掉，基于这种特性，WeakHashMap特别适用于缓存处理。</description>
+    </item>
+    
+    <item>
+      <title>PriorityQueue 源码分析</title>
+      <link>/blog/priorityqueue-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 12 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/priorityqueue-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>PriorityQueue里的每个元素都会进行排序，每次弹出一个元素要么是最大的要么是最小的，取决于排序规则。</description>
+    </item>
+    
+  </channel>
+</rss>

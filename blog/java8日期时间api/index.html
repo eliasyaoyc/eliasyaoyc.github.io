@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Java8—日期时间API · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Java, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Java8—日期时间API" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="书籍《Java实战》一些操作的汇总">
+  <meta property="og:description" content="书籍《Java实战》一些操作的汇总">
+  <meta name="twitter:description" content="书籍《Java实战》一些操作的汇总">
+  <meta property="og:description" content="书籍《Java实战》一些操作的汇总" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—日期时间API logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—日期时间API logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Java8—日期时间API - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—日期时间API logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—日期时间API logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Java8—日期时间API - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—日期时间API logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—日期时间API logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Java8—日期时间API - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Java8—日期时间API</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月9日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            1500字 | 阅读大约需要3分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/java">Java</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/java/"><i>#Java</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <ul>
+<li>
+<p><code>LocalDate</code> : 该类的实例是一个<code>不可变对象</code>，它只提供了简单的日期，并不含当天的时间信息。另外，它也不附带任何与时区相关的信息。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//创建一个LocalDate对象并读取其值
+</span><span style="color:#75715e"></span>LocalDate date <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">);</span> <span style="color:#75715e">//2014-03-18
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> year <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">getYear</span><span style="color:#f92672">();</span> <span style="color:#75715e">//2014
+</span><span style="color:#75715e"></span>Month month <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">getMonth</span><span style="color:#f92672">();</span> <span style="color:#75715e">//MARCH
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> day <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">getDayOfMonth</span><span style="color:#f92672">();</span> <span style="color:#75715e">//18
+</span><span style="color:#75715e"></span>DayOfWeek dow <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">getDayOfWeek</span><span style="color:#f92672">();</span> <span style="color:#75715e">//TUESDAY
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> len <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">lengthOfMonth</span><span style="color:#f92672">();</span> <span style="color:#75715e">//31(days in March)
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">boolean</span> leap <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">isLeapYear</span><span style="color:#f92672">();</span> <span style="color:#75715e">//false (not a leap year)
+</span><span style="color:#75715e"></span>LocalDate today <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">now</span><span style="color:#f92672">();</span> <span style="color:#75715e">//2020-04-10 当天日期
+</span><span style="color:#75715e"></span>  
+<span style="color:#75715e">//使用TemporalField读取LocalDate的值
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> year <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>ChronoField<span style="color:#f92672">.</span><span style="color:#a6e22e">YEAR</span><span style="color:#f92672">);</span>
+<span style="color:#66d9ef">int</span> month <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>ChronoField<span style="color:#f92672">.</span><span style="color:#a6e22e">MONTH_OF_YEAR</span><span style="color:#f92672">);</span>
+<span style="color:#66d9ef">int</span> day <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>ChronoField<span style="color:#f92672">.</span><span style="color:#a6e22e">DAY_OF_MONTH</span><span style="color:#f92672">);</span>
+  
+<span style="color:#75715e">//以比较直观的方式操纵LocalDate的属性
+</span><span style="color:#75715e"></span>LocalDate date1 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">);</span><span style="color:#75715e">//2014-03-18
+</span><span style="color:#75715e"></span>LocalDate date2 <span style="color:#f92672">=</span> date1<span style="color:#f92672">.</span><span style="color:#a6e22e">withYear</span><span style="color:#f92672">(</span>2011<span style="color:#f92672">);</span><span style="color:#75715e">//2011-03-18
+</span><span style="color:#75715e"></span>LocalDate date3 <span style="color:#f92672">=</span> date2<span style="color:#f92672">.</span><span style="color:#a6e22e">withDayOfMonth</span><span style="color:#f92672">(</span>25<span style="color:#f92672">);</span><span style="color:#75715e">//2011-03-25
+</span><span style="color:#75715e"></span>LocalDate date4 <span style="color:#f92672">=</span> date3<span style="color:#f92672">.</span><span style="color:#a6e22e">with</span><span style="color:#f92672">(</span>ChronoField<span style="color:#f92672">.</span><span style="color:#a6e22e">MONTH_OF_YEAR</span><span style="color:#f92672">,</span> 9<span style="color:#f92672">);</span><span style="color:#75715e">//2011-09-25
+</span><span style="color:#75715e"></span>  
+<span style="color:#75715e">//以相对方式修改LocalDate对象的属性
+</span><span style="color:#75715e"></span>LocalDate date1 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">);</span><span style="color:#75715e">//2014-03-18
+</span><span style="color:#75715e"></span>LocalDate date2 <span style="color:#f92672">=</span> date1<span style="color:#f92672">.</span><span style="color:#a6e22e">plusWeeks</span><span style="color:#f92672">(</span>1<span style="color:#f92672">);</span><span style="color:#75715e">//2014-03-25
+</span><span style="color:#75715e"></span>LocalDate date3 <span style="color:#f92672">=</span> date2<span style="color:#f92672">.</span><span style="color:#a6e22e">minusYears</span><span style="color:#f92672">(</span>3<span style="color:#f92672">);</span><span style="color:#75715e">//2011-03-25
+</span><span style="color:#75715e"></span>LocalDate date4 <span style="color:#f92672">=</span> date3<span style="color:#f92672">.</span><span style="color:#a6e22e">plus</span><span style="color:#f92672">(</span>6<span style="color:#f92672">,</span> ChronoUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MONTHS</span><span style="color:#f92672">);</span><span style="color:#75715e">//2011-09-25
+</span></code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><code>LocalTime</code>: 一天中的时间，比如13:45:20，可以使用LocalTime类表示。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//创建LocalTime并读取其值
+</span><span style="color:#75715e"></span>LocalTime time <span style="color:#f92672">=</span> LocalTime<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>13<span style="color:#f92672">,</span> 45<span style="color:#f92672">,</span> 20<span style="color:#f92672">);</span><span style="color:#75715e">//13:45:20
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> hour <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">getHour</span><span style="color:#f92672">();</span> <span style="color:#75715e">//13
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> minute <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">getMinute</span><span style="color:#f92672">();</span><span style="color:#75715e">//45
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> second <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">getSecond</span><span style="color:#f92672">();</span> <span style="color:#75715e">//20
+</span><span style="color:#75715e"></span>  
+<span style="color:#75715e">//LocalDate和LocalTime都可以通过解析代表它们的字符串创建。使用静态方法parse，你 可以实现这一目的:
+</span><span style="color:#75715e"></span>LocalDate date <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">parse</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;2014-03-18&#34;</span><span style="color:#f92672">);</span>
+LocalTime time <span style="color:#f92672">=</span> LocalTime<span style="color:#f92672">.</span><span style="color:#a6e22e">parse</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;13:45:20&#34;</span><span style="color:#f92672">);</span>
+  
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><code>LocalDateTime</code> ：是LocalDate和LocalTime的合体。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 2014-03-18T13:45:20
+</span><span style="color:#75715e"></span>LocalDateTime dt1 <span style="color:#f92672">=</span> LocalDateTime<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> Month<span style="color:#f92672">.</span><span style="color:#a6e22e">MARCH</span><span style="color:#f92672">,</span> 18<span style="color:#f92672">,</span> 13<span style="color:#f92672">,</span> 45<span style="color:#f92672">,</span> 20<span style="color:#f92672">);</span> 
+LocalDateTime dt2 <span style="color:#f92672">=</span> LocalDateTime<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>date<span style="color:#f92672">,</span> time<span style="color:#f92672">);</span>
+LocalDateTime dt3 <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">atTime</span><span style="color:#f92672">(</span>13<span style="color:#f92672">,</span> 45<span style="color:#f92672">,</span> 20<span style="color:#f92672">);</span>
+LocalDateTime dt4 <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">atTime</span><span style="color:#f92672">(</span>time<span style="color:#f92672">);</span>
+LocalDateTime dt5 <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">atDate</span><span style="color:#f92672">(</span>date<span style="color:#f92672">);</span>
+  
+LocalDate date1 <span style="color:#f92672">=</span> dt1<span style="color:#f92672">.</span><span style="color:#a6e22e">toLocalDate</span><span style="color:#f92672">();</span> <span style="color:#75715e">//2014-03-18
+</span><span style="color:#75715e"></span>LocalTime time1 <span style="color:#f92672">=</span> dt1<span style="color:#f92672">.</span><span style="color:#a6e22e">toLocalTime</span><span style="color:#f92672">();</span> <span style="color:#75715e">//13:45:20
+</span></code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><code>Instant</code> ：机器的日期和时间格式 以Unix元年时间开始所经历的 秒数进行计算。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Instant<span style="color:#f92672">.</span><span style="color:#a6e22e">ofEpochSecond</span><span style="color:#f92672">(</span>3<span style="color:#f92672">);</span> 
+Instant<span style="color:#f92672">.</span><span style="color:#a6e22e">ofEpochSecond</span><span style="color:#f92672">(</span>3<span style="color:#f92672">,</span> 0<span style="color:#f92672">);</span>
+Instant<span style="color:#f92672">.</span><span style="color:#a6e22e">ofEpochSecond</span><span style="color:#f92672">(</span>2<span style="color:#f92672">,</span> 1_000_000_000<span style="color:#f92672">);</span> <span style="color:#75715e">//2秒之后再加上 100万纳秒(1秒)
+</span><span style="color:#75715e"></span>Instant<span style="color:#f92672">.</span><span style="color:#a6e22e">ofEpochSecond</span><span style="color:#f92672">(</span>4<span style="color:#f92672">,</span> <span style="color:#f92672">-</span>1_000_000_000<span style="color:#f92672">);</span>  <span style="color:#75715e">//4秒之前的100万纳秒(1秒)
+</span><span style="color:#75715e"></span>Instant<span style="color:#f92672">.</span><span style="color:#a6e22e">now</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getEpochSecond</span><span style="color:#f92672">()</span> <span style="color:#75715e">//当前时间的秒数
+</span></code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>定义<code>Duration</code>或<code>Period</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//两个LocalTimes对象、两个LocalDateTimes对象，或者两个Instant对象之间的duration
+</span><span style="color:#75715e">//由于Duration类主要用于以秒和纳 秒衡量时间的长短，你不能仅向between方法传递一个LocalDate对象做参数。
+</span><span style="color:#75715e"></span>Duration d1 <span style="color:#f92672">=</span> Duration<span style="color:#f92672">.</span><span style="color:#a6e22e">between</span><span style="color:#f92672">(</span>time1<span style="color:#f92672">,</span> time2<span style="color:#f92672">);</span>
+Duration d1 <span style="color:#f92672">=</span> Duration<span style="color:#f92672">.</span><span style="color:#a6e22e">between</span><span style="color:#f92672">(</span>dateTime1<span style="color:#f92672">,</span> dateTime2<span style="color:#f92672">);</span>
+Duration d2 <span style="color:#f92672">=</span> Duration<span style="color:#f92672">.</span><span style="color:#a6e22e">between</span><span style="color:#f92672">(</span>instant1<span style="color:#f92672">,</span> instant2<span style="color:#f92672">);</span>
+<span style="color:#75715e">//如果你需要以年、月或者日的方式对多个时间单位建模，可以使用Period类。
+</span><span style="color:#75715e"></span>Period tenDays <span style="color:#f92672">=</span> Period<span style="color:#f92672">.</span><span style="color:#a6e22e">between</span><span style="color:#f92672">(</span>LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 8<span style="color:#f92672">),</span>
+                                    LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">));</span>
+<span style="color:#75715e">//创建Duration和Period对象
+</span><span style="color:#75715e"></span>Duration threeMinutes <span style="color:#f92672">=</span> Duration<span style="color:#f92672">.</span><span style="color:#a6e22e">ofMinutes</span><span style="color:#f92672">(</span>3<span style="color:#f92672">);</span>
+Duration threeMinutes <span style="color:#f92672">=</span> Duration<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>3<span style="color:#f92672">,</span> ChronoUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MINUTES</span><span style="color:#f92672">);</span>
+Period tenDays <span style="color:#f92672">=</span> Period<span style="color:#f92672">.</span><span style="color:#a6e22e">ofDays</span><span style="color:#f92672">(</span>10<span style="color:#f92672">);</span>
+Period threeWeeks <span style="color:#f92672">=</span> Period<span style="color:#f92672">.</span><span style="color:#a6e22e">ofWeeks</span><span style="color:#f92672">(</span>3<span style="color:#f92672">);</span>
+Period twoYearsSixMonthsOneDay <span style="color:#f92672">=</span> Period<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2<span style="color:#f92672">,</span> 6<span style="color:#f92672">,</span> 1<span style="color:#f92672">);</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>使用<code>TemporalAdjuster</code></p>
+<p>将日期调整到下个周日、下个工作日，或者是本月的最后一天。这时，你可 2 以使用重载版本的with方法，向其传递一个提供了更多定制化选择的TemporalAdjuster对象， 更加灵活地处理日期。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">LocalDate date1 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">);</span> <span style="color:#75715e">//2014-03-18
+</span><span style="color:#75715e"></span>LocalDate date2 <span style="color:#f92672">=</span> date1<span style="color:#f92672">.</span><span style="color:#a6e22e">with</span><span style="color:#f92672">(</span>nextOrSame<span style="color:#f92672">(</span>DayOfWeek<span style="color:#f92672">.</span><span style="color:#a6e22e">SUNDAY</span><span style="color:#f92672">));</span> <span style="color:#75715e">//2014-03-23
+</span><span style="color:#75715e"></span>LocalDate date3 <span style="color:#f92672">=</span> date2<span style="color:#f92672">.</span><span style="color:#a6e22e">with</span><span style="color:#f92672">(</span>lastDayOfMonth<span style="color:#f92672">());</span>  <span style="color:#75715e">//2014-03-31
+</span></code></pre></div><ul>
+<li><code>dayOfWeekInMonth</code>  创建一个新的日期，它的值为同一个月中每一周的第几天</li>
+<li><code>firstDayOfMonth</code>  创建一个新的日期，它的值为当月的第一天</li>
+<li><code>firstDayOfNextMonth</code>  创建一个新的日期，它的值为下月的第一天</li>
+<li><code>firstDayOfNextYear</code>  创建一个新的日期，它的值为明年的第一天</li>
+<li><code>firstDayOfYear</code> 创建一个新的日期，它的值为当年的第一天</li>
+<li><code>firstInMonth</code> 创建一个新的日期，它的值为同一个月中，第一个符合星期几要求的值</li>
+<li><code>lastDayOfMonth</code>  创建一个新的日期，它的值为当月的最后一天</li>
+<li><code>lastDayOfNextMonth</code>  创建一个新的日期，它的值为下月的最后一天</li>
+<li><code>lastDayOfNextYear</code>  创建一个新的日期，它的值为明年的最后一天</li>
+<li><code>lastDayOfYear</code>  创建一个新的日期，它的值为今年的最后一天</li>
+<li><code>lastInMonth</code> 创建一个新的日期，它的值为同一个月中，最后一个符合星期几要求的值</li>
+<li><code>next/previous</code>  创建一个新的日期，并将其值设定为日期调整后或者调整前，第一个符合指定星 期几要求的日期</li>
+<li><code>nextOrSame/previousOrSame</code>  创建一个新的日期，并将其值设定为日期调整后或者调整前，第一个符合指定星 期几要求的日期，如果该日期已经符合要求，直接返回该对象</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>打印输出及解析日期-时间对象</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">LocalDate date <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">);</span>
+String s1 <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>DateTimeFormatter<span style="color:#f92672">.</span><span style="color:#a6e22e">BASIC_ISO_DATE</span><span style="color:#f92672">);</span> <span style="color:#75715e">//20140318 
+</span><span style="color:#75715e"></span>String s2 <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>DateTimeFormatter<span style="color:#f92672">.</span><span style="color:#a6e22e">ISO_LOCAL_DATE</span><span style="color:#f92672">);</span> <span style="color:#75715e">//2014-03-18
+</span><span style="color:#75715e"></span>  
+LocalDate date1 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">parse</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;20140318&#34;</span><span style="color:#f92672">,</span>
+                                 DateTimeFormatter<span style="color:#f92672">.</span><span style="color:#a6e22e">BASIC_ISO_DATE</span><span style="color:#f92672">);</span>
+LocalDate date2 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">parse</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;2014-03-18&#34;</span><span style="color:#f92672">,</span>
+                                 DateTimeFormatter<span style="color:#f92672">.</span><span style="color:#a6e22e">ISO_LOCAL_DATE</span><span style="color:#f92672">);</span>
+  
+<span style="color:#75715e">//按照某个模式创建DateTimeFormatter
+</span><span style="color:#75715e"></span>DateTimeFormatter formatter <span style="color:#f92672">=</span> DateTimeFormatter<span style="color:#f92672">.</span><span style="color:#a6e22e">ofPattern</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;dd/MM/yyyy&#34;</span><span style="color:#f92672">);</span>
+LocalDate date1 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">);</span>
+String formattedDate <span style="color:#f92672">=</span> date1<span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>formatter<span style="color:#f92672">);</span>
+LocalDate date2 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">parse</span><span style="color:#f92672">(</span>formattedDate<span style="color:#f92672">,</span> formatter<span style="color:#f92672">);</span>
+  
+<span style="color:#75715e">//创建一个本地化的DateTimeFormatter
+</span><span style="color:#75715e"></span>DateTimeFormatter italianFormatter <span style="color:#f92672">=</span> DateTimeFormatter<span style="color:#f92672">.</span><span style="color:#a6e22e">ofPattern</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;d. MMMM yyyy&#34;</span><span style="color:#f92672">,</span> Locale<span style="color:#f92672">.</span><span style="color:#a6e22e">ITALIAN</span><span style="color:#f92672">);</span>
+LocalDate date1 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>2014<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 18<span style="color:#f92672">);</span>
+String formattedDate <span style="color:#f92672">=</span> date<span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>italianFormatter<span style="color:#f92672">);</span> <span style="color:#75715e">// 18. marzo 2014 
+</span><span style="color:#75715e"></span>LocalDate date2 <span style="color:#f92672">=</span> LocalDate<span style="color:#f92672">.</span><span style="color:#a6e22e">parse</span><span style="color:#f92672">(</span>formattedDate<span style="color:#f92672">,</span> italianFormatter<span style="color:#f92672">);</span>
+  
+<span style="color:#75715e">//构造一个DateTimeFormatter 更加细致化的格式器
+</span><span style="color:#75715e"></span>DateTimeFormatter italianFormatter <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DateTimeFormatterBuilder<span style="color:#f92672">()</span> <span style="color:#f92672">.</span><span style="color:#a6e22e">appendText</span><span style="color:#f92672">(</span>ChronoField<span style="color:#f92672">.</span><span style="color:#a6e22e">DAY_OF_MONTH</span><span style="color:#f92672">)</span>
+<span style="color:#f92672">.</span><span style="color:#a6e22e">appendLiteral</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;. &#34;</span><span style="color:#f92672">)</span>
+<span style="color:#f92672">.</span><span style="color:#a6e22e">appendText</span><span style="color:#f92672">(</span>ChronoField<span style="color:#f92672">.</span><span style="color:#a6e22e">MONTH_OF_YEAR</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span><span style="color:#a6e22e">appendLiteral</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span><span style="color:#a6e22e">appendText</span><span style="color:#f92672">(</span>ChronoField<span style="color:#f92672">.</span><span style="color:#a6e22e">YEAR</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span><span style="color:#a6e22e">parseCaseInsensitive</span><span style="color:#f92672">()</span>
+            <span style="color:#f92672">.</span><span style="color:#a6e22e">toFormatter</span><span style="color:#f92672">(</span>Locale<span style="color:#f92672">.</span><span style="color:#a6e22e">ITALIAN</span><span style="color:#f92672">);</span>
+  
+</code></pre></div></li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/" data-toggle="tooltip" data-placement="top" title="引用以及Reference类">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/" data-toggle="tooltip" data-placement="top" title="Java8—新特性汇总.md">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/"><i class="fa fa-link"></i>Java8—新特性汇总.md</a></li>
+         
+        <li><a href="/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/"><i class="fa fa-link"></i>深入理解 String</a></li>
+         
+        <li><a href="/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/"><i class="fa fa-link"></i>引用以及Reference类</a></li>
+         
+        <li><a href="/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/"><i class="fa fa-link"></i>println、sleep、Integer与线程安全的一些故事</a></li>
+         
+        <li><a href="/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/"><i class="fa fa-link"></i>JVM 内存区域与内存溢出异常</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

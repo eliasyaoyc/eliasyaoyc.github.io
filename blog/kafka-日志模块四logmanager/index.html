@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kafka 日志模块（四）LogManager · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Kafka">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Kafka 日志模块（四）LogManager" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E5%9B%9Blogmanager//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="Kafka 的所有的消息都是通过日志来存储的，它是通过 LogManager 来进行初始化的，Log 类是真正操作日志的，LogManager 是用来管理 Log 的。">
+  <meta property="og:description" content="Kafka 的所有的消息都是通过日志来存储的，它是通过 LogManager 来进行初始化的，Log 类是真正操作日志的，LogManager 是用来管理 Log 的。">
+  <meta name="twitter:description" content="Kafka 的所有的消息都是通过日志来存储的，它是通过 LogManager 来进行初始化的，Log 类是真正操作日志的，LogManager 是用来管理 Log 的。">
+  <meta property="og:description" content="Kafka 的所有的消息都是通过日志来存储的，它是通过 LogManager 来进行初始化的，Log 类是真正操作日志的，LogManager 是用来管理 Log 的。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（四）LogManager logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（四）LogManager logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 日志模块（四）LogManager - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（四）LogManager logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（四）LogManager logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 日志模块（四）LogManager - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（四）LogManager logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（四）LogManager logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 日志模块（四）LogManager - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Kafka 日志模块（四）LogManager</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年5月5日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            9900字 | 阅读大约需要20分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/kafka/"><i>#kafka</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="1-概述">1. 概述</h3>
+<p>在 <a href="http://www.sirann.cn/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%89kafka-server-start.sh/">Kafka 服务端（三）kafka-server-start.sh</a>  一文中讲述了我们启动Kafka之后，Kafka 每个模块初始化的入口类。</p>
+<p>Kafka 的所有的消息都是通过日志来存储的，它是通过 <code>LogManager</code> 来进行初始化的，Log 类是真正操作日志的，LogManager 是用来管理 Log 的。</p>
+<p><code>LogManager</code> 提供了<strong>创建、恢复、删除、查询</strong> Log集合等功能，所有的<code>读写</code>操作都委托给 <code>Log</code> 去完成，并且在<code>LogManager</code> 初始化的时候会启动<code>五个定时任务</code>以及启动一个后台线程 <code>Cleaner</code>。</p>
+<hr>
+<h3 id="2-源码解析">2. 源码解析</h3>
+<p>在Kafka 启动初始化的时候调用 <code>LogManager#startup</code> 进行初始化日志模块</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">startup</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//...省略
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">/* start log manager */</span>
+    logManager <span style="color:#f92672">=</span> LogManager<span style="color:#f92672">(</span>config<span style="color:#f92672">,</span> initialOfflineDirs<span style="color:#f92672">,</span> zkClient<span style="color:#f92672">,</span> brokerState<span style="color:#f92672">,</span> kafkaScheduler<span style="color:#f92672">,</span> time<span style="color:#f92672">,</span> brokerTopicStats<span style="color:#f92672">,</span> logDirFailureChannel<span style="color:#f92672">)</span>
+    logManager<span style="color:#f92672">.</span><span style="color:#a6e22e">startup</span><span style="color:#f92672">()</span>
+    <span style="color:#75715e">//...省略
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="21-logmanager">2.1 LogManager</h4>
+<p>LogManager 类中的参数与属性</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LogManager</span><span style="color:#f92672">(</span>logDirs<span style="color:#f92672">:</span> Seq<span style="color:#f92672">[</span>File<span style="color:#f92672">],</span>
+                 initialOfflineDirs<span style="color:#f92672">:</span> Seq<span style="color:#f92672">[</span>File<span style="color:#f92672">],</span>
+                 val topicConfigs<span style="color:#f92672">:</span> Map<span style="color:#f92672">[</span>String<span style="color:#f92672">,</span> LogConfig<span style="color:#f92672">],</span> <span style="color:#75715e">// note that this doesn&#39;t get updated after creation
+</span><span style="color:#75715e"></span>                 val initialDefaultConfig<span style="color:#f92672">:</span> LogConfig<span style="color:#f92672">,</span>
+                 val cleanerConfig<span style="color:#f92672">:</span> CleanerConfig<span style="color:#f92672">,</span>
+                 recoveryThreadsPerDataDir<span style="color:#f92672">:</span> Int<span style="color:#f92672">,</span>
+                 val flushCheckMs<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                 val flushRecoveryOffsetCheckpointMs<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                 val flushStartOffsetCheckpointMs<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                 val retentionCheckMs<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                 val maxPidExpirationMs<span style="color:#f92672">:</span> Int<span style="color:#f92672">,</span>
+                 scheduler<span style="color:#f92672">:</span> Scheduler<span style="color:#f92672">,</span>
+                 val brokerState<span style="color:#f92672">:</span> BrokerState<span style="color:#f92672">,</span>
+                 brokerTopicStats<span style="color:#f92672">:</span> BrokerTopicStats<span style="color:#f92672">,</span>
+                 logDirFailureChannel<span style="color:#f92672">:</span> LogDirFailureChannel<span style="color:#f92672">,</span>
+                 time<span style="color:#f92672">:</span> Time<span style="color:#f92672">)</span> <span style="color:#66d9ef">extends</span> Logging with KafkaMetricsGroup <span style="color:#f92672">{</span>
+
+  val LockFile <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.lock&#34;</span>
+  val InitialTaskDelayMs <span style="color:#f92672">=</span> 30 <span style="color:#f92672">*</span> 1000
+
+  <span style="color:#66d9ef">private</span> val logCreationOrDeletionLock <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object
+  <span style="color:#66d9ef">private</span> val currentLogs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Pool<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> Log<span style="color:#f92672">]()</span>
+  <span style="color:#66d9ef">private</span> val futureLogs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Pool<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> Log<span style="color:#f92672">]()</span>
+  <span style="color:#66d9ef">private</span> val logsToBeDeleted <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedBlockingQueue<span style="color:#f92672">[(</span>Log<span style="color:#f92672">,</span> Long<span style="color:#f92672">)]()</span>
+
+  <span style="color:#66d9ef">private</span> val _liveLogDirs<span style="color:#f92672">:</span> ConcurrentLinkedQueue<span style="color:#f92672">[</span>File<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> createAndValidateLogDirs<span style="color:#f92672">(</span>logDirs<span style="color:#f92672">,</span> initialOfflineDirs<span style="color:#f92672">)</span>
+  <span style="color:#a6e22e">@volatile</span> <span style="color:#66d9ef">private</span> var _currentDefaultConfig <span style="color:#f92672">=</span> initialDefaultConfig
+  <span style="color:#a6e22e">@volatile</span> <span style="color:#66d9ef">private</span> var numRecoveryThreadsPerDataDir <span style="color:#f92672">=</span> recoveryThreadsPerDataDir
+
+  <span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>log<span style="color:#f92672">]</span> val partitionsInitializing <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> Boolean<span style="color:#f92672">]().</span><span style="color:#a6e22e">asScala</span>
+
+  def <span style="color:#a6e22e">reconfigureDefaultLogConfig</span><span style="color:#f92672">(</span>logConfig<span style="color:#f92672">:</span> LogConfig<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">_currentDefaultConfig</span> <span style="color:#f92672">=</span> logConfig
+  <span style="color:#f92672">}</span>
+
+  def currentDefaultConfig<span style="color:#f92672">:</span> LogConfig <span style="color:#f92672">=</span> _currentDefaultConfig
+
+  def liveLogDirs<span style="color:#f92672">:</span> Seq<span style="color:#f92672">[</span>File<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>_liveLogDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span> <span style="color:#f92672">==</span> logDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">)</span>
+      logDirs
+    <span style="color:#66d9ef">else</span>
+      _liveLogDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">asScala</span><span style="color:#f92672">.</span><span style="color:#a6e22e">toBuffer</span>
+  <span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">//dirLocks：FileLock 集合，这些FileLock 用来在文件系统层面为每个Log 目录加文件锁。在LogManager 对象初始化时，就会将所有的log目录加锁
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> val dirLocks <span style="color:#f92672">=</span> lockLogDirs<span style="color:#f92672">(</span>liveLogDirs<span style="color:#f92672">)</span>
+  <span style="color:#75715e">//Map(File,OffsetCheckpointFile) 类型，用于管理每个log目录与其下的RecoveryPointCheckPoint文件之间的映射关系，在LogManager 对象初始化时，
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">//会在每个目录下创建一个对应的RecoveryPointCheckpoint 文件。此map 的value 是offsetCheckpoint对象。其中封装了对应log目录下的RecoveryPointCheckpoint文件，
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">//并提供对RecoveryPointCheckpoint 文件的读写操作。Recovery文件中则记录了该log目录下的所有Log的recoveryPoint。
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">@volatile</span> <span style="color:#66d9ef">private</span> var recoveryPointCheckpoints <span style="color:#f92672">=</span> liveLogDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>dir <span style="color:#f92672">=&gt;</span>
+    <span style="color:#f92672">(</span>dir<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> OffsetCheckpointFile<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> File<span style="color:#f92672">(</span>dir<span style="color:#f92672">,</span> RecoveryPointCheckpointFile<span style="color:#f92672">),</span> logDirFailureChannel<span style="color:#f92672">))).</span><span style="color:#a6e22e">toMap</span>
+  <span style="color:#a6e22e">@volatile</span> <span style="color:#66d9ef">private</span> var logStartOffsetCheckpoints <span style="color:#f92672">=</span> liveLogDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>dir <span style="color:#f92672">=&gt;</span>
+    <span style="color:#f92672">(</span>dir<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> OffsetCheckpointFile<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> File<span style="color:#f92672">(</span>dir<span style="color:#f92672">,</span> LogStartOffsetCheckpointFile<span style="color:#f92672">),</span> logDirFailureChannel<span style="color:#f92672">))).</span><span style="color:#a6e22e">toMap</span>
+
+  <span style="color:#66d9ef">private</span> val preferredLogDirs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> String<span style="color:#f92672">]()</span>
+
+  <span style="color:#66d9ef">private</span> def offlineLogDirs<span style="color:#f92672">:</span> Iterable<span style="color:#f92672">[</span>File<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    val logDirsSet <span style="color:#f92672">=</span> mutable<span style="color:#f92672">.</span><span style="color:#a6e22e">Set</span><span style="color:#f92672">[</span>File<span style="color:#f92672">]()</span> <span style="color:#f92672">++=</span> logDirs
+    _liveLogDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">asScala</span><span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span><span style="color:#f92672">(</span>logDirsSet <span style="color:#f92672">-=)</span>
+    logDirsSet
+  <span style="color:#f92672">}</span>
+
+  loadLogs<span style="color:#f92672">()</span>
+
+  <span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>kafka<span style="color:#f92672">]</span> val cleaner<span style="color:#f92672">:</span> LogCleaner <span style="color:#f92672">=</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cleanerConfig<span style="color:#f92672">.</span><span style="color:#a6e22e">enableCleaner</span><span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">new</span> LogCleaner<span style="color:#f92672">(</span>cleanerConfig<span style="color:#f92672">,</span> liveLogDirs<span style="color:#f92672">,</span> currentLogs<span style="color:#f92672">,</span> logDirFailureChannel<span style="color:#f92672">,</span> time <span style="color:#f92672">=</span> time<span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">else</span>
+      <span style="color:#66d9ef">null</span>
+
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>logDirs</code>：log 目录集合，在<code>server.properties</code> 配置文件中通过<code>log.dirs</code> 项指定的多个目录。每个目录下可以创建多个Log，每个log 都有自己对应的目录，LogManager 在创建Log时会选择Log最少的log目录创建Log</p>
+</li>
+<li>
+<p><code>initialOfflineDirs</code>：</p>
+</li>
+<li>
+<p><code>topicConfigs</code>：topic的一些信息，从zk中读取。Kafka 目前<code>元数据</code>存取以及<code>KafkaController</code>选举都是通过zk的，但是kafka已经有计划替换掉zk了，详情可以查看此连接 <a href="https://cwiki.apache.org/confluence/display/KAFKA/KIP-500%3A+Replace+ZooKeeper+with+a+Self-Managed+Metadata+Quorum">KIP-500</a></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">val <span style="color:#f92672">(</span>topicConfigs<span style="color:#f92672">,</span> failed<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> zkClient<span style="color:#f92672">.</span><span style="color:#a6e22e">getLogConfigs</span><span style="color:#f92672">(</span>
+    zkClient<span style="color:#f92672">.</span><span style="color:#a6e22e">getAllTopicsInCluster</span><span style="color:#f92672">,</span>
+    defaultProps
+  <span style="color:#f92672">)</span>
+</code></pre></div></li>
+<li>
+<p><code>initialDefaultConfig</code>：Kafka关于 Log 的一些配置比如：分段大小，flush间隔时间，日志清理的配置等。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">val defaultProps <span style="color:#f92672">=</span> KafkaServer<span style="color:#f92672">.</span><span style="color:#a6e22e">copyKafkaConfigToLog</span><span style="color:#f92672">(</span>config<span style="color:#f92672">)</span>
+LogConfig<span style="color:#f92672">.</span><span style="color:#a6e22e">validateValues</span><span style="color:#f92672">(</span>defaultProps<span style="color:#f92672">)</span>
+val defaultLogConfig <span style="color:#f92672">=</span> LogConfig<span style="color:#f92672">(</span>defaultProps<span style="color:#f92672">)</span>
+</code></pre></div></li>
+<li>
+<p><code>cleanerConfig</code>：cleaner 线程的配置</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CleanerConfig</span><span style="color:#f92672">(</span>numThreads<span style="color:#f92672">:</span> Int <span style="color:#f92672">=</span> 1<span style="color:#f92672">,</span> <span style="color:#75715e">//启动多少个 cleaner 线程
+</span><span style="color:#75715e"></span>                       dedupeBufferSize<span style="color:#f92672">:</span> Long <span style="color:#f92672">=</span> 4<span style="color:#f92672">*</span>1024<span style="color:#f92672">*</span>1024L<span style="color:#f92672">,</span> <span style="color:#75715e">//用于日志重复数据删除的总内存 4mb
+</span><span style="color:#75715e"></span>                       dedupeBufferLoadFactor<span style="color:#f92672">:</span> Double <span style="color:#f92672">=</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">9d</span><span style="color:#f92672">,</span><span style="color:#75715e">//重复数据删除缓冲区的最大已用百分比
+</span><span style="color:#75715e"></span>                       ioBufferSize<span style="color:#f92672">:</span> Int <span style="color:#f92672">=</span> 1024<span style="color:#f92672">*</span>1024<span style="color:#f92672">,</span>
+                       maxMessageSize<span style="color:#f92672">:</span> Int <span style="color:#f92672">=</span> 32<span style="color:#f92672">*</span>1024<span style="color:#f92672">*</span>1024<span style="color:#f92672">,</span> <span style="color:#75715e">//日志中可以显示的消息的最大大小
+</span><span style="color:#75715e"></span>                       maxIoBytesPerSecond<span style="color:#f92672">:</span> Double <span style="color:#f92672">=</span> Double<span style="color:#f92672">.</span><span style="color:#a6e22e">MaxValue</span><span style="color:#f92672">,</span> <span style="color:#75715e">//允许所有 cleaner 线程执行的最大读写I / O
+</span><span style="color:#75715e"></span>                       backOffMs<span style="color:#f92672">:</span> Long <span style="color:#f92672">=</span> 15 <span style="color:#f92672">*</span> 1000<span style="color:#f92672">,</span> <span style="color:#75715e">//如果没有可清除的日志则等待的时间
+</span><span style="color:#75715e"></span>                       enableCleaner<span style="color:#f92672">:</span> Boolean <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">,</span> <span style="color:#75715e">//是否开启cleaner 线程
+</span><span style="color:#75715e"></span>                       hashAlgorithm<span style="color:#f92672">:</span> String <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MD5&#34;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">//key 比较的算法
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li><code>numThreads</code>：启动多少个 cleaner 线程</li>
+<li><code>dedupeBufferSize</code>：用于日志重复数据删除的总内存 4mb</li>
+<li><code>dedupeBufferLoadFactor</code>：重复数据删除缓冲区的最大已用百分比</li>
+<li><code>maxMessageSize</code>：日志中可以显示的消息的最大大小</li>
+<li><code>maxIoBytesPerSecond</code>：允许所有 cleaner 线程执行的最大读写I / O</li>
+<li><code>backOffMs</code>：如果没有可清除的日志则等待的时间</li>
+<li><code>enableCleaner</code>：是否开启cleaner 线程</li>
+<li><code>hashAlgorithm</code>：key 比较的算法</li>
+</ul>
+</li>
+<li>
+<p><code>recoveryThreadsPerDataDir</code>：在Kafka启动的时候处理日志恢复，关闭的时候处理日志flush的线程数量。默认为1个，可以通过<code>num.recovery.threads.per.data.dir</code>进行配置。</p>
+</li>
+<li>
+<p><code>flushCheckMs</code>：从内存刷新到磁盘的间隔时间，通过 <code>log.flush.scheduler.interval.ms</code> 进行配置，默认 <code>Long.MaxValue</code></p>
+</li>
+<li>
+<p><code>flushRecoveryOffsetCheckpointMs</code>：更新日志恢复点的频率，通过 <code>log.flush.offset.checkpoint.interval.ms</code> 进行配置，默认 <code>60000ms</code></p>
+</li>
+<li>
+<p><code>flushStartOffsetCheckpointMs</code>：更新日志<code>Log Start Offset </code>的频率，通过<code>log.flush.start.offset.checkpoint.interval.ms</code> 进行配置，默认<code>60000ms</code></p>
+</li>
+<li>
+<p><code>retentionCheckMs</code>：检查日志是否有过期的频率，通过 <code>log.retention.check.interval.ms</code> 进行配置，默认 <code>5 * 60 * 1000Lms</code></p>
+</li>
+<li>
+<p><code>maxPidExpirationMs</code>：transactional id 过期的时间，通过 <code>transactional.id.expiration.ms</code> 进行配置，默认<code>7天</code></p>
+</li>
+<li>
+<p><code>scheduler</code>：定时器，用的是Java中的 <code>ScheduledThreadPoolExecutor</code> 对象</p>
+</li>
+<li>
+<p><code>brokerState</code>：broker的状态，有 <code>NotRunning</code>、<code>Starting</code>、<code>RecoveringFromUncleanShutdown</code>、<code>RunningAsBroker</code>、<code>PendingControlledShutdown</code>、<code>BrokerShuttingDown</code> 这几种状态。</p>
+</li>
+<li>
+<p><code>brokerTopicStats</code>：broker中topic 的状态</p>
+</li>
+<li>
+<p><code>logDirFailureChannel</code>：访问日志目录失败的，会加入此对象中的 <code>offlineLogDirs</code> 和 <code>offlineLogDirQueue</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LogDirFailureChannel</span><span style="color:#f92672">(</span>logDirNum<span style="color:#f92672">:</span> Int<span style="color:#f92672">)</span> <span style="color:#66d9ef">extends</span> Logging <span style="color:#f92672">{</span>
+     <span style="color:#66d9ef">private</span> val offlineLogDirs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">[</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">]</span>
+     <span style="color:#66d9ef">private</span> val offlineLogDirQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayBlockingQueue<span style="color:#f92672">[</span>String<span style="color:#f92672">](</span>logDirNum<span style="color:#f92672">)</span>
+<span style="color:#f92672">}</span>   
+</code></pre></div></li>
+<li>
+<p><code>InitialTaskDelayMs</code>：定时任务启动的延迟时间，<code>30 * 1000</code>ms</p>
+</li>
+<li>
+<p><code>logCreationOrDeletionLock</code>：锁</p>
+</li>
+<li>
+<p><code>currentLogs</code>：用于管理 <code>TopicAndPartition</code> 与 <code>Log</code> 之间的对应关系。使用的是Kafka自定义的 <code>pool</code> 类型对象，底层是jdk 提供的 <code>ConcurrentHashMap</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> val currentLogs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Pool<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> Log<span style="color:#f92672">]()</span>
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Pool</span><span style="color:#f92672">[</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">](</span>valueFactory<span style="color:#f92672">:</span> Option<span style="color:#f92672">[</span>K <span style="color:#f92672">=&gt;</span> V<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> None<span style="color:#f92672">)</span> <span style="color:#66d9ef">extends</span> Iterable<span style="color:#f92672">[(</span>K<span style="color:#f92672">,</span> V<span style="color:#f92672">)]</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">private</span> val pool<span style="color:#f92672">:</span> ConcurrentMap<span style="color:#f92672">[</span>K<span style="color:#f92672">,</span> V<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">[</span>K<span style="color:#f92672">,</span> V<span style="color:#f92672">]</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p><code>futureLogs</code>：用于存放 <code>-future</code> 后缀的日志，当用户在想在相同的broker 移动到另外一个replica 中的时候会创建-future 的日志，使用的是Kafka自定义的 <code>pool</code> 类型对象，底层是jdk 提供的 <code>ConcurrentHashMap</code></p>
+</li>
+<li>
+<p><code>logsToBeDeleted</code>： 需要被删除的日志的集合，使用jdk 提供的 <code>LinkedBlockingQueue</code></p>
+</li>
+<li>
+<p><code>partitionsInitializing</code>：用于解决 <a href="https://github.com/apache/kafka/pull/7305">KAFKA-8813</a> 这个 bug</p>
+<blockquote>
+<p><strong>大致的意思是</strong>：</p>
+<p>Topic-Partition 下的 log 初始化有以下几个步骤</p>
+<ol>
+<li>从 zk 中拉取 log 的配置</li>
+<li>调用 LogManager.getOrCreateLog 方法创建 log 对象</li>
+<li>注册 log 对象</li>
+</ol>
+<p>但是如果在<code>第二步</code>创建完 log 对象之后，如果用户修改了配置，那么这个配置将无法更新。</p>
+<p>所以通过在 <code>LogManager</code> 初始化的时候，在 <code>partitionsInitializing</code> 集合中，插入  <code>Topic-Partition ，false。</code></p>
+<p>如果有人修改了配置，那么该 <code>Topic-Partition</code> 的值设置为 <code>true</code></p>
+<p>在初始化完结束后检查是否为 <code>true</code> 如果是的话，重新从 <code>zk</code> 中拉取配置，重新创建 <code>log</code> 对象</p>
+</blockquote>
+</li>
+<li>
+<p><code>_liveLogDirs</code>：创建或者获取 log.dirs 项指定的多个目录，要求：没有重复，都是可读的，通过 ConcurrentLinkedQueue 存储</p>
+</li>
+<li>
+<p><code>dirLocks</code>：FileLock 集合，这些<code>FileLock</code> 用来在文件系统层面为每个Log 目录加文件锁。在LogManager 对象初始化时，就会将所有的log目录加锁</p>
+</li>
+<li>
+<p><code>recoveryPointCheckpoints</code>： 用于管理每个log目录与其下的 <code>RecoveryPointCheckPoint</code> 文件之间的映射关系，<code>Map(File,OffsetCheckpointFile)</code> 类型。</p>
+<blockquote>
+<p>在 <code>LogManager</code> 对象初始化时，会在每个目录下创建一个对应的 <code>RecoveryPointCheckpoint</code> 文件。此map 的value <code>是offsetCheckpoint</code> 对象。其中封装了对应log目录下的 <code>RecoveryPointCheckpoint文件，并提供对</code> <code>RecoveryPointCheckpoint</code> 文件的读写操作。Recovery文件中则记录了该log目录下的所有Log的 <code>recoveryPoint</code> 。</p>
+</blockquote>
+</li>
+<li>
+<p><code>logStartOffsetCheckpoints</code>：用于管理每个log目录与其下的 <code>LogStartOffsetCheckpoint</code> 文件之间的映射关系，<code>Map(File,OffsetCheckpointFile)</code> 类型。</p>
+</li>
+<li>
+<p><code>preferredLogDirs</code>：用于管理每个log目录与其下的 <code>preferredLog</code> 之间的映射关系</p>
+</li>
+<li>
+<p><code>cleaner</code>：cleaner 线程</p>
+</li>
+</ul>
+<hr>
+<h4 id="22-startup-">2.2 startup( )</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">startup</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">/* Schedule the cleanup task to delete old logs */</span>
+    <span style="color:#75715e">//在KafkaServer 中初始化的 Schedule 传入，开定时的清理log的任务
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>scheduler <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Starting log cleanup with a period of %d ms.&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>retentionCheckMs<span style="color:#f92672">))</span>
+      scheduler<span style="color:#f92672">.</span><span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;kafka-log-retention&#34;</span><span style="color:#f92672">,</span> <span style="color:#75715e">//LogSegment 清理任务
+</span><span style="color:#75715e"></span>                         cleanupLogs _<span style="color:#f92672">,</span> <span style="color:#75715e">//核心方法
+</span><span style="color:#75715e"></span>                         delay <span style="color:#f92672">=</span> InitialTaskDelayMs<span style="color:#f92672">,</span> <span style="color:#75715e">// 30 * 1000  启动延迟时间30秒
+</span><span style="color:#75715e"></span>                         period <span style="color:#f92672">=</span> retentionCheckMs<span style="color:#f92672">,</span> <span style="color:#75715e">// 每次检查过期 log 的间隔时间  通过 log.retention.check.interval.ms 配置 默认300000毫秒也就是每5分钟检查一次。
+</span><span style="color:#75715e"></span>                         TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">)</span>
+      info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Starting log flusher with a default period of %d ms.&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>flushCheckMs<span style="color:#f92672">))</span>
+      scheduler<span style="color:#f92672">.</span><span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;kafka-log-flusher&#34;</span><span style="color:#f92672">,</span> <span style="color:#75715e">//定时 flush log 到磁盘
+</span><span style="color:#75715e"></span>                         flushDirtyLogs _<span style="color:#f92672">,</span> <span style="color:#75715e">//核心方法
+</span><span style="color:#75715e"></span>                         delay <span style="color:#f92672">=</span> InitialTaskDelayMs<span style="color:#f92672">,</span>
+                         period <span style="color:#f92672">=</span> flushCheckMs<span style="color:#f92672">,</span><span style="color:#75715e">//检查时间 通过log.flush.scheduler.interval.ms 配置 默认 Long.maxValue 2的63次方 -1.
+</span><span style="color:#75715e"></span>                         TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">)</span>
+      scheduler<span style="color:#f92672">.</span><span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;kafka-recovery-point-checkpoint&#34;</span><span style="color:#f92672">,</span> <span style="color:#75715e">//定时将recovery-point 写入到  kafka-recovery-point-checkpoint文件中。
+</span><span style="color:#75715e"></span>                         checkpointLogRecoveryOffsets _<span style="color:#f92672">,</span> <span style="color:#75715e">//核心方法
+</span><span style="color:#75715e"></span>                         delay <span style="color:#f92672">=</span> InitialTaskDelayMs<span style="color:#f92672">,</span>
+                         period <span style="color:#f92672">=</span> flushRecoveryOffsetCheckpointMs<span style="color:#f92672">,</span> <span style="color:#75715e">//间隔时间 通过log.flush.offset.checkpoint.interval.ms 配置，默认60000 毫秒
+</span><span style="color:#75715e"></span>                         TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">)</span>
+      scheduler<span style="color:#f92672">.</span><span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;kafka-log-start-offset-checkpoint&#34;</span><span style="color:#f92672">,</span>  <span style="color:#75715e">//log start offset 的检查任务(它用来标识日志的起始偏移量。各个副本在变动 LEO 和 HW的过程中，logStartOffset 也有可能随之而动，Kafka 也有一个定时任务来负责将所有分区的logStartOffset书写到起始点文件log-start-offset-checkpoint中)
+</span><span style="color:#75715e"></span>                         checkpointLogStartOffsets _<span style="color:#f92672">,</span><span style="color:#75715e">//核心方法
+</span><span style="color:#75715e"></span>                         delay <span style="color:#f92672">=</span> InitialTaskDelayMs<span style="color:#f92672">,</span>
+                         period <span style="color:#f92672">=</span> flushStartOffsetCheckpointMs<span style="color:#f92672">,</span> <span style="color:#75715e">//间隔时间  通过 log.flush.start.offset.checkpoint.interval.ms配置，默认60000 毫秒
+</span><span style="color:#75715e"></span>                         TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">)</span>
+      scheduler<span style="color:#f92672">.</span><span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;kafka-delete-logs&#34;</span><span style="color:#f92672">,</span> <span style="color:#75715e">// will be rescheduled after each delete logs with a dynamic period
+</span><span style="color:#75715e"></span>                         deleteLogs _<span style="color:#f92672">,</span><span style="color:#75715e">//核心方法
+</span><span style="color:#75715e"></span>                         delay <span style="color:#f92672">=</span> InitialTaskDelayMs<span style="color:#f92672">,</span>
+                         unit <span style="color:#f92672">=</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cleanerConfig<span style="color:#f92672">.</span><span style="color:#a6e22e">enableCleaner</span><span style="color:#f92672">)</span>
+      cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">startup</span><span style="color:#f92672">()</span>  <span style="color:#75715e">//启动cleaner 线程
+</span><span style="color:#75715e"></span>  <span style="color:#f92672">}</span>
+</code></pre></div><p>LogManager 初始化方法就启动了5个定时任务和一个cleaner 线程</p>
+<ul>
+<li><code>kafka-log-retention</code> ：清理过期的 <code>LogSegment</code> 任务</li>
+<li><code>kafka-log-flusher</code>：定时 flush log 到磁盘</li>
+<li><code>kafka-recovery-point-checkpoint</code>：定时将recovery-point 写入到  <code>kafka-recovery-point-checkpoint</code>文件</li>
+<li><code>kafka-log-start-offset-checkpoint</code>：<code>log start offset</code> 的检查任务(它用来标识日志的起始偏移量。各个副本在变动 LEO 和 HW的过程中，logStartOffset 也有可能随之而动，Kafka 也有一个定时任务来负责将所有分区的<code>logStartOffset</code>书写到起始点文件</li>
+<li><code>kafka-delete-logs</code>：定时把<code>.delete</code>后缀的日志删除</li>
+<li><code>cleaner 线程</code>：用于压缩日志</li>
+</ul>
+<hr>
+<h4 id="23-定时任务-kafka-log-retention">2.3 定时任务 Kafka-log-retention</h4>
+<p>清理过期的 <code>LogSegment</code> 任务</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">cleanupLogs</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    debug<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Beginning log cleanup...&#34;</span><span style="color:#f92672">)</span>
+    var total <span style="color:#f92672">=</span> 0
+    val startMs <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span>
+
+    <span style="color:#75715e">// clean current logs.
+</span><span style="color:#75715e"></span>    val deletableLogs <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cleaner <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// prevent cleaner from working on same partitions when changing cleanup policy
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//① 先中断当前 topic-partition 下正在进行执行cleaner的线程
+</span><span style="color:#75715e"></span>        cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">pauseCleaningForNonCompactedPartitions</span><span style="color:#f92672">()</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//② 过滤掉 cleanup.policy 配置的不是 delete 的 log
+</span><span style="color:#75715e"></span>        currentLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>_<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> <span style="color:#f92672">!</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">compact</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">//到这里了 deletableLogs 中log的cleanup.policy 配置是delete，开始进行删除
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      deletableLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+          debug<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Garbage collecting &#39;${log.name}&#39;&#34;</span><span style="color:#f92672">)</span>
+          <span style="color:#75715e">//③ 委托给 log.deleteOldSegments() 方法进行删除过期的 `logSegment`
+</span><span style="color:#75715e"></span>          total <span style="color:#f92672">+=</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteOldSegments</span><span style="color:#f92672">()</span>
+
+          val futureLog <span style="color:#f92672">=</span> futureLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">)</span>
+          <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>futureLog <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// clean future logs
+</span><span style="color:#75715e"></span>            debug<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Garbage collecting future log &#39;${futureLog.name}&#39;&#34;</span><span style="color:#f92672">)</span>
+            total <span style="color:#f92672">+=</span> futureLog<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteOldSegments</span><span style="color:#f92672">()</span>
+          <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//④ 如果在第①步中中断了cleaner 线程，则在这里进行恢复。也就是说在topic-partition的同一时刻 只有一个cleaner 对其进行清理
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cleaner <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">resumeCleaning</span><span style="color:#f92672">(</span>deletableLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>_<span style="color:#f92672">.</span><span style="color:#a6e22e">_1</span><span style="color:#f92672">))</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    debug<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Log cleanup completed. $total files deleted in &#34;</span> <span style="color:#f92672">+</span>
+                  <span style="color:#f92672">(</span>time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span> <span style="color:#f92672">-</span> startMs<span style="color:#f92672">)</span> <span style="color:#f92672">/</span> 1000 <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; seconds&#34;</span><span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 先中断当前 <code>topic-partition</code> 下正在进行执行 <code>cleaner</code> 的线程</li>
+<li>② 过滤掉 <code>cleanup.policy</code> 配置的不是 <code>delete</code> 的 log</li>
+<li>③ 委托给 <code>log.deleteOldSegments()</code> 方法进行删除过期的 <code>logSegment</code>
+<ul>
+<li>此方法在 <a href="http://www.sirann.cn/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%80log/">Kafka 日志模块（一）Log</a> 的 <code>2.7.3 LogSegment</code>  日志分段小节已经分析了就不重复分析了</li>
+</ul>
+</li>
+<li>④ 如果在第<code>①</code>步中中断了<code>cleaner</code> 线程，则在这里进行恢复。也就是说在topic-partition的同一时刻 只有一个cleaner 对其进行清理</li>
+</ul>
+<hr>
+<h4 id="24-定时任务-kafka-log-flusher">2.4 定时任务 kafka-log-flusher</h4>
+<p>定时 flush log 到磁盘任务</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">flushDirtyLogs</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    debug<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Checking for dirty logs to flush...&#34;</span><span style="color:#f92672">)</span>
+
+    <span style="color:#75715e">//① 遍历 currentLogs 和  futureLogs 集合
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> <span style="color:#f92672">((</span>topicPartition<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;-</span> currentLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span> <span style="color:#f92672">++</span> futureLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//② 计算上一次flush 的时间与当前时间做比较
+</span><span style="color:#75715e"></span>        val timeSinceLastFlush <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span> <span style="color:#f92672">-</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">lastFlushTime</span>
+        <span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Checking if flush is needed on ${topicPartition.topic} flush interval ${log.config.flushMs}&#34;</span> <span style="color:#f92672">+</span>
+              s<span style="color:#e6db74">&#34; last flushed ${log.lastFlushTime} time since last flush: $timeSinceLastFlush&#34;</span><span style="color:#f92672">)</span>
+        <span style="color:#75715e">//③ 如果满足 flush.ms 配置的时间，则调用flush 方法 刷新到磁盘上
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//会把 recoverPoint ~ LEO 之间的消息数据刷新到磁盘上，并修改recoverPoint 值
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>timeSinceLastFlush <span style="color:#f92672">&gt;=</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">flushMs</span><span style="color:#f92672">)</span>
+          log<span style="color:#f92672">.</span><span style="color:#a6e22e">flush</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> Throwable <span style="color:#f92672">=&gt;</span>
+          error<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Error flushing topic ${topicPartition.topic}&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 遍历 <code>currentLogs</code> 和  <code>futureLogs</code> 集合</li>
+<li>② 计算上一次<code>flush</code> 的时间与当前时间做比较</li>
+<li>③ 如果满足 <code>flush.ms</code> 配置的时间，则调用 <code>flush</code> 方法 刷新到磁盘上，会把 <code>recoverPoint ~ LEO</code> <code>之间的消息数据刷新到磁盘上，并修改recoverPoint</code> 值</li>
+</ul>
+<hr>
+<h4 id="25-定时任务-kafka-recovery-point-checkpoint">2.5 定时任务 kafka-recovery-point-checkpoint</h4>
+<p>定时将<code>recovery-point</code> 写入到  <code>kafka-recovery-point-checkpoint</code>文件</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">checkpointLogRecoveryOffsets</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    logsByDir<span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>dir<span style="color:#f92672">,</span> partitionToLogMap<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+      liveLogDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">find</span><span style="color:#f92672">(</span>_<span style="color:#f92672">.</span><span style="color:#a6e22e">getAbsolutePath</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>dir<span style="color:#f92672">)).</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span> f <span style="color:#f92672">=&gt;</span>
+        checkpointRecoveryOffsetsAndCleanSnapshot<span style="color:#f92672">(</span>f<span style="color:#f92672">,</span> partitionToLogMap<span style="color:#f92672">.</span><span style="color:#a6e22e">values</span><span style="color:#f92672">.</span><span style="color:#a6e22e">toSeq</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>log<span style="color:#f92672">]</span> def <span style="color:#a6e22e">checkpointRecoveryOffsetsAndCleanSnapshot</span><span style="color:#f92672">(</span>dir<span style="color:#f92672">:</span> File<span style="color:#f92672">,</span> logsToCleanSnapshot<span style="color:#f92672">:</span> Seq<span style="color:#f92672">[</span>Log<span style="color:#f92672">]):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      checkpointLogRecoveryOffsetsInDir<span style="color:#f92672">(</span>dir<span style="color:#f92672">)</span>
+      logsToCleanSnapshot<span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span><span style="color:#f92672">(</span>_<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteSnapshotsAfterRecoveryPointCheckpoint</span><span style="color:#f92672">())</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> IOException <span style="color:#f92672">=&gt;</span>
+        logDirFailureChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeAddOfflineLogDir</span><span style="color:#f92672">(</span>dir<span style="color:#f92672">.</span><span style="color:#a6e22e">getAbsolutePath</span><span style="color:#f92672">,</span> s<span style="color:#e6db74">&#34;Disk error while writing to recovery point &#34;</span> <span style="color:#f92672">+</span>
+          s<span style="color:#e6db74">&#34;file in directory $dir&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>  
+</code></pre></div><p><code>checkpointLogRecoveryOffsetsInDir</code> 核心方法是调用 <code>kafka.server.checkpoints.CheckpointFile.write( )</code>方法，主要逻辑是：</p>
+<ol>
+<li>先将log 目录下的所有 <code>recoveryPoint</code> 写到 <code>tmp</code> 临时文件中。</li>
+<li>然后用<code>tmp</code> 文件替换原来的 <code>RecoveryPointCheckpoint</code> 文件。
+比较简单，可以自行查看源码。</li>
+</ol>
+<hr>
+<h4 id="26-定时任务-kafka-log-start-offset-checkpoint">2.6 定时任务 kafka-log-start-offset-checkpoint</h4>
+<p><code>log start offset</code> 的检查任务(它用来标识日志的起始偏移量。各个副本在变动 LEO 和 HW的过程中，logStartOffset 也有可能随之而动，Kafka 也有一个定时任务来负责将所有分区的<code>logStartOffset</code>书写到起始点文件</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">checkpointLogStartOffsets</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    liveLogDirs<span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span><span style="color:#f92672">(</span>checkpointLogStartOffsetsInDir<span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">checkpointLogStartOffsetsInDir</span><span style="color:#f92672">(</span>dir<span style="color:#f92672">:</span> File<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#f92672">{</span>
+      partitionToLog <span style="color:#f92672">&lt;-</span> logsByDir<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>dir<span style="color:#f92672">.</span><span style="color:#a6e22e">getAbsolutePath</span><span style="color:#f92672">)</span>
+      checkpoint <span style="color:#f92672">&lt;-</span> logStartOffsetCheckpoints<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>dir<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        val logStartOffsets <span style="color:#f92672">=</span> partitionToLog<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>k<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#66d9ef">if</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">logStartOffset</span> <span style="color:#f92672">&gt;</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">logSegments</span><span style="color:#f92672">.</span><span style="color:#a6e22e">head</span><span style="color:#f92672">.</span><span style="color:#a6e22e">baseOffset</span> <span style="color:#f92672">=&gt;</span> k <span style="color:#f92672">-&gt;</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">logStartOffset</span>
+        <span style="color:#f92672">}</span>
+        checkpoint<span style="color:#f92672">.</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>logStartOffsets<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> IOException <span style="color:#f92672">=&gt;</span>
+          logDirFailureChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeAddOfflineLogDir</span><span style="color:#f92672">(</span>dir<span style="color:#f92672">.</span><span style="color:#a6e22e">getAbsolutePath</span><span style="color:#f92672">,</span> s<span style="color:#e6db74">&#34;Disk error while writing to logStartOffset file in directory $dir&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>  
+</code></pre></div><p>此定时任务和 <code>kafka-recovery-point-checkpoint</code> 任务的逻辑是一样的。</p>
+<hr>
+<h4 id="27-定时任务-kafka-delete-logs">2.7 定时任务 kafka-delete-logs</h4>
+<p>定时把<code>.delete</code>后缀的日志删除，此定时任务要与 <code>Kafka-log-retention</code>区分开来。</p>
+<ul>
+<li><code>Kafka-log-retention</code> 是删除过期的 <strong>logSegment对象</strong></li>
+<li><code>kafka-delete-logs</code> 是删除 <strong>delete后缀的文件。</strong>
+<ul>
+<li>在 <code>LogManager</code> 初始化的时候 会调用 loadLogs 方法加载日志，如果发现上次Kafka关闭的时候没有删除的文件，会加入 <code>logsToBeDeleted</code> 队列中，等待此定时任务来删除</li>
+<li>用户进行 <code>move</code> 文件的时候，会把旧的文件标记为<code>.delete</code> 加入 <code>logsToBeDeleted</code> 队列中，也就是说Kafka 移动文件并不是移动<strong>而是在目标目录下创建并且删除旧文件。</strong></li>
+</ul>
+</li>
+</ul>
+<p>这个定时任务比较简单，就是不断从<code>logsToBeDeleted</code> 队列中取出然后删除。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">deleteLogs</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    var nextDelayMs <span style="color:#f92672">=</span> 0L
+    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      def nextDeleteDelayMs<span style="color:#f92672">:</span> Long <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>logsToBeDeleted<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          <span style="color:#75715e">//队列中取出
+</span><span style="color:#75715e"></span>          val <span style="color:#f92672">(</span>_<span style="color:#f92672">,</span> scheduleTimeMs<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> logsToBeDeleted<span style="color:#f92672">.</span><span style="color:#a6e22e">peek</span><span style="color:#f92672">()</span>
+          scheduleTimeMs <span style="color:#f92672">+</span> currentDefaultConfig<span style="color:#f92672">.</span><span style="color:#a6e22e">fileDeleteDelayMs</span> <span style="color:#f92672">-</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span><span style="color:#f92672">()</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span>
+          currentDefaultConfig<span style="color:#f92672">.</span><span style="color:#a6e22e">fileDeleteDelayMs</span>
+      <span style="color:#f92672">}</span>
+
+      <span style="color:#66d9ef">while</span> <span style="color:#f92672">({</span>nextDelayMs <span style="color:#f92672">=</span> nextDeleteDelayMs<span style="color:#f92672">;</span> nextDelayMs <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">})</span> <span style="color:#f92672">{</span>
+        val <span style="color:#f92672">(</span>removedLog<span style="color:#f92672">,</span> _<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> logsToBeDeleted<span style="color:#f92672">.</span><span style="color:#a6e22e">take</span><span style="color:#f92672">()</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>removedLog <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//删除
+</span><span style="color:#75715e"></span>            removedLog<span style="color:#f92672">.</span><span style="color:#a6e22e">delete</span><span style="color:#f92672">()</span>
+            info<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Deleted log for partition ${removedLog.topicPartition} in ${removedLog.dir.getAbsolutePath}.&#34;</span><span style="color:#f92672">)</span>
+          <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> KafkaStorageException <span style="color:#f92672">=&gt;</span>
+              error<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Exception while deleting $removedLog in dir ${removedLog.dir.getParent}.&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+          <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> Throwable <span style="color:#f92672">=&gt;</span>
+        error<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Exception in kafka-delete-logs thread.&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//重新创建一个定时任务
+</span><span style="color:#75715e"></span>        scheduler<span style="color:#f92672">.</span><span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;kafka-delete-logs&#34;</span><span style="color:#f92672">,</span>
+          deleteLogs _<span style="color:#f92672">,</span>
+          delay <span style="color:#f92672">=</span> nextDelayMs<span style="color:#f92672">,</span>
+          unit <span style="color:#f92672">=</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> Throwable <span style="color:#f92672">=&gt;</span>
+          <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>scheduler<span style="color:#f92672">.</span><span style="color:#a6e22e">isStarted</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// No errors should occur unless scheduler has been shutdown
+</span><span style="color:#75715e"></span>            error<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Failed to schedule next delete in kafka-delete-logs thread&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+          <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="28-cleaner-线程">2.8 Cleaner 线程</h4>
+<p>执行日志压缩的操作线程，与 <code>kafka-log-retention</code> 定时任务的区别在于：</p>
+<ul>
+<li><code>kafka-log-retention</code> 是根据 <code>时间</code>，<code>日志大小</code>，<code>日志起始偏移量</code>三个维度来删除日志。</li>
+<li><code>cleaner</code> 线程是清理墓碑消息(<strong>key 不为空，value 为空的消息</strong>)，以及压缩消息(相同 key 保留最新的value)。
+<blockquote>
+<p>如果消费者只关心key 对应的最新value 值，就可以开启日志压缩功能，以官方的例子说明：
+key为K1 的offset 0、2、3的三条消息只会保存最新的一条。也就是offset为3的值。</p>
+</blockquote>
+</li>
+</ul>
+<p><img src="https://kafka.apache.org/25/images/log_compaction.png" alt=""></p>
+<p>Log 在写入消息的时候其实就是将消息加入到 <code>activeSegment</code> 的日志文件的末尾，为了避免activeSegment 成为热点，<code>activeSegment</code> 不会参与日志压缩操作。</p>
+<p>在日志压缩的过程中可以启动多条<code>Cleaner</code> 线程，通过配置进行配置。</p>
+<p>每个Log 都可以通过 <code>CleanerPoint</code> 为分隔成两个部分，如下图所示：
+<img src="https://kafka.apache.org/25/images/log_cleaner_anatomy.png" alt=""></p>
+<ul>
+<li><code>Log Head</code> 部分就是和普通日志一样保存了所有的消息</li>
+<li><code>Log Tail</code> 部分就是经过Cleaner线程清理过的部分。</li>
+<li>可以通过 <code>min.cleanable.dirty.ratio</code>来配置指定topic 的日志dirty 部分占比，占比越高那么会优先进行清除，也可以通过 <code>log.cleaner.min.cleanable.ratio</code> 配置整个broker中的topic</li>
+<li>Cleaner线程通过 <code>dirty</code> 的占比选出需要被清理的Log 后， 首先会为dirty 部分的消息建立 <code>key</code> 与其 <code>last_offset</code> 的映射关系，通过<code>SkimpyOffsetMap</code>维护。</li>
+</ul>
+<p><strong>日志压缩的相关实现类</strong></p>
+<p><img src="http://img.sirann.cn//siran/20200507112703.png" alt=""></p>
+<ul>
+<li><code>LogCleaner</code>：通过cleaner 字段管理 CleanerThread 线程，通过 startup()方法和 shutdown 方法 完成 CleanerThread 线程的启动和停止</li>
+<li><code>CleanerThread</code>：日志压缩的真正逻辑的地方，继承 ShutdownableThread</li>
+<li><code>ShutdownableThread</code>：继承Thread，给 CleanerThread 提供基础方法，比如 <code>initiateShutdown</code> <code>、awaitShutdown</code> 、 <code>run</code> 方法</li>
+<li><code>Cleaner</code>：CleanerThread 线程的一些方法都委托给了 Cleaner 。</li>
+<li><code>LogCleanerManager</code>：负责每个log 的压缩状态管理以及 cleaner checkpoint 信息维护</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#75715e">//启动 CleanerThread 线程。
+</span><span style="color:#75715e"></span>  def <span style="color:#a6e22e">startup</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Starting the log cleaner&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#f92672">(</span>0 until config<span style="color:#f92672">.</span><span style="color:#a6e22e">numThreads</span><span style="color:#f92672">).</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span> i <span style="color:#f92672">=&gt;</span>
+      val cleaner <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CleanerThread<span style="color:#f92672">(</span>i<span style="color:#f92672">)</span>
+      cleaners <span style="color:#f92672">+=</span> cleaner
+      cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">()</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>默认启动一个 <code>CleanerThread</code> 线程，可以通过 <code>log.cleaner.threads</code> 进行配置</li>
+</ul>
+<p><strong>CleanerThread</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//初始化 Cleaner 对象
+</span><span style="color:#75715e"></span>val cleaner <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Cleaner<span style="color:#f92672">(</span>id <span style="color:#f92672">=</span> threadId<span style="color:#f92672">,</span>
+                              offsetMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SkimpyOffsetMap<span style="color:#f92672">(</span>memory <span style="color:#f92672">=</span> math<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>config<span style="color:#f92672">.</span><span style="color:#a6e22e">dedupeBufferSize</span> <span style="color:#f92672">/</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">numThreads</span><span style="color:#f92672">,</span> Int<span style="color:#f92672">.</span><span style="color:#a6e22e">MaxValue</span><span style="color:#f92672">).</span><span style="color:#a6e22e">toInt</span><span style="color:#f92672">,</span>
+                                                              hashAlgorithm <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">hashAlgorithm</span><span style="color:#f92672">),</span>
+                              ioBufferSize <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">ioBufferSize</span> <span style="color:#f92672">/</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">numThreads</span> <span style="color:#f92672">/</span> 2<span style="color:#f92672">,</span>
+                              maxIoBufferSize <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">maxMessageSize</span><span style="color:#f92672">,</span>
+                              dupBufferLoadFactor <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">dedupeBufferLoadFactor</span><span style="color:#f92672">,</span>
+                              throttler <span style="color:#f92672">=</span> throttler<span style="color:#f92672">,</span>
+                              time <span style="color:#f92672">=</span> time<span style="color:#f92672">,</span>
+                              checkDone <span style="color:#f92672">=</span> checkDone<span style="color:#f92672">)</span>
+
+<span style="color:#75715e">//核心方法                              
+</span><span style="color:#75715e"></span>override def <span style="color:#a6e22e">doWork</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      val cleaned <span style="color:#f92672">=</span> tryCleanFilthiestLog<span style="color:#f92672">()</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>cleaned<span style="color:#f92672">)</span>
+        pause<span style="color:#f92672">(</span>config<span style="color:#f92672">.</span><span style="color:#a6e22e">backOffMs</span><span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">tryCleanFilthiestLog</span><span style="color:#f92672">():</span> Boolean <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        cleanFilthiestLog<span style="color:#f92672">()</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> LogCleaningException <span style="color:#f92672">=&gt;</span>
+          warn<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Unexpected exception thrown when cleaning log ${e.log}. Marking its partition (${e.log.topicPartition}) as uncleanable&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+          cleanerManager<span style="color:#f92672">.</span><span style="color:#a6e22e">markPartitionUncleanable</span><span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">dir</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getParent</span><span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">)</span>
+
+          <span style="color:#66d9ef">false</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#a6e22e">@throws</span><span style="color:#f92672">(</span>classOf<span style="color:#f92672">[</span>LogCleaningException<span style="color:#f92672">])</span>
+<span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">cleanFilthiestLog</span><span style="color:#f92672">():</span> Boolean <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      val preCleanStats <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PreCleanStats<span style="color:#f92672">()</span>
+      <span style="color:#75715e">//① 获取需要进行日志压缩的 log
+</span><span style="color:#75715e"></span>      val cleaned <span style="color:#f92672">=</span> cleanerManager<span style="color:#f92672">.</span><span style="color:#a6e22e">grabFilthiestCompactedLog</span><span style="color:#f92672">(</span>time<span style="color:#f92672">,</span> preCleanStats<span style="color:#f92672">)</span> match <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> None <span style="color:#f92672">=&gt;</span>
+          <span style="color:#66d9ef">false</span>
+        <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+          <span style="color:#75715e">// there&#39;s a log, clean it
+</span><span style="color:#75715e"></span>          <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lastPreCleanStats</span> <span style="color:#f92672">=</span> preCleanStats
+          <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//② 核心方法 进行压缩
+</span><span style="color:#75715e"></span>            cleanLog<span style="color:#f92672">(</span>cleanable<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">true</span>
+          <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">case</span> e <span style="color:#960050;background-color:#1e0010">@</span> <span style="color:#f92672">(</span>_<span style="color:#f92672">:</span> ThreadShutdownException <span style="color:#f92672">|</span> _<span style="color:#f92672">:</span> ControlThrowable<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">throw</span> e
+            <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> Exception <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> LogCleaningException<span style="color:#f92672">(</span>cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">getMessage</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+          <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+      val deletable<span style="color:#f92672">:</span> Iterable<span style="color:#f92672">[(</span>TopicPartition<span style="color:#f92672">,</span> Log<span style="color:#f92672">)]</span> <span style="color:#f92672">=</span> cleanerManager<span style="color:#f92672">.</span><span style="color:#a6e22e">deletableLogs</span><span style="color:#f92672">()</span>
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        deletable<span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>_<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+          <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteOldSegments</span><span style="color:#f92672">()</span>
+          <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">case</span> e <span style="color:#960050;background-color:#1e0010">@</span> <span style="color:#f92672">(</span>_<span style="color:#f92672">:</span> ThreadShutdownException <span style="color:#f92672">|</span> _<span style="color:#f92672">:</span> ControlThrowable<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">throw</span> e
+            <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> Exception <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> LogCleaningException<span style="color:#f92672">(</span>log<span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">getMessage</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+          <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span>  <span style="color:#f92672">{</span>
+        cleanerManager<span style="color:#f92672">.</span><span style="color:#a6e22e">doneDeleting</span><span style="color:#f92672">(</span>deletable<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>_<span style="color:#f92672">.</span><span style="color:#a6e22e">_1</span><span style="color:#f92672">))</span>
+      <span style="color:#f92672">}</span>
+
+      cleaned
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">cleanLog</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">:</span> LogToClean<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      var endOffset <span style="color:#f92672">=</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">firstDirtyOffset</span>
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        val <span style="color:#f92672">(</span>nextDirtyOffset<span style="color:#f92672">,</span> cleanerStats<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">clean</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">)</span>
+        recordStats<span style="color:#f92672">(</span>cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">,</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">,</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">firstDirtyOffset</span><span style="color:#f92672">,</span> endOffset<span style="color:#f92672">,</span> cleanerStats<span style="color:#f92672">)</span>
+        endOffset <span style="color:#f92672">=</span> nextDirtyOffset
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> _<span style="color:#f92672">:</span> LogCleaningAbortedException <span style="color:#f92672">=&gt;</span> <span style="color:#75715e">// task can be aborted, let it go.
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">case</span> _<span style="color:#f92672">:</span> KafkaStorageException <span style="color:#f92672">=&gt;</span> <span style="color:#75715e">// partition is already offline. let it go.
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> IOException <span style="color:#f92672">=&gt;</span>
+          val logDirectory <span style="color:#f92672">=</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">dir</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getParent</span>
+          val msg <span style="color:#f92672">=</span> s<span style="color:#e6db74">&#34;Failed to clean up log for ${cleanable.topicPartition} in dir ${logDirectory} due to IOException&#34;</span>
+          logDirFailureChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeAddOfflineLogDir</span><span style="color:#f92672">(</span>logDirectory<span style="color:#f92672">,</span> msg<span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+        cleanerManager<span style="color:#f92672">.</span><span style="color:#a6e22e">doneCleaning</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">,</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">dir</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getParentFile</span><span style="color:#f92672">,</span> endOffset<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>                                  
+</code></pre></div><ul>
+<li>
+<p>初始化 <code>Cleaner</code> 对象的重要参数</p>
+<ul>
+<li><code>offsetMap</code>：是一个SkimpyOffsetMap 类型的对象，是为 dirty 部分的消息建立 key 与 last_offset 的映射关系。</li>
+<li><code>ioBufferSize</code>： 读写 LogSegment 的 byteBuffer 的大小</li>
+<li><code>maxIoBufferSize</code>Segment：消息的最大长度</li>
+<li><code>dupBufferLoadFactor</code>：指定了SkimpyOffsetMap 的最大占用比率</li>
+<li><code>throttler</code>：用来限制读写LogSegment的速度</li>
+<li><code>checkDone</code>：检查Log的压缩状态</li>
+</ul>
+</li>
+<li>
+<p>① 通过<code>LogCleanerManager#grabFilthiestCompactedLog</code>获取需要进行日志压缩的 <code>log</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">grabFilthiestCompactedLog</span><span style="color:#f92672">(</span>time<span style="color:#f92672">:</span> Time<span style="color:#f92672">,</span> preCleanStats<span style="color:#f92672">:</span> PreCleanStats <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PreCleanStats<span style="color:#f92672">()):</span> Option<span style="color:#f92672">[</span>LogToClean<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+  inLock<span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//当前时间
+</span><span style="color:#75715e"></span>    val now <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span>
+    <span style="color:#75715e">//监控指标 记录 cleaner 线程跑的时间
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">timeOfLastRun</span> <span style="color:#f92672">=</span> now
+    val lastClean <span style="color:#f92672">=</span> allCleanerCheckpoints
+    val dirtyLogs <span style="color:#f92672">=</span> logs<span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//① 过滤掉 cleaner.policy 不是 compact 的log
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>_<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">compact</span>  <span style="color:#75715e">// match logs that are marked as compacted
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}.</span><span style="color:#a6e22e">filterNot</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+        <span style="color:#75715e">//② skip any logs already in-progress and uncleanable partitions
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// 过滤掉已经 in-progress 集合中的 不需要清理的
+</span><span style="color:#75715e"></span>        inProgress<span style="color:#f92672">.</span><span style="color:#a6e22e">contains</span><span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">)</span> <span style="color:#f92672">||</span> isUncleanablePartition<span style="color:#f92672">(</span>log<span style="color:#f92672">,</span> topicPartition<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}.</span><span style="color:#a6e22e">map</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> log<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> <span style="color:#75715e">// create a LogToClean instance for each
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+          <span style="color:#75715e">//计算出 firstDirtyOffset， firstDirtyOffset 的值可能是 logStartOffset 也可能是 clean checkpoint
+</span><span style="color:#75715e"></span>          val lastCleanOffset <span style="color:#f92672">=</span> lastClean<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">)</span>
+          val <span style="color:#f92672">(</span>firstDirtyOffset<span style="color:#f92672">,</span> firstUncleanableDirtyOffset<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> cleanableOffsets<span style="color:#f92672">(</span>log<span style="color:#f92672">,</span> lastCleanOffset<span style="color:#f92672">,</span> now<span style="color:#f92672">)</span>
+          val compactionDelayMs <span style="color:#f92672">=</span> maxCompactionDelay<span style="color:#f92672">(</span>log<span style="color:#f92672">,</span> firstDirtyOffset<span style="color:#f92672">,</span> now<span style="color:#f92672">)</span>
+          preCleanStats<span style="color:#f92672">.</span><span style="color:#a6e22e">updateMaxCompactionDelay</span><span style="color:#f92672">(</span>compactionDelayMs<span style="color:#f92672">)</span>
+
+          <span style="color:#75715e">//③ 为每个 Log 创建一个 LogToClean对象，维护了每个Log的clean部分的字节数、dirty部分字节数 以及 cleanableRatio
+</span><span style="color:#75715e"></span>          LogToClean<span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> log<span style="color:#f92672">,</span> firstDirtyOffset<span style="color:#f92672">,</span> firstUncleanableDirtyOffset<span style="color:#f92672">,</span> compactionDelayMs <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> Throwable <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> LogCleaningException<span style="color:#f92672">(</span>log<span style="color:#f92672">,</span>
+            s<span style="color:#e6db74">&#34;Failed to calculate log cleaning stats for partition $topicPartition&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>ltc <span style="color:#f92672">=&gt;</span> ltc<span style="color:#f92672">.</span><span style="color:#a6e22e">totalBytes</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#75715e">// skip any empty logs
+</span><span style="color:#75715e"></span>
+    <span style="color:#75715e">//④ 获取 dirtyLogs 集合中 cleanableRatio 的最大值
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">dirtiestLogCleanableRatio</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>dirtyLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">nonEmpty</span><span style="color:#f92672">)</span> dirtyLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cleanableRatio</span> <span style="color:#66d9ef">else</span> 0
+    <span style="color:#75715e">// and must meet the minimum threshold for dirty byte ratio or have some bytes required to be compacted
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//⑤ 过滤掉 cleanableRatio 小于配置的log
+</span><span style="color:#75715e"></span>    val cleanableLogs <span style="color:#f92672">=</span> dirtyLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span> <span style="color:#f92672">{</span> ltc <span style="color:#f92672">=&gt;</span>
+      <span style="color:#f92672">(</span>ltc<span style="color:#f92672">.</span><span style="color:#a6e22e">needCompactionNow</span> <span style="color:#f92672">&amp;&amp;</span> ltc<span style="color:#f92672">.</span><span style="color:#a6e22e">cleanableBytes</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">||</span> ltc<span style="color:#f92672">.</span><span style="color:#a6e22e">cleanableRatio</span> <span style="color:#f92672">&gt;</span> ltc<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">minCleanableRatio</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>cleanableLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      None
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//⑥ 选择要压缩的日志，加入inProgress 集合中
+</span><span style="color:#75715e"></span>      preCleanStats<span style="color:#f92672">.</span><span style="color:#a6e22e">recordCleanablePartitions</span><span style="color:#f92672">(</span>cleanableLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">)</span>
+      val filthiest <span style="color:#f92672">=</span> cleanableLogs<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span>
+      inProgress<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>filthiest<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">,</span> LogCleaningInProgress<span style="color:#f92672">)</span>
+      Some<span style="color:#f92672">(</span>filthiest<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p>② 核心方法 调用一开始初始化的 <code>Cleaner</code>对象中的<code>clean</code>方法进行压缩，通过下图可以更好理解clean方法
+<img src="http://img.sirann.cn//siran/20200507135536.png" alt=""></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>log<span style="color:#f92672">]</span> def <span style="color:#a6e22e">clean</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">:</span> LogToClean<span style="color:#f92672">):</span> <span style="color:#f92672">(</span>Long<span style="color:#f92672">,</span> CleanerStats<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">// figure out the timestamp below which it is safe to remove delete tombstones
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// this position is defined to be a configurable time beneath the last modified time of the last clean segment
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">//计算可以安全删除 &#34;删除标识&#34; (即value 为空的消息) 的logSegment
+</span><span style="color:#75715e"></span>  val deleteHorizonMs <span style="color:#f92672">=</span>
+    cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">logSegments</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">firstDirtyOffset</span><span style="color:#f92672">).</span><span style="color:#a6e22e">lastOption</span> match <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">case</span> None <span style="color:#f92672">=&gt;</span> 0L
+      <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span>seg<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> seg<span style="color:#f92672">.</span><span style="color:#a6e22e">lastModified</span> <span style="color:#f92672">-</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">deleteRetentionMs</span>
+  <span style="color:#f92672">}</span>
+
+  doClean<span style="color:#f92672">(</span>cleanable<span style="color:#f92672">,</span> deleteHorizonMs<span style="color:#f92672">)</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>log<span style="color:#f92672">]</span> def <span style="color:#a6e22e">doClean</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">:</span> LogToClean<span style="color:#f92672">,</span> deleteHorizonMs<span style="color:#f92672">:</span> Long<span style="color:#f92672">):</span> <span style="color:#f92672">(</span>Long<span style="color:#f92672">,</span> CleanerStats<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+  info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Beginning cleaning of log %s.&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">))</span>
+
+  val log <span style="color:#f92672">=</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span>
+  val stats <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CleanerStats<span style="color:#f92672">()</span>
+
+  <span style="color:#75715e">// build the offset map
+</span><span style="color:#75715e"></span>  info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Building offset map for %s...&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">))</span>
+  <span style="color:#75715e">//① 确认日志压缩的上限，因为 activeSegment不参与日志压缩，所以可以确定日志压缩的最大上限是 activeSegment.baseOffset。
+</span><span style="color:#75715e"></span>  val upperBoundOffset <span style="color:#f92672">=</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">firstUncleanableOffset</span>
+  <span style="color:#75715e">//② 填充 offsetMap，确定日志压缩的真正上限
+</span><span style="color:#75715e"></span>  buildOffsetMap<span style="color:#f92672">(</span>log<span style="color:#f92672">,</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">firstDirtyOffset</span><span style="color:#f92672">,</span> upperBoundOffset<span style="color:#f92672">,</span> offsetMap<span style="color:#f92672">,</span> stats<span style="color:#f92672">)</span>
+  val endOffset <span style="color:#f92672">=</span> offsetMap<span style="color:#f92672">.</span><span style="color:#a6e22e">latestOffset</span> <span style="color:#f92672">+</span> 1
+  stats<span style="color:#f92672">.</span><span style="color:#a6e22e">indexDone</span><span style="color:#f92672">()</span>
+
+  <span style="color:#75715e">// determine the timestamp up to which the log will be cleaned
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// this is the lower of the last active segment and the compaction lag
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">//计算出将被清理到的时间戳，可以和upperBoundOffset 一起理解。 一个是offset 一个是timestamp
+</span><span style="color:#75715e"></span>  val cleanableHorizonMs <span style="color:#f92672">=</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">logSegments</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">firstUncleanableOffset</span><span style="color:#f92672">).</span><span style="color:#a6e22e">lastOption</span><span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>_<span style="color:#f92672">.</span><span style="color:#a6e22e">lastModified</span><span style="color:#f92672">).</span><span style="color:#a6e22e">getOrElse</span><span style="color:#f92672">(</span>0L<span style="color:#f92672">)</span>
+
+  <span style="color:#75715e">// group the segments and clean the groups
+</span><span style="color:#75715e"></span>  info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Cleaning log %s (cleaning prior to %s, discarding tombstones prior to %s)...&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> Date<span style="color:#f92672">(</span>cleanableHorizonMs<span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> Date<span style="color:#f92672">(</span>deleteHorizonMs<span style="color:#f92672">)))</span>
+  val transactionMetadata <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CleanedTransactionMetadata
+
+  <span style="color:#75715e">//③ 对要压缩的Segment进行分区，并且进行分组进行clean
+</span><span style="color:#75715e"></span>  val groupedSegments <span style="color:#f92672">=</span> groupSegmentsBySize<span style="color:#f92672">(</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">logSegments</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> endOffset<span style="color:#f92672">),</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">segmentSize</span><span style="color:#f92672">,</span>
+    log<span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maxIndexSize</span><span style="color:#f92672">,</span> cleanable<span style="color:#f92672">.</span><span style="color:#a6e22e">firstUncleanableOffset</span><span style="color:#f92672">)</span>
+  <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>group <span style="color:#f92672">&lt;-</span> groupedSegments<span style="color:#f92672">)</span>
+    <span style="color:#75715e">//④ 清理
+</span><span style="color:#75715e"></span>    cleanSegments<span style="color:#f92672">(</span>log<span style="color:#f92672">,</span> group<span style="color:#f92672">,</span> offsetMap<span style="color:#f92672">,</span> deleteHorizonMs<span style="color:#f92672">,</span> stats<span style="color:#f92672">,</span> transactionMetadata<span style="color:#f92672">)</span>
+
+  <span style="color:#75715e">// record buffer utilization
+</span><span style="color:#75715e"></span>  stats<span style="color:#f92672">.</span><span style="color:#a6e22e">bufferUtilization</span> <span style="color:#f92672">=</span> offsetMap<span style="color:#f92672">.</span><span style="color:#a6e22e">utilization</span>
+
+  stats<span style="color:#f92672">.</span><span style="color:#a6e22e">allDone</span><span style="color:#f92672">()</span>
+
+  <span style="color:#f92672">(</span>endOffset<span style="color:#f92672">,</span> stats<span style="color:#f92672">)</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 确认日志压缩的上限，因为 <code>activeSegment</code>不参与日志压缩，所以可以确定日志压缩的最大上限是 <code>activeSegment.baseOffset</code>。</li>
+<li>② 填充 <code>offsetMap</code>，确定日志压缩的真正上限</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>log<span style="color:#f92672">]</span> def <span style="color:#a6e22e">buildOffsetMap</span><span style="color:#f92672">(</span>log<span style="color:#f92672">:</span> Log<span style="color:#f92672">,</span>
+                                start<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                                end<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                                map<span style="color:#f92672">:</span> OffsetMap<span style="color:#f92672">,</span>
+                                stats<span style="color:#f92672">:</span> CleanerStats<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+  map<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">()</span>
+  <span style="color:#75715e">//查找从firstDirtyOffset ~ upperBoundOffset 所有的 LogSegment
+</span><span style="color:#75715e"></span>  val dirty <span style="color:#f92672">=</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">logSegments</span><span style="color:#f92672">(</span>start<span style="color:#f92672">,</span> end<span style="color:#f92672">).</span><span style="color:#a6e22e">toBuffer</span>
+  val nextSegmentStartOffsets <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ListBuffer<span style="color:#f92672">[</span>Long<span style="color:#f92672">]</span>
+  <span style="color:#a6e22e">if</span> <span style="color:#f92672">(</span>dirty<span style="color:#f92672">.</span><span style="color:#a6e22e">nonEmpty</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>nextSegment <span style="color:#f92672">&lt;-</span> dirty<span style="color:#f92672">.</span><span style="color:#a6e22e">tail</span><span style="color:#f92672">)</span> nextSegmentStartOffsets<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>nextSegment<span style="color:#f92672">.</span><span style="color:#a6e22e">baseOffset</span><span style="color:#f92672">)</span>
+    nextSegmentStartOffsets<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>end<span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span>
+  info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Building offset map for log %s for %d segments in offset range [%d, %d).&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">,</span> dirty<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">,</span> start<span style="color:#f92672">,</span> end<span style="color:#f92672">))</span>
+
+  <span style="color:#75715e">//事务有关
+</span><span style="color:#75715e"></span>  val transactionMetadata <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CleanedTransactionMetadata
+  val abortedTransactions <span style="color:#f92672">=</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">collectAbortedTransactions</span><span style="color:#f92672">(</span>start<span style="color:#f92672">,</span> end<span style="color:#f92672">)</span>
+  transactionMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">addAbortedTransactions</span><span style="color:#f92672">(</span>abortedTransactions<span style="color:#f92672">)</span>
+
+  <span style="color:#75715e">// Add all the cleanable dirty segments. We must take at least map.slots * load_factor,
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// but we may be able to fit more (if there is lots of duplication in the dirty section of the log)
+</span><span style="color:#75715e"></span>  var full <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>
+  <span style="color:#75715e">//遍历dirty集合，循环条件是offsetMap 未被填满
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span> <span style="color:#f92672">(</span>segment<span style="color:#f92672">,</span> nextSegmentStartOffset<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;-</span> dirty<span style="color:#f92672">.</span><span style="color:#a6e22e">zip</span><span style="color:#f92672">(</span>nextSegmentStartOffsets<span style="color:#f92672">)</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">!</span>full<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//检查 LogCleanerManager 记录的该分区的压缩状态
+</span><span style="color:#75715e"></span>    checkDone<span style="color:#f92672">(</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">)</span>
+    <span style="color:#75715e">//处理单个 logSegment，将消息的key 和 offset添加到 OffsetMap 中
+</span><span style="color:#75715e"></span>    full <span style="color:#f92672">=</span> buildOffsetMapForSegment<span style="color:#f92672">(</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">,</span> segment<span style="color:#f92672">,</span> map<span style="color:#f92672">,</span> start<span style="color:#f92672">,</span> nextSegmentStartOffset<span style="color:#f92672">,</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maxMessageSize</span><span style="color:#f92672">,</span>
+      transactionMetadata<span style="color:#f92672">,</span> stats<span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>full<span style="color:#f92672">)</span>
+      debug<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Offset map is full, %d segments fully mapped, segment with base offset %d is partially mapped&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>dirty<span style="color:#f92672">.</span><span style="color:#a6e22e">indexOf</span><span style="color:#f92672">(</span>segment<span style="color:#f92672">),</span> segment<span style="color:#f92672">.</span><span style="color:#a6e22e">baseOffset</span><span style="color:#f92672">))</span>
+  <span style="color:#f92672">}</span>
+  info<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Offset map for log %s complete.&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">))</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">buildOffsetMapForSegment</span><span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">:</span> TopicPartition<span style="color:#f92672">,</span>
+                                     segment<span style="color:#f92672">:</span> LogSegment<span style="color:#f92672">,</span>
+                                     map<span style="color:#f92672">:</span> OffsetMap<span style="color:#f92672">,</span>
+                                     startOffset<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                                     nextSegmentStartOffset<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                                     maxLogMessageSize<span style="color:#f92672">:</span> Int<span style="color:#f92672">,</span>
+                                     transactionMetadata<span style="color:#f92672">:</span> CleanedTransactionMetadata<span style="color:#f92672">,</span>
+                                     stats<span style="color:#f92672">:</span> CleanerStats<span style="color:#f92672">):</span> Boolean <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+  var position <span style="color:#f92672">=</span> segment<span style="color:#f92672">.</span><span style="color:#a6e22e">offsetIndex</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lookup</span><span style="color:#f92672">(</span>startOffset<span style="color:#f92672">).</span><span style="color:#a6e22e">position</span>
+  val maxDesiredMapSize <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>map<span style="color:#f92672">.</span><span style="color:#a6e22e">slots</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">dupBufferLoadFactor</span><span style="color:#f92672">).</span><span style="color:#a6e22e">toInt</span>
+  <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>position <span style="color:#f92672">&lt;</span> segment<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sizeInBytes</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span><span style="color:#75715e">//遍历 LogSegment
+</span><span style="color:#75715e"></span>    checkDone<span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">)</span> <span style="color:#75715e">//检查压缩状态
+</span><span style="color:#75715e"></span>    readBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">()</span>
+    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//从logSegment中读取消息
+</span><span style="color:#75715e"></span>      segment<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">.</span><span style="color:#a6e22e">readInto</span><span style="color:#f92672">(</span>readBuffer<span style="color:#f92672">,</span> position<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> Exception <span style="color:#f92672">=&gt;</span>
+        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> KafkaException<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Failed to read from segment $segment of partition $topicPartition &#34;</span> <span style="color:#f92672">+</span>
+          <span style="color:#e6db74">&#34;while loading offset map&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+    val records <span style="color:#f92672">=</span> MemoryRecords<span style="color:#f92672">.</span><span style="color:#a6e22e">readableRecords</span><span style="color:#f92672">(</span>readBuffer<span style="color:#f92672">)</span>
+    throttler<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeThrottle</span><span style="color:#f92672">(</span>records<span style="color:#f92672">.</span><span style="color:#a6e22e">sizeInBytes</span><span style="color:#f92672">)</span>
+
+    val startPosition <span style="color:#f92672">=</span> position
+    <span style="color:#a6e22e">for</span> <span style="color:#f92672">(</span>batch <span style="color:#f92672">&lt;-</span> records<span style="color:#f92672">.</span><span style="color:#a6e22e">batches</span><span style="color:#f92672">.</span><span style="color:#a6e22e">asScala</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">isControlBatch</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        transactionMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">onControlBatchRead</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">)</span>
+        stats<span style="color:#f92672">.</span><span style="color:#a6e22e">indexMessagesRead</span><span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        val isAborted <span style="color:#f92672">=</span> transactionMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">onBatchRead</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isAborted<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          <span style="color:#75715e">// If the batch is aborted, do not bother populating the offset map.
+</span><span style="color:#75715e"></span>          <span style="color:#75715e">// Note that abort markers are supported in v2 and above, which means count is defined.
+</span><span style="color:#75715e"></span>          stats<span style="color:#f92672">.</span><span style="color:#a6e22e">indexMessagesRead</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">countOrNull</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>record <span style="color:#f92672">&lt;-</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">asScala</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//只处理有key的消息
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>record<span style="color:#f92672">.</span><span style="color:#a6e22e">hasKey</span> <span style="color:#f92672">&amp;&amp;</span> record<span style="color:#f92672">.</span><span style="color:#a6e22e">offset</span> <span style="color:#f92672">&gt;=</span> startOffset<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+              <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>map<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span> <span style="color:#f92672">&lt;</span> maxDesiredMapSize<span style="color:#f92672">)</span>
+                <span style="color:#75715e">//将key和offset 放入 offsetMap中
+</span><span style="color:#75715e"></span>                map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>record<span style="color:#f92672">.</span><span style="color:#a6e22e">key</span><span style="color:#f92672">,</span> record<span style="color:#f92672">.</span><span style="color:#a6e22e">offset</span><span style="color:#f92672">)</span>
+              <span style="color:#66d9ef">else</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>
+            <span style="color:#f92672">}</span>
+            stats<span style="color:#f92672">.</span><span style="color:#a6e22e">indexMessagesRead</span><span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>
+          <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">lastOffset</span> <span style="color:#f92672">&gt;=</span> startOffset<span style="color:#f92672">)</span>
+        map<span style="color:#f92672">.</span><span style="color:#a6e22e">updateLatestOffset</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">lastOffset</span><span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+    val bytesRead <span style="color:#f92672">=</span> records<span style="color:#f92672">.</span><span style="color:#a6e22e">validBytes</span>
+    <span style="color:#75715e">//移动position 准备下次读取
+</span><span style="color:#75715e"></span>    position <span style="color:#f92672">+=</span> bytesRead
+    stats<span style="color:#f92672">.</span><span style="color:#a6e22e">indexBytesRead</span><span style="color:#f92672">(</span>bytesRead<span style="color:#f92672">)</span>
+
+    <span style="color:#75715e">// if we didn&#39;t read even one complete message, our read buffer may be too small
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//如果position 没有移动表示没有读取到一个完整的 message， 则对 readbuffer writebuffer进行扩容
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>position <span style="color:#f92672">==</span> startPosition<span style="color:#f92672">)</span>
+      growBuffersOrFail<span style="color:#f92672">(</span>segment<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">,</span> position<span style="color:#f92672">,</span> maxLogMessageSize<span style="color:#f92672">,</span> records<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// In the case of offsets gap, fast forward to latest expected offset in this segment.
+</span><span style="color:#75715e"></span>    map<span style="color:#f92672">.</span><span style="color:#a6e22e">updateLatestOffset</span><span style="color:#f92672">(</span>nextSegmentStartOffset <span style="color:#f92672">-</span> 1L<span style="color:#f92672">)</span>
+
+    <span style="color:#75715e">//重置readbuffer writebuffer 大小
+</span><span style="color:#75715e"></span>    restoreBuffers<span style="color:#f92672">()</span>
+    <span style="color:#66d9ef">false</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>③ 对要压缩的Segment进行<code>分区</code>，并且进行分组进行 clean</li>
+<li>④ 清理</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>log<span style="color:#f92672">]</span> def <span style="color:#a6e22e">cleanSegments</span><span style="color:#f92672">(</span>log<span style="color:#f92672">:</span> Log<span style="color:#f92672">,</span>
+                               segments<span style="color:#f92672">:</span> Seq<span style="color:#f92672">[</span>LogSegment<span style="color:#f92672">],</span>
+                               map<span style="color:#f92672">:</span> OffsetMap<span style="color:#f92672">,</span>
+                               deleteHorizonMs<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                               stats<span style="color:#f92672">:</span> CleanerStats<span style="color:#f92672">,</span>
+                               transactionMetadata<span style="color:#f92672">:</span> CleanedTransactionMetadata<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">// create a new segment with a suffix appended to the name of the log and indexes
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">//创建 &#34;.clean&#34; 后缀的日志文件和索引文件，文件名是分组中第一个 logSegment 的 baseOffset
+</span><span style="color:#75715e"></span>  val cleaned <span style="color:#f92672">=</span> LogCleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">createNewCleanedSegment</span><span style="color:#f92672">(</span>log<span style="color:#f92672">,</span> segments<span style="color:#f92672">.</span><span style="color:#a6e22e">head</span><span style="color:#f92672">.</span><span style="color:#a6e22e">baseOffset</span><span style="color:#f92672">)</span>
+  transactionMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">cleanedIndex</span> <span style="color:#f92672">=</span> Some<span style="color:#f92672">(</span>cleaned<span style="color:#f92672">.</span><span style="color:#a6e22e">txnIndex</span><span style="color:#f92672">)</span>
+
+  <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// clean segments into the new destination segment
+</span><span style="color:#75715e"></span>    val iter <span style="color:#f92672">=</span> segments<span style="color:#f92672">.</span><span style="color:#a6e22e">iterator</span>
+    var currentSegmentOpt<span style="color:#f92672">:</span> Option<span style="color:#f92672">[</span>LogSegment<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> Some<span style="color:#f92672">(</span>iter<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">())</span>
+    val lastOffsetOfActiveProducers <span style="color:#f92672">=</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">lastRecordsOfActiveProducers</span>
+
+    <span style="color:#a6e22e">while</span> <span style="color:#f92672">(</span>currentSegmentOpt<span style="color:#f92672">.</span><span style="color:#a6e22e">isDefined</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      val currentSegment <span style="color:#f92672">=</span> currentSegmentOpt<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span>
+      val nextSegmentOpt <span style="color:#f92672">=</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>iter<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">)</span> Some<span style="color:#f92672">(</span>iter<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">())</span> <span style="color:#66d9ef">else</span> None
+
+      val startOffset <span style="color:#f92672">=</span> currentSegment<span style="color:#f92672">.</span><span style="color:#a6e22e">baseOffset</span>
+      val upperBoundOffset <span style="color:#f92672">=</span> nextSegmentOpt<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>_<span style="color:#f92672">.</span><span style="color:#a6e22e">baseOffset</span><span style="color:#f92672">).</span><span style="color:#a6e22e">getOrElse</span><span style="color:#f92672">(</span>map<span style="color:#f92672">.</span><span style="color:#a6e22e">latestOffset</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">)</span>
+      val abortedTransactions <span style="color:#f92672">=</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">collectAbortedTransactions</span><span style="color:#f92672">(</span>startOffset<span style="color:#f92672">,</span> upperBoundOffset<span style="color:#f92672">)</span>
+      transactionMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">addAbortedTransactions</span><span style="color:#f92672">(</span>abortedTransactions<span style="color:#f92672">)</span>
+
+      val retainDeletesAndTxnMarkers <span style="color:#f92672">=</span> currentSegment<span style="color:#f92672">.</span><span style="color:#a6e22e">lastModified</span> <span style="color:#f92672">&gt;</span> deleteHorizonMs
+      <span style="color:#a6e22e">info</span><span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Cleaning $currentSegment in log ${log.name} into ${cleaned.baseOffset} &#34;</span> <span style="color:#f92672">+</span>
+        s<span style="color:#e6db74">&#34;with deletion horizon $deleteHorizonMs, &#34;</span> <span style="color:#f92672">+</span>
+        s<span style="color:#e6db74">&#34;${if(retainDeletesAndTxnMarkers) &#34;</span>retaining<span style="color:#e6db74">&#34; else &#34;</span>discarding<span style="color:#e6db74">&#34;} deletes.&#34;</span><span style="color:#f92672">)</span>
+
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//进行日志压缩操作
+</span><span style="color:#75715e"></span>        cleanInto<span style="color:#f92672">(</span>log<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">,</span> currentSegment<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">,</span> cleaned<span style="color:#f92672">,</span> map<span style="color:#f92672">,</span> retainDeletesAndTxnMarkers<span style="color:#f92672">,</span> log<span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maxMessageSize</span><span style="color:#f92672">,</span>
+          transactionMetadata<span style="color:#f92672">,</span> lastOffsetOfActiveProducers<span style="color:#f92672">,</span> stats<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> LogSegmentOffsetOverflowException <span style="color:#f92672">=&gt;</span>
+          <span style="color:#75715e">// Split the current segment. It&#39;s also safest to abort the current cleaning process, so that we retry from
+</span><span style="color:#75715e"></span>          <span style="color:#75715e">// scratch once the split is complete.
+</span><span style="color:#75715e"></span>          info<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Caught segment overflow error during cleaning: ${e.getMessage}&#34;</span><span style="color:#f92672">)</span>
+          log<span style="color:#f92672">.</span><span style="color:#a6e22e">splitOverflowedSegment</span><span style="color:#f92672">(</span>currentSegment<span style="color:#f92672">)</span>
+          <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> LogCleaningAbortedException<span style="color:#f92672">()</span>
+      <span style="color:#f92672">}</span>
+      currentSegmentOpt <span style="color:#f92672">=</span> nextSegmentOpt
+    <span style="color:#f92672">}</span>
+
+    cleaned<span style="color:#f92672">.</span><span style="color:#a6e22e">onBecomeInactiveSegment</span><span style="color:#f92672">()</span>
+    <span style="color:#75715e">// flush new segment to disk before swap
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//执行flush 操作，将数据刷新到磁盘上
+</span><span style="color:#75715e"></span>    cleaned<span style="color:#f92672">.</span><span style="color:#a6e22e">flush</span><span style="color:#f92672">()</span>
+
+    <span style="color:#75715e">// update the modification date to retain the last modified date of the original files
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//更新最后的修改时间
+</span><span style="color:#75715e"></span>    val modified <span style="color:#f92672">=</span> segments<span style="color:#f92672">.</span><span style="color:#a6e22e">last</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lastModified</span>
+    cleaned<span style="color:#f92672">.</span><span style="color:#a6e22e">lastModified</span> <span style="color:#f92672">=</span> modified
+
+    <span style="color:#75715e">// swap in new segment
+</span><span style="color:#75715e"></span>    info<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Swapping in cleaned segment $cleaned for segment(s) $segments in log $log&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#75715e">//将.clean 后缀改为 .swap 后缀
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//将 cleaned 对象加入到 segments 中
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//将分组中的 logSegment 从 segments 中删除
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//最后将文件的 .swap 后缀删除
+</span><span style="color:#75715e"></span>    log<span style="color:#f92672">.</span><span style="color:#a6e22e">replaceSegments</span><span style="color:#f92672">(</span>List<span style="color:#f92672">(</span>cleaned<span style="color:#f92672">),</span> segments<span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">case</span> e<span style="color:#f92672">:</span> LogCleaningAbortedException <span style="color:#f92672">=&gt;</span>
+      <span style="color:#66d9ef">try</span> cleaned<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteIfExists</span><span style="color:#f92672">()</span>
+      <span style="color:#66d9ef">catch</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">case</span> deleteException<span style="color:#f92672">:</span> Exception <span style="color:#f92672">=&gt;</span>
+          e<span style="color:#f92672">.</span><span style="color:#a6e22e">addSuppressed</span><span style="color:#f92672">(</span>deleteException<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#66d9ef">throw</span> e
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>日志压缩</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span><span style="color:#f92672">[</span>log<span style="color:#f92672">]</span> def <span style="color:#a6e22e">cleanInto</span><span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">:</span> TopicPartition<span style="color:#f92672">,</span>
+                          sourceRecords<span style="color:#f92672">:</span> FileRecords<span style="color:#f92672">,</span>
+                          dest<span style="color:#f92672">:</span> LogSegment<span style="color:#f92672">,</span>
+                          map<span style="color:#f92672">:</span> OffsetMap<span style="color:#f92672">,</span>
+                          retainDeletesAndTxnMarkers<span style="color:#f92672">:</span> Boolean<span style="color:#f92672">,</span>
+                          maxLogMessageSize<span style="color:#f92672">:</span> Int<span style="color:#f92672">,</span>
+                          transactionMetadata<span style="color:#f92672">:</span> CleanedTransactionMetadata<span style="color:#f92672">,</span>
+                          lastRecordsOfActiveProducers<span style="color:#f92672">:</span> Map<span style="color:#f92672">[</span>Long<span style="color:#f92672">,</span> LastRecord<span style="color:#f92672">],</span>
+                          stats<span style="color:#f92672">:</span> CleanerStats<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+ val logCleanerFilter<span style="color:#f92672">:</span> RecordFilter <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> RecordFilter <span style="color:#f92672">{</span>
+   var discardBatchRecords<span style="color:#f92672">:</span> Boolean <span style="color:#f92672">=</span> _
+
+   override def <span style="color:#a6e22e">checkBatchRetention</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">:</span> RecordBatch<span style="color:#f92672">):</span> BatchRetention <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+     <span style="color:#75715e">// we piggy-back on the tombstone retention logic to delay deletion of transaction markers.
+</span><span style="color:#75715e"></span>     <span style="color:#75715e">// note that we will never delete a marker until all the records from that transaction are removed.
+</span><span style="color:#75715e"></span>     discardBatchRecords <span style="color:#f92672">=</span> shouldDiscardBatch<span style="color:#f92672">(</span>batch<span style="color:#f92672">,</span> transactionMetadata<span style="color:#f92672">,</span> retainTxnMarkers <span style="color:#f92672">=</span> retainDeletesAndTxnMarkers<span style="color:#f92672">)</span>
+
+     def isBatchLastRecordOfProducer<span style="color:#f92672">:</span> Boolean <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+       <span style="color:#75715e">// We retain the batch in order to preserve the state of active producers. There are three cases:
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">// 1) The producer is no longer active, which means we can delete all records for that producer.
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">// 2) The producer is still active and has a last data offset. We retain the batch that contains
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">//    this offset since it also contains the last sequence number for this producer.
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">// 3) The last entry in the log is a transaction marker. We retain this marker since it has the
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">//    last producer epoch, which is needed to ensure fencing.
+</span><span style="color:#75715e"></span>       lastRecordsOfActiveProducers<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">producerId</span><span style="color:#f92672">).</span><span style="color:#a6e22e">exists</span> <span style="color:#f92672">{</span> lastRecord <span style="color:#f92672">=&gt;</span>
+         lastRecord<span style="color:#f92672">.</span><span style="color:#a6e22e">lastDataOffset</span> match <span style="color:#f92672">{</span>
+           <span style="color:#66d9ef">case</span> Some<span style="color:#f92672">(</span>offset<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">lastOffset</span> <span style="color:#f92672">==</span> offset
+           <span style="color:#66d9ef">case</span> None <span style="color:#f92672">=&gt;</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">isControlBatch</span> <span style="color:#f92672">&amp;&amp;</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">producerEpoch</span> <span style="color:#f92672">==</span> lastRecord<span style="color:#f92672">.</span><span style="color:#a6e22e">producerEpoch</span>
+         <span style="color:#f92672">}</span>
+       <span style="color:#f92672">}</span>
+     <span style="color:#f92672">}</span>
+
+     <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">hasProducerId</span> <span style="color:#f92672">&amp;&amp;</span> isBatchLastRecordOfProducer<span style="color:#f92672">)</span>
+       BatchRetention<span style="color:#f92672">.</span><span style="color:#a6e22e">RETAIN_EMPTY</span>
+     <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> <span style="color:#f92672">(</span>discardBatchRecords<span style="color:#f92672">)</span>
+       BatchRetention<span style="color:#f92672">.</span><span style="color:#a6e22e">DELETE</span>
+     <span style="color:#66d9ef">else</span>
+       BatchRetention<span style="color:#f92672">.</span><span style="color:#a6e22e">DELETE_EMPTY</span>
+   <span style="color:#f92672">}</span>
+
+   override def <span style="color:#a6e22e">shouldRetainRecord</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">:</span> RecordBatch<span style="color:#f92672">,</span> record<span style="color:#f92672">:</span> Record<span style="color:#f92672">):</span> Boolean <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+     <span style="color:#75715e">//调用上面的 checkBatchRetention 方法判断是否要丢弃。
+</span><span style="color:#75715e"></span>     <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>discardBatchRecords<span style="color:#f92672">)</span>
+       <span style="color:#75715e">// The batch is only retained to preserve producer sequence information; the records can be removed
+</span><span style="color:#75715e"></span>       <span style="color:#66d9ef">false</span>
+     <span style="color:#66d9ef">else</span>
+       <span style="color:#75715e">//是否保存这个消息，有三个条件
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">//1.此消息是否含有key
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">//2.offsetMap中是否有相同的key
+</span><span style="color:#75715e"></span>       <span style="color:#75715e">//3.value 不为空 或者 value 为空但是现在不可以删除。
+</span><span style="color:#75715e"></span>       Cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">shouldRetainRecord</span><span style="color:#f92672">(</span>map<span style="color:#f92672">,</span> retainDeletesAndTxnMarkers<span style="color:#f92672">,</span> batch<span style="color:#f92672">,</span> record<span style="color:#f92672">,</span> stats<span style="color:#f92672">)</span>
+   <span style="color:#f92672">}</span>
+ <span style="color:#f92672">}</span>
+
+ var position <span style="color:#f92672">=</span> 0
+ <span style="color:#75715e">// 遍历待压缩的 LogSegment
+</span><span style="color:#75715e"></span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>position <span style="color:#f92672">&lt;</span> sourceRecords<span style="color:#f92672">.</span><span style="color:#a6e22e">sizeInBytes</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+   <span style="color:#75715e">//检查压缩状态
+</span><span style="color:#75715e"></span>   checkDone<span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">)</span>
+   <span style="color:#75715e">// read a chunk of messages and copy any that are to be retained to the write buffer to be written out
+</span><span style="color:#75715e"></span>   readBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">()</span>
+   writeBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">()</span>
+
+   <span style="color:#75715e">//读取消息
+</span><span style="color:#75715e"></span>   sourceRecords<span style="color:#f92672">.</span><span style="color:#a6e22e">readInto</span><span style="color:#f92672">(</span>readBuffer<span style="color:#f92672">,</span> position<span style="color:#f92672">)</span>
+   val records <span style="color:#f92672">=</span> MemoryRecords<span style="color:#f92672">.</span><span style="color:#a6e22e">readableRecords</span><span style="color:#f92672">(</span>readBuffer<span style="color:#f92672">)</span>
+   <span style="color:#75715e">//是否限制读取速率
+</span><span style="color:#75715e"></span>   throttler<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeThrottle</span><span style="color:#f92672">(</span>records<span style="color:#f92672">.</span><span style="color:#a6e22e">sizeInBytes</span><span style="color:#f92672">)</span>
+   val result <span style="color:#f92672">=</span> records<span style="color:#f92672">.</span><span style="color:#a6e22e">filterTo</span><span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> logCleanerFilter<span style="color:#f92672">,</span> writeBuffer<span style="color:#f92672">,</span> maxLogMessageSize<span style="color:#f92672">,</span> decompressionBufferSupplier<span style="color:#f92672">)</span>
+   stats<span style="color:#f92672">.</span><span style="color:#a6e22e">readMessages</span><span style="color:#f92672">(</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">messagesRead</span><span style="color:#f92672">,</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">bytesRead</span><span style="color:#f92672">)</span>
+   stats<span style="color:#f92672">.</span><span style="color:#a6e22e">recopyMessages</span><span style="color:#f92672">(</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">messagesRetained</span><span style="color:#f92672">,</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">bytesRetained</span><span style="color:#f92672">)</span>
+
+   position <span style="color:#f92672">+=</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">bytesRead</span>
+
+   <span style="color:#75715e">// if any messages are to be retained, write them out
+</span><span style="color:#75715e"></span>   val outputBuffer <span style="color:#f92672">=</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">outputBuffer</span>
+   <span style="color:#a6e22e">if</span> <span style="color:#f92672">(</span>outputBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+     outputBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">()</span>
+     val retained <span style="color:#f92672">=</span> MemoryRecords<span style="color:#f92672">.</span><span style="color:#a6e22e">readableRecords</span><span style="color:#f92672">(</span>outputBuffer<span style="color:#f92672">)</span>
+     <span style="color:#75715e">// it&#39;s OK not to hold the Log&#39;s lock in this case, because this segment is only accessed by other threads
+</span><span style="color:#75715e"></span>     <span style="color:#75715e">// after `Log.replaceSegments` (which acquires the lock) is called
+</span><span style="color:#75715e"></span>     <span style="color:#75715e">//添加到目标legsegment中
+</span><span style="color:#75715e"></span>     dest<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>largestOffset <span style="color:#f92672">=</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">maxOffset</span><span style="color:#f92672">,</span>
+       largestTimestamp <span style="color:#f92672">=</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">maxTimestamp</span><span style="color:#f92672">,</span>
+       shallowOffsetOfMaxTimestamp <span style="color:#f92672">=</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">shallowOffsetOfMaxTimestamp</span><span style="color:#f92672">,</span>
+       records <span style="color:#f92672">=</span> retained<span style="color:#f92672">)</span>
+     throttler<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeThrottle</span><span style="color:#f92672">(</span>outputBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">())</span>
+   <span style="color:#f92672">}</span>
+
+   <span style="color:#75715e">// if we read bytes but didn&#39;t get even one complete batch, our I/O buffer is too small, grow it and try again
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// `result.bytesRead` contains bytes from `messagesRead` and any discarded batches.
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// 未读取一个完整的消息，表示 readBuffer 过小，需要扩容
+</span><span style="color:#75715e"></span>   <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>readBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0 <span style="color:#f92672">&amp;&amp;</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">bytesRead</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+     growBuffersOrFail<span style="color:#f92672">(</span>sourceRecords<span style="color:#f92672">,</span> position<span style="color:#f92672">,</span> maxLogMessageSize<span style="color:#f92672">,</span> records<span style="color:#f92672">)</span>
+ <span style="color:#f92672">}</span>
+ <span style="color:#75715e">//重置 readBuffer 和 writeBuffer
+</span><span style="color:#75715e"></span> restoreBuffers<span style="color:#f92672">()</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<p><strong>参考：</strong></p>
+<p>Kafka-2.5.0 源码</p>
+<p><a href="https://kafka.apache.org/">Kafka 官网</a></p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%89%E7%B4%A2%E5%BC%95/" data-toggle="tooltip" data-placement="top" title="Kafka 日志模块（三）索引">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%B8%80delayedoperationpurgatory/" data-toggle="tooltip" data-placement="top" title="Kafka 延迟操作（一）DelayedOperationPurgatory">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%89%E7%B4%A2%E5%BC%95/"><i class="fa fa-link"></i>Kafka 日志模块（三）索引</a></li>
+         
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%BA%8Clogsegment/"><i class="fa fa-link"></i>Kafka 日志模块（二）LogSegment</a></li>
+         
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%80log/"><i class="fa fa-link"></i>Kafka 日志模块（一）Log</a></li>
+         
+        <li><a href="/blog/kafka-%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83-log-%E8%BE%93%E5%87%BA%E9%97%AE%E9%A2%98/"><i class="fa fa-link"></i>Kafka 源码环境 Log 输出问题</a></li>
+         
+        <li><a href="/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%89kafka-server-start.sh/"><i class="fa fa-link"></i>Kafka 服务端（三）kafka-server-start.sh</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

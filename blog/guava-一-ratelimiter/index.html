@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guava (一) ：RateLimiter · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Guava">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Guava (一) ：RateLimiter" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/guava-%E4%B8%80-ratelimiter//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="每个API接口都是有访问上限的，当访问频率或者并发量超过其承受范围时候,我们就必须考虑限流来保证接口的可用性或者降级可用性。以防止非预期的请求对系统压力过大而引起的系统瘫痪。">
+  <meta property="og:description" content="每个API接口都是有访问上限的，当访问频率或者并发量超过其承受范围时候,我们就必须考虑限流来保证接口的可用性或者降级可用性。以防止非预期的请求对系统压力过大而引起的系统瘫痪。">
+  <meta name="twitter:description" content="每个API接口都是有访问上限的，当访问频率或者并发量超过其承受范围时候,我们就必须考虑限流来保证接口的可用性或者降级可用性。以防止非预期的请求对系统压力过大而引起的系统瘫痪。">
+  <meta property="og:description" content="每个API接口都是有访问上限的，当访问频率或者并发量超过其承受范围时候,我们就必须考虑限流来保证接口的可用性或者降级可用性。以防止非预期的请求对系统压力过大而引起的系统瘫痪。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Guava (一) ：RateLimiter logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Guava (一) ：RateLimiter logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Guava (一) ：RateLimiter - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Guava (一) ：RateLimiter logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Guava (一) ：RateLimiter logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Guava (一) ：RateLimiter - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Guava (一) ：RateLimiter logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Guava (一) ：RateLimiter logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Guava (一) ：RateLimiter - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Guava (一) ：RateLimiter</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月21日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            5600字 | 阅读大约需要12分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/guava">Guava</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/guava/"><i>#Guava</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="简述">简述</h3>
+<p>每个API接口都是有访问上限的，当访问频率或者并发量超过其承受范围时候,我们就必须考虑<code>限流</code>来保证接口的可用性或者<code>降级</code>可用性。以防止非预期的请求对系统压力过大而引起的<code>系统瘫痪</code>。</p>
+<p>通常的策略就是<strong>拒绝多余的访问</strong>，或者让多余的访问<strong>排队等待服务</strong>，或者<strong>引流</strong>。</p>
+<p>如果要准确的控制QPS,简单的做法是维护一个单位时间内的<code>计数器</code>，如判断单位时间已经过去,则将<code>计数器</code>重置零。
+<img src="/img/blog/guava/simple_RateLimiter.png" alt=""></p>
+<p>如上图所示会出现<strong>两倍的QPS的情况</strong>：没有很好的处理单位时间的边界，比如在前一秒的最后一毫秒里和下一秒的第一毫秒都触发了最大的请求数，将目光移动一下，就看到在两毫秒内发生了两倍的QPS。</p>
+<p>常用的更平滑的限流算法有两种:<code>漏桶算法</code>和<code>令牌桶算法</code>。</p>
+<h4 id="漏桶算法">漏桶算法</h4>
+<ul>
+<li>
+<p><code>漏桶(Leaky Bucket)算法</code>思路很简单，水(请求)先进入到漏桶里，漏桶以一定的速度出水(接口有响应速率)，当水流入速度过大会直接溢出(访问频率超过接口响应速率)，然后就拒绝请求，可以看出漏桶算法能强行限制数据的传输速率</p>
+</li>
+<li>
+<p>因为漏桶的<code>漏出速率</code>是<code>固定</code>的参数，所以，即使网络中不存在<code>资源冲突</code>(没有发生拥塞)，漏桶算法也不能使流突发(burst)到端口速率。因此，漏桶算法对于存在突发特性的流量来说缺乏效率(突发性流量也会被按照固定的速率放行)</p>
+</li>
+</ul>
+<h4 id="令牌桶算法">令牌桶算法</h4>
+<ul>
+<li>
+<p><code>令牌桶算法(Token Bucket)</code>。随着时间流逝，系统会按恒定1/QPS时间间隔(如果QPS=100,则间隔是10ms)往桶里加入Token(<strong>想象和漏洞漏水相反，有个水龙头在不断的加水</strong>),如果桶已经满了就不再加了。新请求来临时,会各自拿走一个Token,<strong>如果没有Token可拿了就阻塞或者拒绝服务</strong>。</p>
+</li>
+<li>
+<p>因为令牌桶是按照恒定的速率往桶中放令牌，即如果由突发性流量来访问，只要桶中有足够的令牌，那就可以放行。可以预防突发特性的流量。</p>
+</li>
+</ul>
+<h4 id="ratelimiter">RateLimiter</h4>
+<p>Google开源工具包<code>Guava</code>提供了限流工具类<code>RateLimiter</code>，该类基于<code>令牌桶算法(Token Bucket)</code>来完成限流。</p>
+<p>RateLimiter和Java中的<code>信号量</code>(java.util.concurrent.Semaphore)类似,Semaphore通常用于限制并发量。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SemaphoreTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">static</span> Semaphore semaphore <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Semaphore<span style="color:#f92672">(</span>10<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">static</span> ExecutorService executor <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>20<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">Test</span><span style="color:#f92672">(){</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 20<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">int</span> finalI <span style="color:#f92672">=</span> i<span style="color:#f92672">;</span>
+            executor<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(()-&gt;{</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    semaphore<span style="color:#f92672">.</span><span style="color:#a6e22e">acquire</span><span style="color:#f92672">();</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;成员&#34;</span> <span style="color:#f92672">+</span> finalI <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 过来了&#34;</span><span style="color:#f92672">);</span>
+                    TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>10<span style="color:#f92672">);</span>
+                    semaphore<span style="color:#f92672">.</span><span style="color:#a6e22e">release</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">});</span>
+
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Test<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><code>Semaphore</code> 用来控制同时访问某个资源的并发数量，如上面的代码，设置 100 个线程工作，但是我们能做到最多只有 10 个线程能同时到方法中。它控制的是<code>并发数量</code>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RateLimiterTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">final</span> RateLimiter rateLimiter <span style="color:#f92672">=</span> RateLimiter<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span>2<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">);</span>
+
+    <span style="color:#75715e">//每秒 2 个许可
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">submitTasks</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>Runnable<span style="color:#f92672">&gt;</span> tasks<span style="color:#f92672">,</span> Executor executor<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Runnable task <span style="color:#f92672">:</span> tasks<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            rateLimiter<span style="color:#f92672">.</span><span style="color:#a6e22e">acquire</span><span style="color:#f92672">(</span>10<span style="color:#f92672">);</span>
+            executor<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>task<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">test</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">double</span> acquire <span style="color:#f92672">=</span> rateLimiter<span style="color:#f92672">.</span><span style="color:#a6e22e">acquire</span><span style="color:#f92672">(</span>10<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>acquire<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        RateLimiterTest t <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> RateLimiterTest<span style="color:#f92672">();</span>
+        t<span style="color:#f92672">.</span><span style="color:#a6e22e">test</span><span style="color:#f92672">();</span>
+        t<span style="color:#f92672">.</span><span style="color:#a6e22e">test</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//输出
+</span><span style="color:#75715e"></span>0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span>
+4<span style="color:#f92672">.</span><span style="color:#a6e22e">997451</span>
+</code></pre></div><p>而 <code>RateLimiter</code> 是用来控制访问资源的速率（rate）的，它强调的是<code>控制速率</code>。比如控制每秒只能有 100 个请求通过，比如允许每秒发送 1MB 的数据。</p>
+<p>它的构造方法指定一个 <code>permitsPerSecond</code> 参数，代表每秒钟产生多少个 <code>permits</code>，这就是我们的<code>速率</code>。</p>
+<p><strong>RateLimiter 允许预占未来的令牌，比如，每秒产生 5 个 permits，我们可以单次请求 100 个，这样，紧接着的下一个请求需要等待大概 20 秒才能获取到 permits。</strong></p>
+<p><strong>如上面的代码所示</strong>：每秒产生2个<code>permits</code> 但是我一下子就取10个<code>permits</code> ，在测试方法中我尝试取了2次，看输出结果第一次直接输出，而第二次过了5秒。</p>
+<hr>
+<h3 id="ratelimiter-源码解析">RateLimiter 源码解析</h3>
+<h4 id="ratelimiter-类图">RateLimiter 类图</h4>
+<p><img src="/img/blog/guava/1.png" alt=""></p>
+<ul>
+<li><code>RateLimiter 抽象类</code>目前只有一个子类，那就是抽象类 <code>SmoothRateLimiter</code>。</li>
+<li><code>SmoothRateLimiter</code> 有两个实现类：<code>SmoothWarmingUp</code> 和 <code>SmoothBursty</code>。</li>
+</ul>
+<h4 id="ratelimiter-抽象类">RateLimiter 抽象类</h4>
+<p>RateLimiter 抽象类提供静态方法来用来实例化具体哪种模式，实例化后，通过<code>acquire</code>方法来获取令牌</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RateLimiter</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">//SmoothBursty 模式
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> RateLimiter <span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> create<span style="color:#f92672">(</span>permitsPerSecond<span style="color:#f92672">,</span> SleepingStopwatch<span style="color:#f92672">.</span><span style="color:#a6e22e">createFromSystemTimer</span><span style="color:#f92672">());</span>
+  <span style="color:#f92672">}</span>
+ 
+  <span style="color:#75715e">//SmoothWarmingUp模式
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> RateLimiter <span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> warmupPeriod<span style="color:#f92672">,</span> TimeUnit unit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    checkArgument<span style="color:#f92672">(</span>warmupPeriod <span style="color:#f92672">&gt;=</span> 0<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;warmupPeriod must not be negative: %s&#34;</span><span style="color:#f92672">,</span> warmupPeriod<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">return</span> create<span style="color:#f92672">(</span>
+        permitsPerSecond<span style="color:#f92672">,</span> warmupPeriod<span style="color:#f92672">,</span> unit<span style="color:#f92672">,</span> 3<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">,</span> SleepingStopwatch<span style="color:#f92672">.</span><span style="color:#a6e22e">createFromSystemTimer</span><span style="color:#f92672">());</span>
+  <span style="color:#f92672">}</span>
+  
+  <span style="color:#75715e">//获取令牌
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">acquire</span><span style="color:#f92672">()</span> <span style="color:#f92672">{}</span>
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">acquire</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> permits<span style="color:#f92672">)</span> <span style="color:#f92672">{}</span>
+
+  <span style="color:#75715e">//是否能获取到令牌
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryAcquire</span><span style="color:#f92672">()</span> <span style="color:#f92672">{}</span>
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryAcquire</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> permits<span style="color:#f92672">)</span> <span style="color:#f92672">{}</span>
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryAcquire</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> timeout<span style="color:#f92672">,</span> TimeUnit unit<span style="color:#f92672">)</span> <span style="color:#f92672">{}</span>
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryAcquire</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> permits<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> timeout<span style="color:#f92672">,</span> TimeUnit unit<span style="color:#f92672">)</span> <span style="color:#f92672">{}</span>
+ 
+  <span style="color:#75715e">//获取当前的速率 以及动态的设置当前的速率
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">getRate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{}</span>
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setRate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">)</span> <span style="color:#f92672">{}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="ratelimiter-属性">RateLimiter 属性</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//计时，RateLimiter 把实例化的时间设置为 0 值，后续都是取相对时间，用微秒表示。
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> SleepingStopwatch stopwatch<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">//用来做锁，RateLimiter 依赖于 synchronized 来控制并发，各个属性甚至都没有用 volatile 修饰。
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> Object mutexDoNotUseDirectly<span style="color:#f92672">;</span>
+</code></pre></div><hr>
+<h4 id="smoothbursty-模式">SmoothBursty 模式</h4>
+<p>先分析<code>SmoothBursty</code> 模式，此模式会缓存一定数量的 <code>permits</code> 在池中，这样对于突发请求，能及时得到满足。</p>
+<p>想象一下我们的某个接口，很久没有请求过来，突然同时来了好几个请求，如果我们没有缓存一些 permits 的话，很多线程就需要等待了。SmoothBursty 默认缓存最多 <code>1</code> 秒钟的 permits，不可以修改。</p>
+<hr>
+<h4 id="smoothbursty-重要的属性">SmoothBursty 重要的属性</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 当前还有多少 permits 没有被使用，被存下来的 permits 数量
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">double</span> storedPermits<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">// 最大允许缓存的 permits 数量，也就是 storedPermits 能达到的最大值
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">double</span> maxPermits<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">// 每隔多少时间产生一个 permit，
+</span><span style="color:#75715e">// 比如我们构造方法中设置每秒 5 个，也就是每隔 200ms 一个，这里单位是微秒，也就是 200,000
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">double</span> stableIntervalMicros<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">// 下一次可以获取 permits 的时间，这个时间是相对 RateLimiter 的构造时间的，是一个相对时间，理解为时间戳吧
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> nextFreeTicketMicros <span style="color:#f92672">=</span> 0L<span style="color:#f92672">;</span> 
+</code></pre></div><ul>
+<li><code>storedPermits</code>：当前还有多少 permits 没有被使用，被存下来的 permits 数量</li>
+<li><code>maxPermits</code>：最大允许缓存的 permits 数量，也就是 storedPermits 能达到的最大值</li>
+<li><code>stableIntervalMicros</code>：每隔多少时间产生一个 permit，</li>
+<li><code>nextFreeTicketMicros</code>：下一次可以获取 permits 的时间</li>
+</ul>
+<hr>
+<h4 id="smoothbursty-构造函数">SmoothBursty 构造函数</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//SmoothBursty 模式
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> RateLimiter <span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> create<span style="color:#f92672">(</span>permitsPerSecond<span style="color:#f92672">,</span> SleepingStopwatch<span style="color:#f92672">.</span><span style="color:#a6e22e">createFromSystemTimer</span><span style="color:#f92672">());</span>
+  <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">static</span> RateLimiter <span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">,</span> SleepingStopwatch stopwatch<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    RateLimiter rateLimiter <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SmoothBursty<span style="color:#f92672">(</span>stopwatch<span style="color:#f92672">,</span> 1<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#75715e">/* maxBurstSeconds */</span><span style="color:#f92672">);</span>
+    rateLimiter<span style="color:#f92672">.</span><span style="color:#a6e22e">setRate</span><span style="color:#f92672">(</span>permitsPerSecond<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">return</span> rateLimiter<span style="color:#f92672">;</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>构造参数 <code>permitsPerSecond</code> 指定每秒钟可以产生多少个 permits。</li>
+<li>可以看到构造方法调用了<code>create</code>静态方法。此静态方法用于构建 <code>SmoothBursty</code> 模式的限流</li>
+<li>可以看到<code>maxBurstSeconds</code> 默认被设置了<code>1.0</code>，也就是说它最多就只能缓存 <code>1 秒钟</code>的 permits。</li>
+<li>然后调用了 <code>rateLimiter#setRate()</code> 方法设置当前的速率是多少。</li>
+</ul>
+<hr>
+<h4 id="ratelimitersetrate--方法">RateLimiter.setRate( ) 方法</h4>
+<p>用于设置当前的<code>速率</code>是多少</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setRate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//&lt;1&gt; 检查参数
+</span><span style="color:#75715e"></span>    checkArgument<span style="color:#f92672">(</span>
+        permitsPerSecond <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>Double<span style="color:#f92672">.</span><span style="color:#a6e22e">isNaN</span><span style="color:#f92672">(</span>permitsPerSecond<span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;rate must be positive&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>mutex<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//&lt;2&gt; 子类实现
+</span><span style="color:#75715e"></span>      doSetRate<span style="color:#f92672">(</span>permitsPerSecond<span style="color:#f92672">,</span> stopwatch<span style="color:#f92672">.</span><span style="color:#a6e22e">readMicros</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//抽象方法 由子类实现
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSetRate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> nowMicros<span style="color:#f92672">);</span>
+</code></pre></div><ul>
+<li><code>setRate</code> 这个方法是一个 <code>public</code> 方法，它可以用来调整速率。</li>
+<li>这里用了 <code>synchronized</code> 控制并发。</li>
+<li>调用了 <code>doSetRate</code> 方法，抽象方法由子类 <code>SmoothRateLimiter</code> 实现</li>
+</ul>
+<hr>
+<h4 id="smoothratelimiterdosetrate-">SmoothRateLimiter.doSetRate( )</h4>
+<p>实现上面的<code>RateLimiter.setRate() </code>方法中<code>&lt;2&gt;</code>的抽象方法<code>doSetRate</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSetRate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> nowMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//&lt;1&gt; 同步
+</span><span style="color:#75715e"></span>    resync<span style="color:#f92672">(</span>nowMicros<span style="color:#f92672">);</span>
+    <span style="color:#75715e">//&lt;2&gt; 计算属性 stableIntervalMicros  每生成一个permit 需要多少微妙
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">double</span> stableIntervalMicros <span style="color:#f92672">=</span> SECONDS<span style="color:#f92672">.</span><span style="color:#a6e22e">toMicros</span><span style="color:#f92672">(</span>1L<span style="color:#f92672">)</span> <span style="color:#f92672">/</span> permitsPerSecond<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">stableIntervalMicros</span> <span style="color:#f92672">=</span> stableIntervalMicros<span style="color:#f92672">;</span>
+    <span style="color:#f92672">&lt;</span>3<span style="color:#f92672">&gt;</span> 子类实现
+    <span style="color:#a6e22e">doSetRate</span><span style="color:#f92672">(</span>permitsPerSecond<span style="color:#f92672">,</span> stableIntervalMicros<span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//SmoothRateLimiter.resync
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">resync</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> nowMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 如果 nextFreeTicket 已经过掉了，想象一下很长时间都没有再次调用 limiter.acquire() 的场景
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 需要将 nextFreeTicket 设置为当前时间，重新计算 storedPermits
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>nowMicros <span style="color:#f92672">&gt;</span> nextFreeTicketMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//计算的新permits
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">double</span> newPermits <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>nowMicros <span style="color:#f92672">-</span> nextFreeTicketMicros<span style="color:#f92672">)</span> <span style="color:#f92672">/</span> coolDownIntervalMicros<span style="color:#f92672">();</span>
+      <span style="color:#75715e">//给storedPermits 赋值
+</span><span style="color:#75715e"></span>      storedPermits <span style="color:#f92672">=</span> min<span style="color:#f92672">(</span>maxPermits<span style="color:#f92672">,</span> storedPermits <span style="color:#f92672">+</span> newPermits<span style="color:#f92672">);</span>
+      nextFreeTicketMicros <span style="color:#f92672">=</span> nowMicros<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><p>resync 方法根据当前时间来调整 <code>storedPermits</code> 和 <code>nextFreeTicketMicros</code></p>
+<ul>
+<li>
+<p><code>storedPermits</code>：当前还有多少 permits 没有被使用，被存下来的 permits 数量</p>
+</li>
+<li>
+<p><code>nextFreeTicketMicros</code>：下一次可以获取 permits 的时间，这个时间是相对 RateLimiter 的构造时间的，是一个相对时间，理解为时间戳吧</p>
+</li>
+</ul>
+<hr>
+<h4 id="smoothburstydosetrate方法">SmoothBursty.doSetRate方法</h4>
+<p>在<code>SmoothRateLimiter#doSetRate()</code> 方法中<code>&lt;3&gt;</code>，经过resync方法同步后，会进入此方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSetRate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">,</span> <span style="color:#66d9ef">double</span> stableIntervalMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">double</span> oldMaxPermits <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maxPermits</span><span style="color:#f92672">;</span>
+  <span style="color:#75715e">//&lt;1&gt; 这里计算了，maxPermits 为 1 秒产生的 permits
+</span><span style="color:#75715e"></span>  maxPermits <span style="color:#f92672">=</span> maxBurstSeconds <span style="color:#f92672">*</span> permitsPerSecond<span style="color:#f92672">;</span>
+  <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>oldMaxPermits <span style="color:#f92672">==</span> Double<span style="color:#f92672">.</span><span style="color:#a6e22e">POSITIVE_INFINITY</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// if we don&#39;t special-case this, we would get storedPermits == NaN, below
+</span><span style="color:#75715e"></span>    storedPermits <span style="color:#f92672">=</span> maxPermits<span style="color:#f92672">;</span>
+  <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 因为 storedPermits 的值域变化了，需要等比例缩放
+</span><span style="color:#75715e"></span>    storedPermits <span style="color:#f92672">=</span>
+        <span style="color:#f92672">(</span>oldMaxPermits <span style="color:#f92672">==</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">)</span>
+            <span style="color:#f92672">?</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#75715e">// initial state
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">:</span> storedPermits <span style="color:#f92672">*</span> maxPermits <span style="color:#f92672">/</span> oldMaxPermits<span style="color:#f92672">;</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>上面这个方法，我们要这么看，原来的 RateLimiter 是用某个 permitsPerSecond 值初始化的，现在我们要调整这个频率。对于 maxPermits 来说，是重新计算，而对于 storedPermits 来说，是做等比例的缩放。</p>
+<p>到此，<code>构造方法就完成了</code>，我们得到了一个 RateLimiter 的实现类 <code>SmoothBursty</code> 的实例。</p>
+<hr>
+<h4 id="acquire">acquire</h4>
+<p>获取令牌</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//默认是获取一个
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">acquire</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">return</span> acquire<span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">acquire</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> permits<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">//&lt;1&gt; 预约，如果当前不能直接获取到 permits，需要等待
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// 返回值代表需要 sleep 多久
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">long</span> microsToWait <span style="color:#f92672">=</span> reserve<span style="color:#f92672">(</span>permits<span style="color:#f92672">);</span>
+  <span style="color:#75715e">//&lt;2&gt; sleep
+</span><span style="color:#75715e"></span>  stopwatch<span style="color:#f92672">.</span><span style="color:#a6e22e">sleepMicrosUninterruptibly</span><span style="color:#f92672">(</span>microsToWait<span style="color:#f92672">);</span>
+  <span style="color:#75715e">// 返回 sleep 的时长
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">return</span> 1<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#f92672">*</span> microsToWait <span style="color:#f92672">/</span> SECONDS<span style="color:#f92672">.</span><span style="color:#a6e22e">toMicros</span><span style="color:#f92672">(</span>1L<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>回到上面使用RateLimiter的例子中的输出</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//输出
+</span><span style="color:#75715e"></span>0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span>
+4<span style="color:#f92672">.</span><span style="color:#a6e22e">997451</span>
+</code></pre></div><p>因为设置每秒生成<code>2</code>个permit，但是<code>第一个acquire</code>一下子获取了10个，所以在<code>第二个acquire</code>中需要sleep <code>5秒</code>，故输出了<code>4.997451</code></p>
+<hr>
+<h4 id="reserve-方法">reserve 方法</h4>
+<p>在<code>acquire</code>方法中的<code>&lt;1&gt;</code>处用于计算是否需要<code>sleep</code>，是的话需要<code>sleep</code> 多久</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">reserve</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> permits<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">//检查
+</span><span style="color:#75715e"></span>  checkPermits<span style="color:#f92672">(</span>permits<span style="color:#f92672">);</span>
+  <span style="color:#75715e">//synchronized 保持同步
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>mutex<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> reserveAndGetWaitLength<span style="color:#f92672">(</span>permits<span style="color:#f92672">,</span> stopwatch<span style="color:#f92672">.</span><span style="color:#a6e22e">readMicros</span><span style="color:#f92672">());</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">reserveAndGetWaitLength</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> permits<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> nowMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">// 返回 nextFreeTicketMicros
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">long</span> momentAvailable <span style="color:#f92672">=</span> reserveEarliestAvailable<span style="color:#f92672">(</span>permits<span style="color:#f92672">,</span> nowMicros<span style="color:#f92672">);</span>
+  <span style="color:#75715e">// 计算时长
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">return</span> max<span style="color:#f92672">(</span>momentAvailable <span style="color:#f92672">-</span> nowMicros<span style="color:#f92672">,</span> 0<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">reserveEarliestAvailable</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> requiredPermits<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> nowMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">// 这里做一次同步，更新 storedPermits 和 nextFreeTicketMicros (如果需要)
+</span><span style="color:#75715e"></span>  resync<span style="color:#f92672">(</span>nowMicros<span style="color:#f92672">);</span>
+  <span style="color:#75715e">// 返回值就是 nextFreeTicketMicros，注意刚刚已经做了 resync 了，此时它是最新的正确的值
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">long</span> returnValue <span style="color:#f92672">=</span> nextFreeTicketMicros<span style="color:#f92672">;</span>
+  <span style="color:#75715e">// storedPermits 中可以使用多少个 permits
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">double</span> storedPermitsToSpend <span style="color:#f92672">=</span> min<span style="color:#f92672">(</span>requiredPermits<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">storedPermits</span><span style="color:#f92672">);</span>
+  <span style="color:#75715e">// storedPermits 中不够的部分
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">double</span> freshPermits <span style="color:#f92672">=</span> requiredPermits <span style="color:#f92672">-</span> storedPermitsToSpend<span style="color:#f92672">;</span>
+  <span style="color:#75715e">// 为了这个不够的部分，需要等待多久时间
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">long</span> waitMicros <span style="color:#f92672">=</span>
+      storedPermitsToWaitTime<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">storedPermits</span><span style="color:#f92672">,</span> storedPermitsToSpend<span style="color:#f92672">)</span> <span style="color:#75715e">// 这部分固定返回 0
+</span><span style="color:#75715e"></span>          <span style="color:#f92672">+</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)</span> <span style="color:#f92672">(</span>freshPermits <span style="color:#f92672">*</span> stableIntervalMicros<span style="color:#f92672">);</span>
+  <span style="color:#75715e">// 将 nextFreeTicketMicros 往前推
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nextFreeTicketMicros</span> <span style="color:#f92672">=</span> LongMath<span style="color:#f92672">.</span><span style="color:#a6e22e">saturatedAdd</span><span style="color:#f92672">(</span>nextFreeTicketMicros<span style="color:#f92672">,</span> waitMicros<span style="color:#f92672">);</span>
+  <span style="color:#75715e">// storedPermits 减去被拿走的部分
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">storedPermits</span> <span style="color:#f92672">-=</span> storedPermitsToSpend<span style="color:#f92672">;</span>
+  <span style="color:#66d9ef">return</span> returnValue<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>我们可以看到，获取 permits 的时候，其实是获取了两部分：</strong></p>
+<ul>
+<li>一部分来自于存量 <code>storedPermits</code></li>
+<li>存量不够的话，另一部分来自于预占未来的 <code>freshPermits</code>。</li>
+</ul>
+<blockquote>
+<p><strong>这里提一个关键点吧，返回值是 <code>nextFreeTicketMicros</code> 的旧值，因为只要到这个时间点，就说明当次 acquire 可以成功返回了，而不管 storedPermits 够不够。如果 storedPermits 不够，会将 nextFreeTicketMicros 往前推一定的时间，预占了一定的量。</strong></p>
+</blockquote>
+<p>到这里，acquire 方法就分析完了。 接下来分析另外一种模式 <code>SmoothWarmingUp</code></p>
+<hr>
+<h4 id="smoothwarmingup-模式">SmoothWarmingUp 模式</h4>
+<p><code>SmoothBursty</code> 可以处理突发请求，因为它会缓存<code>最多 1 秒的 permits</code>。</p>
+<p><code>SmoothWarmingUp</code> 适用于<code>资源需要预热的场景</code>，<strong>比如我们的某个接口业务，需要使用到数据库连接，由于连接需要预热才能进入到最佳状态，如果我们的系统长时间处于低负载或零负载状态（当然，应用刚启动也是一样的），连接池中的连接慢慢释放掉了，此时我们认为连接池是冷的。</strong></p>
+<p>假设我们的业务在稳定状态下，正常可以提供最大 <code>1000 QPS</code> 的访问，但是如果连接池是冷的，<strong>我们就不能让 1000 个请求同时进来，因为这会拖垮我们的系统，我们应该有个预热升温的过程。</strong></p>
+<p>对应到 <code>SmoothWarmingUp</code> 中，如果系统处于<code>低负载状态</code>，<code>storedPermits</code> 会一直增加，当请求来的时候，我们要从 storedPermits 中取 <code>permits</code>，最关键的点在于，从 storedPermits 中取 permits 的操作是比较耗时的，因为没有预热。</p>
+<p><strong>SmoothBursty 它从 storedPermits 中获取 permits 是不需要等待时间的，而这边洽洽相反，从 storedPermits 获取需要更多的时间。</strong>
+<img src="/img/blog/guava/1585486192717.jpg" alt=""></p>
+<p>如上图所示：<code>X 轴</code>代表 <code>storedPermits 的数量</code>，<code>Y 轴</code>代表获取一个 <code>permits 需要的时间</code>。</p>
+<blockquote>
+<p>假设指定 permitsPerSecond 为 10，那么 stableInterval 为 100ms，而 coldInterval 是 3 倍，也就是 300ms（coldFactor，3 倍是写死的，用户不能修改）。也就是说，当达到 maxPermits 时，此时处于系统最冷的时候，获取一个 permit 需要 300ms，而如果 storedPermits 小于 thresholdPermits 的时候，只需要 100ms。</p>
+</blockquote>
+<p>看上图有一条垂直线<code>k</code>，它与 <code>X 轴</code>的交点 k 代表当前 <code>storedPermits</code> 的数量：</p>
+<ul>
+<li>
+<p>当系统在非常繁忙的时候，这条线停留在 x=0 处，此时 storedPermits 为 0(<code>一直调用acquire来获取令牌</code>)</p>
+</li>
+<li>
+<p>当 limiter <code>没有被调用</code>的时候，这条线慢慢往右移动，直到 x=maxPermits 处；</p>
+</li>
+<li>
+<p>如果 <code>limiter</code> 被调用，那么这条线又慢慢往左移动，直到 x=0 处；</p>
+<ul>
+<li>当 storedPermits 处于 maxPermits 状态时，我们认为 limiter 中的 permits 是<code>冷的</code>，</li>
+<li>此时获取一个 <code>permit</code> 需要较多的时间，因为需要预热，有一个关键的分界点是 <code>thresholdPermits</code>。</li>
+<li>当小于<code>thresholdPermits</code> 则认为不需要预热直接就获取返回，反之需要预热获取令牌的时间延长
+<img src="/img/blog/guava/1585487442266.jpg" alt=""></li>
+</ul>
+</li>
+</ul>
+<p>预热时间是我们在构造的时候指定的，上图中红色梯形的面积就是<code>预热时间</code>，因为预热完成后，我们能进入到一个稳定的速率中（stableInterval），下面我们来计算出 <code>thresholdPermits</code> 和 <code>maxPermits</code> 的值。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//SmoothWarmingUp 模式
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> RateLimiter <span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> warmupPeriod<span style="color:#f92672">,</span> TimeUnit unit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    checkArgument<span style="color:#f92672">(</span>warmupPeriod <span style="color:#f92672">&gt;=</span> 0<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;warmupPeriod must not be negative: %s&#34;</span><span style="color:#f92672">,</span> warmupPeriod<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">return</span> create<span style="color:#f92672">(</span>
+        permitsPerSecond<span style="color:#f92672">,</span> warmupPeriod<span style="color:#f92672">,</span> unit<span style="color:#f92672">,</span> 3<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">,</span> SleepingStopwatch<span style="color:#f92672">.</span><span style="color:#a6e22e">createFromSystemTimer</span><span style="color:#f92672">());</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><p>有一个关键点，<strong>从 thresholdPermits 到 0 的时间</strong>，是从 <strong>maxPermits 到 thresholdPermits 时间的一半</strong>，也就是梯形的面积是长方形面积的 <code>2 倍</code>，梯形的面积是 <code>warmupPeriod</code>。</p>
+<p>之所以长方形的面积是<code> warmupPeriod/2</code>，是因为 <code>coldFactor</code> 是硬编码的<code> 3</code>。从上面SmoothWarmingUp 的构造函数可以看到</p>
+<ul>
+<li>
+<p><code>梯形面积为 warmupPeriod</code>，即：<strong>warmupPeriod = 2 * stableInterval * thresholdPermits</strong></p>
+</li>
+<li>
+<p><code>thresholdPermits</code> 的值：<strong>thresholdPermits = 0.5 * warmupPeriod / stableInterval</strong></p>
+</li>
+<li>
+<p>然后我们根据梯形面积的计算公式：<strong>warmupPeriod = 0.5 * (stableInterval + coldInterval) * (maxPermits - thresholdPermits)</strong></p>
+</li>
+<li>
+<p>得出 maxPermits 为：<strong>maxPermits = thresholdPermits + 2.0 * warmupPeriod / (stableInterval + coldInterval)</strong></p>
+</li>
+</ul>
+<p>这样，我们就得到了 <code>thresholdPermits</code> 和 <code>maxPermits</code> 的值。</p>
+<p>接下来，我们来看一下<code>冷却时间间隔</code>，它指的是 storedPermits 中每个 <code>permit</code> 的<code>增长速度</code>，也就是我们前面说的 x=k 这条垂直线往右的移动速度，为了达到从 0 到 maxPermits 花费 <code>warmupPeriodMicros</code> 的时间，我们将其定义为：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">double</span> <span style="color:#a6e22e">coolDownIntervalMicros</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> warmupPeriodMicros <span style="color:#f92672">/</span> maxPermits<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">resync</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> nowMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>nowMicros <span style="color:#f92672">&gt;</span> nextFreeTicketMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// coolDownIntervalMicros 在这里使用
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">double</span> newPermits <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>nowMicros <span style="color:#f92672">-</span> nextFreeTicketMicros<span style="color:#f92672">)</span> <span style="color:#f92672">/</span> coolDownIntervalMicros<span style="color:#f92672">();</span>
+    storedPermits <span style="color:#f92672">=</span> min<span style="color:#f92672">(</span>maxPermits<span style="color:#f92672">,</span> storedPermits <span style="color:#f92672">+</span> newPermits<span style="color:#f92672">);</span>
+    nextFreeTicketMicros <span style="color:#f92672">=</span> nowMicros<span style="color:#f92672">;</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="smoothwarmingupdosetrate-方法">SmoothWarmingUp.doSetRate( )方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSetRate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permitsPerSecond<span style="color:#f92672">,</span> <span style="color:#66d9ef">double</span> stableIntervalMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">double</span> oldMaxPermits <span style="color:#f92672">=</span> maxPermits<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// coldFactor 是固定的 3
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">double</span> coldIntervalMicros <span style="color:#f92672">=</span> stableIntervalMicros <span style="color:#f92672">*</span> coldFactor<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 这个公式我们上面已经说了
+</span><span style="color:#75715e"></span>    thresholdPermits <span style="color:#f92672">=</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">5</span> <span style="color:#f92672">*</span> warmupPeriodMicros <span style="color:#f92672">/</span> stableIntervalMicros<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 这个公式我们上面也已经说了
+</span><span style="color:#75715e"></span>    maxPermits <span style="color:#f92672">=</span>
+        thresholdPermits <span style="color:#f92672">+</span> 2<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#f92672">*</span> warmupPeriodMicros <span style="color:#f92672">/</span> <span style="color:#f92672">(</span>stableIntervalMicros <span style="color:#f92672">+</span> coldIntervalMicros<span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 计算那条斜线的斜率。数学知识，对边 / 临边
+</span><span style="color:#75715e"></span>    slope <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>coldIntervalMicros <span style="color:#f92672">-</span> stableIntervalMicros<span style="color:#f92672">)</span> <span style="color:#f92672">/</span> <span style="color:#f92672">(</span>maxPermits <span style="color:#f92672">-</span> thresholdPermits<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>oldMaxPermits <span style="color:#f92672">==</span> Double<span style="color:#f92672">.</span><span style="color:#a6e22e">POSITIVE_INFINITY</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// if we don&#39;t special-case this, we would get storedPermits == NaN, below
+</span><span style="color:#75715e"></span>        storedPermits <span style="color:#f92672">=</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        storedPermits <span style="color:#f92672">=</span>
+            <span style="color:#f92672">(</span>oldMaxPermits <span style="color:#f92672">==</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">)</span>
+                <span style="color:#f92672">?</span> maxPermits <span style="color:#75715e">// initial state is cold
+</span><span style="color:#75715e"></span>                <span style="color:#f92672">:</span> storedPermits <span style="color:#f92672">*</span> maxPermits <span style="color:#f92672">/</span> oldMaxPermits<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="storedpermitstowaittime-方法">storedPermitsToWaitTime 方法</h4>
+<p><code>setRate</code> 方法非常简单，接下来，我们要分析的是 <code>storedPermitsToWaitTime</code> 方法，我们回顾一下下面的代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">reserveEarliestAvailable</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> requiredPermits<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> nowMicros<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  resync<span style="color:#f92672">(</span>nowMicros<span style="color:#f92672">);</span>
+  <span style="color:#66d9ef">long</span> returnValue <span style="color:#f92672">=</span> nextFreeTicketMicros<span style="color:#f92672">;</span>
+  <span style="color:#66d9ef">double</span> storedPermitsToSpend <span style="color:#f92672">=</span> min<span style="color:#f92672">(</span>requiredPermits<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">storedPermits</span><span style="color:#f92672">);</span>
+  <span style="color:#66d9ef">double</span> freshPermits <span style="color:#f92672">=</span> requiredPermits <span style="color:#f92672">-</span> storedPermitsToSpend<span style="color:#f92672">;</span>
+  <span style="color:#66d9ef">long</span> waitMicros <span style="color:#f92672">=</span>
+      storedPermitsToWaitTime<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">storedPermits</span><span style="color:#f92672">,</span> storedPermitsToSpend<span style="color:#f92672">)</span> <span style="color:#75715e">// 这部分固定返回 0
+</span><span style="color:#75715e"></span>          <span style="color:#f92672">+</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)</span> <span style="color:#f92672">(</span>freshPermits <span style="color:#f92672">*</span> stableIntervalMicros<span style="color:#f92672">);</span>
+  <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nextFreeTicketMicros</span> <span style="color:#f92672">=</span> LongMath<span style="color:#f92672">.</span><span style="color:#a6e22e">saturatedAdd</span><span style="color:#f92672">(</span>nextFreeTicketMicros<span style="color:#f92672">,</span> waitMicros<span style="color:#f92672">);</span>
+  <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">storedPermits</span> <span style="color:#f92672">-=</span> storedPermitsToSpend<span style="color:#f92672">;</span>
+  <span style="color:#66d9ef">return</span> returnValue<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>这段代码是 <code>acquire</code> 方法的核心，waitMicros 由两部分组成：</p>
+<ul>
+<li>一部分是从 <code>storedPermits</code> 中获取花费的时间</li>
+<li>一部分是等待 <code>freshPermits</code> 产生花费的时间。在 <code>SmoothBursty</code> 的实现中，从 storedPermits 中获取 permits 直接返回 <code>0</code>，不需要等待。</li>
+</ul>
+<p>而在 SmoothWarmingUp 的实现中，由于需要预热，所以从 storedPermits 中取 permits 需要花费一定的时间，其实就是要计算下图中，阴影部分的面积。
+<img src="/img/blog/guava/1585487463616.jpg" alt=""></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">long</span> <span style="color:#a6e22e">storedPermitsToWaitTime</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> storedPermits<span style="color:#f92672">,</span> <span style="color:#66d9ef">double</span> permitsToTake<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">double</span> availablePermitsAboveThreshold <span style="color:#f92672">=</span> storedPermits <span style="color:#f92672">-</span> thresholdPermits<span style="color:#f92672">;</span>
+  <span style="color:#66d9ef">long</span> micros <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+  <span style="color:#75715e">// 如果右边梯形部分有 permits，那么先从右边部分获取permits，计算梯形部分的阴影部分的面积
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>availablePermitsAboveThreshold <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 从右边部分获取的 permits 数量
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">double</span> permitsAboveThresholdToTake <span style="color:#f92672">=</span> min<span style="color:#f92672">(</span>availablePermitsAboveThreshold<span style="color:#f92672">,</span> permitsToTake<span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 梯形面积公式：(上底+下底)*高/2
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">double</span> length <span style="color:#f92672">=</span>
+        permitsToTime<span style="color:#f92672">(</span>availablePermitsAboveThreshold<span style="color:#f92672">)</span>
+            <span style="color:#f92672">+</span> permitsToTime<span style="color:#f92672">(</span>availablePermitsAboveThreshold <span style="color:#f92672">-</span> permitsAboveThresholdToTake<span style="color:#f92672">);</span>
+    micros <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)</span> <span style="color:#f92672">(</span>permitsAboveThresholdToTake <span style="color:#f92672">*</span> length <span style="color:#f92672">/</span> 2<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">);</span>
+    permitsToTake <span style="color:#f92672">-=</span> permitsAboveThresholdToTake<span style="color:#f92672">;</span>
+  <span style="color:#f92672">}</span>
+  <span style="color:#75715e">// 加上 长方形部分的阴影面积
+</span><span style="color:#75715e"></span>  micros <span style="color:#f92672">+=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)</span> <span style="color:#f92672">(</span>stableIntervalMicros <span style="color:#f92672">*</span> permitsToTake<span style="color:#f92672">);</span>
+  <span style="color:#66d9ef">return</span> micros<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#75715e">// 对于给定的 x 值，计算 y 值
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">permitsToTime</span><span style="color:#f92672">(</span><span style="color:#66d9ef">double</span> permits<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">return</span> stableIntervalMicros <span style="color:#f92672">+</span> permits <span style="color:#f92672">*</span> slope<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="参考于">参考于</h4>
+<p><a href="https://www.cnblogs.com/forezp/p/11407113.html">RateLimiter 源码分析(Guava 和 Sentinel 实现)</a></p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/http-%E6%8B%BE%E9%81%97tcp%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/" data-toggle="tooltip" data-placement="top" title="HTTP 拾遗——TCP建立连接为什么需要三次握手">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/" data-toggle="tooltip" data-placement="top" title="JVM 内存区域与内存溢出异常">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

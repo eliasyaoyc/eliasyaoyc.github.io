@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>计算机之进程与线程 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="计算机">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="计算机之进程与线程" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="操作系统中最核心的概念是进程，这是对正在运行程序的一个抽象。即时可以使用的CPU只有一个，但是它们也具有支持(伪)并发操作的能力，它们将一个单独的CPU变换成多个 虚拟的CPU">
+  <meta property="og:description" content="操作系统中最核心的概念是进程，这是对正在运行程序的一个抽象。即时可以使用的CPU只有一个，但是它们也具有支持(伪)并发操作的能力，它们将一个单独的CPU变换成多个 虚拟的CPU">
+  <meta name="twitter:description" content="操作系统中最核心的概念是进程，这是对正在运行程序的一个抽象。即时可以使用的CPU只有一个，但是它们也具有支持(伪)并发操作的能力，它们将一个单独的CPU变换成多个 虚拟的CPU">
+  <meta property="og:description" content="操作系统中最核心的概念是进程，这是对正在运行程序的一个抽象。即时可以使用的CPU只有一个，但是它们也具有支持(伪)并发操作的能力，它们将一个单独的CPU变换成多个 虚拟的CPU" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之进程与线程 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之进程与线程 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之进程与线程 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之进程与线程 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之进程与线程 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之进程与线程 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之进程与线程 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之进程与线程 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之进程与线程 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>计算机之进程与线程</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月15日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            28500字 | 阅读大约需要57分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba">计算机</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/"><i>#计算机</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="进程">进程</h3>
+<p>操作系统中最核心的概念是<code>进程</code>，这是对正在运行程序的一个抽象。即时可以使用的CPU只有一个，但是它们也具有支持<code>(伪)并发</code>操作的能力，它们将一个<code>单独</code>的CPU变换成<code>多个 虚拟</code>的CPU，如果没有进程的抽象，现代计算机将不复存在。</p>
+<p><code>举个例子</code>：首先考虑一个web服务器，请求来自于网页请求。当一个请求进入时，服务器检查其需要的网页是否再缓存中。如果是，则把网页返回；如果不是，则启动一个磁盘请求以获取网页。
+但是从<code>CPU</code>的角度来看，磁盘请求需要漫长的时间。当等待磁盘请求完成时，其他更多的请求会进入，如果有多个磁盘的话，可以在第一个请求完成前就可以连续的对其他磁盘发出部分或全部请求。很显然，这是一种并发现象，需要有并发控制条件来控制并发现象。</p>
+<p>现在考虑只有一个用户的 PC。当系统启动时，许多进程也在后台启动，用户通常不知道这些进程的启动，试想一下，当你自己的计算机启动的时候，你能知道哪些进程是需要启动的么？
+这些后台进程可能是一个需要输入电子邮件的电子邮件进程，或者是一个计算机病毒查杀进程来周期性的更新病毒库。某个用户进程可能会在所有用户上网的时候打印文件以及刻录 CD-ROM，这些活动都需要管理。于是一个<code>支持多进程的多道程序系统</code>就会显得很有必要了。</p>
+<p>在任何多到程序设计系统中，CPU 由一个<code>进程</code>快速切换至另一个进程，使每个进程各运行几十或几百毫秒。严格意义来说，在某一个瞬间，CPU 只能运行<code>一个</code>进程，然而我们如果把时间定位为 1 秒内的话，它可能运行多个进程。这样就会让我们产生<code>并行的错觉</code>。
+有时候人们说的 <code>伪并行(pseudoparallelism)</code> 就是这种情况，以此来区分多处理器系统(该系统由两个或多个 CPU 来共享同一个物理内存)</p>
+<blockquote>
+<p><code>伪并行</code>：是指单核或者多核处理器同时执行多个进程，通过非常有限的时间间隔再程序之间进行快速切换CPU，从而产生并行感。缺点是CPU 时间可能分配给下一个进程，页可能不分配给下一个进程</p>
+</blockquote>
+<p>因为 CPU 执行速度很快，进程间的换进换出也非常迅速，因此我们很难对多个并行进程进行跟踪，所以，在经过多年的努力后，操作系统的设计者开发了用于描述并行的一种概念模型（顺序进程），使得并行更加容易理解和分析</p>
+<hr>
+<h4 id="进程模型">进程模型</h4>
+<p>在进程模型中，所有计算机上运行的软件，通常也包括操作系统，被组织为若干<code>顺序进程(sequential processes)</code>，简称为 <code>进程(process)</code> 。
+一个进程就是一个正在执行的程序的实例，进程也包括程序计数器、寄存器和变量的当前值。从概念上来说，每个进程都有各自的虚拟 CPU，但是实际情况是 CPU 会在各个进程之间进行来回切换。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/640.png" alt=""></p>
+<blockquote>
+<p>如上图所示，这是一个具有 4 个程序的多道处理程序，在进程不断切换的过程中，程序计数器也在不同的变化。</p>
+</blockquote>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/641.png" alt=""></p>
+<blockquote>
+<p>在上图中，这 4 道程序被抽象为 4 个拥有<code>各自控制流程</code>（即每个自己的程序计数器）的进程，并且每个程序都独立的运行。当然，实际上只有一个物理程序计数器，每个程序要运行时，其逻辑程序计数器会装载到物理程序计数器中。当程序运行结束后，其物理程序计数器就会是真正的程序计数器，然后再把它放回进程的逻辑计数器中。</p>
+<p>从下图我们可以看到，在观察足够长的一段时间后，所有的进程都运行了，<strong>但在任何一个给定的瞬间<code>仅有</code>一个进程真正运行。</strong></p>
+</blockquote>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/642.png" alt=""></p>
+<blockquote>
+<p>因此，当我们说一个 CPU 只能真正一次运行一个进程的时候，即使有 2 个核（或 CPU），<strong>每一个核也只能一次运行一个线程</strong>。</p>
+</blockquote>
+<p>举个例子来阐述：
+一位会做饭的计算机科学家正在为他的女儿制作生日蛋糕。他有做生日蛋糕的食谱，厨房里有所需的原谅：面粉、鸡蛋、糖、香草汁等。在这个比喻中，做蛋糕的食谱就是程序、计算机科学家就是 CPU、而做蛋糕的各种原料都是输入数据。进程就是科学家阅读食谱、取来各种原料以及烘焙蛋糕等一系列动作的总和。</p>
+<p>现在假设科学家的儿子跑过来告诉他，说他的头被蜜蜂蜇了一下，那么此时科学家会记录出来他做蛋糕这个过程到了哪一步，然后拿出急救手册，按照上面的步骤给他儿子实施救助。这里，会涉及到进程之间的切换，科学家（CPU）会从做蛋糕（进程）切换到实施医疗救助（另一个进程）。等待伤口处理完毕后，科学家会回到刚刚记录做蛋糕的那一步，继续制作。</p>
+<p><strong>这里的<code>关键思想</code>是认识到一个进程所需的<code>条件</code>，进程是某一类特定活动的总和，它有程序、输入输出以及状态。单个处理器可以被若干进程<code>共享</code>，它使用某种<code>调度算法</code>决定何时停止一个进程的工作，并转而为另外一个进程提供服务。另外需要注意的是，如果一个进程运行了两遍，则被认为是<code>两个进程</code>。</strong></p>
+<hr>
+<h4 id="进程的创建">进程的创建</h4>
+<p>下面是一些创建进程的方式</p>
+<ul>
+<li><code>系统初始化（init）</code>：启动操作系统时，会创建若干的进程，比如接受发来的电子邮件的进程</li>
+<li><code>正在运行的程序执行了创建进程的系统调用（比如 fork）</code>：一个正在运行的进程会发出系统调用用来创建一个或多个新进程来帮助其完成工作。</li>
+<li><code>用户请求创建一个新进程</code>：用户输入一个命令或者双击应用图标就可以启动程序，然后操作系统为其创建进程</li>
+<li><code>初始化一个批处理工作</code>：在大型机的批处理系统中应用。用户在这种系统中提交批处理作业。当操作系统决定它有资源来运行另一个任务时，它将创建一个新进程并从其中的输入队列中运行下一个作业。</li>
+</ul>
+<hr>
+<h4 id="进程的终止">进程的终止</h4>
+<p>进程在创建之后，它就开始运行并做完成任务。然而，没有什么事儿是永不停歇的，包括进程也一样。进程早晚会发生终止，但是通常是由于以下情况触发的</p>
+<ul>
+<li><code>正常退出(自愿的)</code>：多数进程完成自己的工作而终止，当编译器完成了所给定程序的编译之后，编译器会执行一个系统调用告诉操作系统它完成了工作。这个调用在 UNIX 中是 exit 。</li>
+<li><code>错误退出(自愿的)</code>：比如再Java中编译执行的时候出现了可预见的错误，并且被你catch住，然后抛出一个错误给前端。</li>
+<li><code>严重错误(非自愿的)</code>：不可预见的错误，比如OOM</li>
+<li><code>被其他进程杀死(非自愿的)</code>：某个进程执行系统调用告诉操作系统杀死某个进程，再UNIX中，就是 kill</li>
+</ul>
+<hr>
+<h4 id="进程的层次结构">进程的层次结构</h4>
+<p>某些系统中，当一个进程创建了其他进程后，父进程和子进程就会以某种形式继续保存关联。子进程它自己就会创建更多进程，从而形成一个进程层次结构。</p>
+<p><strong>再UNIX中</strong>，进程和它的所有的子进程以及子进程的子进程共同组成一个<code>进程组</code>。当用户从键盘中发出一个信号后，该信号被发送给当前与键盘相关的进程组中的所有成员（它们通常是在当前窗口创建的所有活动进程）。每个进程可以分别捕获该信号、忽略该信号或采取默认的动作，即被信号 kill 掉。</p>
+<p>这里有另一个例子，可以用来说明层次的作用，考虑 <code>UNIX</code> 在启动时如何初始化自己。一个称为 <code>init</code> 的特殊进程出现在启动映像中 。当 init 进程开始运行时，它会读取一个文件，文件会告诉它有多少个终端。然后为每个终端创建一个新进程。这些进程等待用户登录。如果登录成功，该登录进程就执行一个 shell 来等待接收用户输入指令，这些命令可能会启动更多的进程，以此类推。因此，整个操作系统中所有的进程都隶属于一个单个以 init 为根的<code>进程树</code>。</p>
+<hr>
+<h4 id="进程的状态">进程的状态</h4>
+<p>尽管每个进程是一个独立的实体，有其自己的程序计数器和内部状态，但是，进程之间仍然需要相互帮助。例如，一个进程的结果可以作为另一个进程的输入，在 shell 命令中</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-markdown" data-lang="markdown">cat chapter1 chapter2 chapter3 | grep tree
+</code></pre></div><p>第一个进程是 <code>cat</code>，将三个文件级联并输出。第二个进程是 <code>grep</code>，它从输入中选择具有包含关键字 <code>tree</code> 的内容，根据这两个进程的相对速度（这取决于两个程序的相对复杂度和各自所分配到的 CPU 时间片），可能会发生下面这种情况，grep 准备就绪开始运行，但是输入进程还没有完成，于是必须<code>阻塞</code> grep 进程，直到输入完毕。</p>
+<p><strong>当一个进程开始运行时，它可能会经历下面这几种状态</strong></p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/643.jpeg" alt=""></p>
+<ol>
+<li><code>运行态</code>: 指的就是进程实际占用 CPU 时间片运行时</li>
+<li><code>就绪态</code>: 指的是可运行，但因为其他进程正在运行而处于就绪状态（<code>因为一个CPU只能运行一个进程</code>）</li>
+<li><code>阻塞态</code>: 除非某种外部事件发生，否则进程不能运行</li>
+</ol>
+<blockquote>
+<p>运行态和就绪态再逻辑上来讲是类似的，进程都是<code>可以运行</code>。但是就绪态没有获得CPU时间分片，故只能等待。
+阻塞态与前两种状态不同的原因是这个进程不能运行，CPU 空闲时也不能运行。（比如Java中的wait，只能等待wait超时或者被notify）</p>
+</blockquote>
+<p>在上图中三种状态之间有<code>四种状态间</code>的切换，在操作系统发现进程不能继续执行时会发生状态1的轮转，在某些系统中进程执行系统调用，例如Java中的<code>wait/LockSupport.park</code>，来获取一个阻塞的状态。在其他系统中包括 UNIX，当进程从管道或特殊文件（例如终端）中读取没有可用的输入时，该进程会被自动终止。</p>
+<p>转换 2 和转换 3 都是由进程调度程序（操作系统的一部分）引起的，进程本身不知道调度程序的存在。转换 2 的出现说明进程调度器认定当前进程已经运行了足够长的时间，是时候让其他进程运行 CPU 时间片了。当所有其他进程都运行过后，这时候该是让第一个进程重新获得 CPU 时间片的时候了，就会发生转换 3。</p>
+<blockquote>
+<p><code>程序调度指的是</code>，决定哪个进程优先被运行和运行多久，这是很重要的一点。已经设计出许多算法来尝试平衡系统整体效率与各个流程之间的竞争需求。</p>
+</blockquote>
+<p>当进程等待的一个外部事件发生时（如从外部输入一些数据后），则发生转换 4。如果此时没有其他进程在运行，则立刻触发转换 3，该进程便开始运行，否则该进程会处于就绪阶段，等待 CPU 空闲后再轮到它运行。</p>
+<p><strong>从上面的观点引入了下面的模型</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/645.png" alt="">
+<strong>操作系统最底层的就是调度程序</strong>，在它上面有许多进程。所有关于中断处理、启动进程和停止进程的具体细节都隐藏在调度程序中。事实上，调度程序只是一段非常小的程序。</p>
+<hr>
+<h4 id="进程的实现">进程的实现</h4>
+<p>操作系统为了执行进程间的切换，会维护着一张表格，这张表就是 <code>进程表(process table)</code>。每个进程占用一个进程表项。该表项包含了进程状态的重要信息，包括程序计数器、堆栈指针、内存分配状况、所打开文件的状态、账号和调度信息，以及其他在进程由运行态转换到就绪态或阻塞态时所必须保存的信息，从而保证该进程随后能再次启动，就像从未被中断过一样。</p>
+<p><strong>下面展示了一个典型系统中的关键字段</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/646.jpeg" alt="">
+第一列内容与<code>进程管理</code>有关，第二列内容与 <code>存储管理</code>有关，第三列内容与<code>文件管理</code>有关。</p>
+<p>根据上图的进程表后，就可以对单个（或每一个）CPU如何维持多个顺序金恒的错误做更多的阐述。</p>
+<p>与每一 I/O 类相关联的是一个称作 <code>中断向量(interrupt vector)</code> 的位置（靠近内存底部的固定区域）。它包含中断服务程序的入口地址。假设当一个磁盘中断发生时，用户进程 3 正在运行，则中断硬件将程序计数器、程序状态字、有时还有一个或多个寄存器压入堆栈，计算机随即跳转到中断向量所指示的地址。这就是硬件所做的事情。然后软件就随即接管一切剩余的工作。</p>
+<p>当中断结束后，操作系统会调用一个 C 程序来处理中断剩下的工作。在完成剩下的工作后，会使某些进程就绪，接着调用调度程序，决定随后运行哪个进程。然后将控制权转移给一段汇编语言代码，为当前的进程装入寄存器值以及内存映射并启动该进程运行，下面显示了中断处理和调度的过程。</p>
+<p><strong>1. 硬件压入堆栈程序计数器等</strong></p>
+<p><strong>2. 硬件从中断向量装入新的程序计数器</strong></p>
+<p><strong>3. 汇编语言过程保存寄存器的值</strong></p>
+<p><strong>4. 汇编语言过程设置新的堆栈</strong></p>
+<p><strong>5. C 中断服务器运行（典型的读和缓存写入）</strong></p>
+<p><strong>6. 调度器决定下面哪个程序先运行</strong></p>
+<p><strong>7. C 过程返回至汇编代码</strong></p>
+<p><strong>8. 汇编语言过程开始运行新的当前进程</strong></p>
+<p>一个进程在执行过程中可能被中断数千次，但关键每次中断后，被中断的进程都返回到与中断发生前完全相同的状态。</p>
+<hr>
+<h4 id="进程总结">进程总结</h4>
+<p><strong>1. 进程是操作系统最核心的概念，是对一个程序的抽象。一个单独的CPU在某个时间点只能运行一个程序(进程)</strong></p>
+<p><strong>2. CPU通过快速切换进程来产生并行感</strong></p>
+<ul>
+<li><code>并行</code>指的是：在同一时间你在喝水也在吃东西；</li>
+<li>与之对应的概念<code>并发</code>：同一时间你喝一口水然后吃一口饭在回去喝水</li>
+</ul>
+<p><strong>3. 每个进程都有自己的程序计数器、寄存器和变量的当前值</strong></p>
+<p><strong>4. 进程可以通过：系统初始化、系统调用、用户请求、批处理来创建</strong></p>
+<p><strong>5. 进程可以通过：系统调用exit、可预见的错误、不可预见错误(程序崩溃)、被其他进程杀死(kill) 来终止</strong></p>
+<p><strong>6. 进程有这几个状态：运行、就绪、阻塞、终止</strong></p>
+<ul>
+<li>当进程获得CPU时间片的时候就是运行状态</li>
+<li>当进程没有获得CPU时间片又没有堵塞，那么就是就绪状态等待CPU分配时间片后执行</li>
+<li>当调用堵塞指令的时候就是堵塞状态，无法执行</li>
+</ul>
+<p><strong>7. 进程是通过调度程序，来调度执行的。调度程序又有很多调度算法</strong></p>
+<p><strong>8. 当进程执行的时间超过CPU分配时间片后会被CPU中断</strong></p>
+<ul>
+<li>当发生中断的时候，中断硬件会将程序计数器、程序状态字、一个或者多个寄存器压入堆栈，计算机随即跳转到中断的地址</li>
+<li>当中断结束后，系统会调用C程序来处理剩下的工作。当工作完成后，使某些进程就绪然后通过调度程序，决定哪个进程运行。</li>
+</ul>
+<hr>
+<h3 id="线程">线程</h3>
+<p>在传统的操作系统中，每个进程都有一个地址空间和一个控制线程。事实上，这是大部分进程的定义。不过，在许多情况下，经常存在同一地址空间中运行多个控制线程的情形，这些线程就像是分离的进程。</p>
+<hr>
+<h4 id="线程的使用">线程的使用</h4>
+<p>在有了进程之后，需要多线程的主要原因：</p>
+<ul>
+<li>多线程之间会共享同一块地址空间和所有可用数据的能力，这是进程所不具备的</li>
+<li>线程要比进程<code>更轻量级</code>，由于线程更轻，所它比进程更容易创建，也更容易撤销。在许多系统中，创建一个线程要比创建一个进程快 10 - 100 倍。</li>
+<li>第三个原因可能是性能方面的探讨，如果多个线程都是 <code>CPU 密集型</code>的，那么并不能获得性能上的增强，但是如果存在着大量的计算和大量的 I/O 处理，拥有多个线程能在这些活动中彼此重叠进行，从而会加快应用程序的执行速度</li>
+</ul>
+<p>现在讨论一个线程使用的例子：</p>
+<blockquote>
+<p>一个Web服务器，对页面的请求发送给服务器，而所请求的页面发送回客户端。在多数 web 站点上，某些页面较其他页面相比有更多的访问。例如，索尼的主页比任何一个照相机详情介绍页面具有更多的访问，Web 服务器可以把获得大量访问的页面集合保存在内存中，避免到磁盘去调入这些页面，从而改善性能。这种页面的集合称为 高速缓存(cache)，高速缓存也应用在许多场合中，比如说 CPU 缓存。</p>
+</blockquote>
+<ul>
+<li><strong><code>多线程解决方案</code></strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/670.jpeg" alt=""></li>
+</ul>
+<p>上面是一个 web 服务器的组织方式，一个叫做 <code>调度线程(dispatcher thread)</code> 的线程从网络中读入工作请求，在调度线程检查完请求后，它会选择一个空闲的（阻塞的）工作线程来处理请求，通常是将消息的指针写入到每个线程关联的特殊字中。然后调度线程会唤醒正在睡眠中的工作线程，把工作线程的状态从阻塞态变为就绪态。</p>
+<p>当工作线程启动后，它会检查请求是否在 web 页面的高速缓存中存在，这个高速缓存是所有线程都可以访问的。如果高速缓存不存在这个 web 页面的话，它会调用一个 <code>read</code> 操作从磁盘中获取页面并且阻塞线程直到磁盘操作完成。当线程阻塞在硬盘操作的期间，为了完成更多的工作，调度线程可能挑选另一个线程运行，也可能把另一个当前就绪的工作线程投入运行。</p>
+<p>这种模型允许将服务器编写为顺序线程的集合，在分派线程的程序中包含一个死循环，该循环用来获得工作请求并且把请求派给工作线程。每个工作线程的代码包含一个从调度线程接收的请求，并且检查 web 高速缓存中是否存在所需页面，如果有，直接把该页面返回给客户，接着工作线程阻塞，等待一个新请求的到达。如果没有，工作线程就从磁盘调入该页面，将该页面返回给客户机，然后工作线程阻塞，等待一个新请求。</p>
+<ul>
+<li><strong><code>单线程解决方案</code></strong></li>
+</ul>
+<p>现在考虑没有多线程的情况下，如何编写 Web 服务器。我们很容易的就想象为单个线程了，Web 服务器的主循环获取请求并检查请求，并争取在下一个请求之前完成工作。在等待磁盘操作时，服务器空转，并且不处理任何到来的其他请求。结果会导致每秒中只有很少的请求被处理，所以这个例子能够说明多线程提高了程序的并行性并提高了程序的性能。</p>
+<ul>
+<li><strong><code>状态机解决方案</code></strong></li>
+</ul>
+<p>如果目前只有一个非阻塞版本的 <code>read</code> 系统调用可以使用，那么当请求到达服务器时，这个唯一的 read 调用的线程会进行检查，如果能够从高速缓存中得到响应，那么直接返回，如果不能，则启动一个非阻塞的磁盘操作</p>
+<p>服务器在表中记录当前请求的状态，然后进入并获取下一个事件，紧接着下一个事件可能就是一个新工作的请求或是磁盘对先前操作的回答。如果是新工作的请求，那么就开始处理请求。如果是磁盘的响应，就从表中取出对应的状态信息进行处理。对于<code>非阻塞式</code>磁盘 I/O 而言，这种响应一般都是信号<code>中断响应</code>。</p>
+<p>每次服务器从某个请求工作的状态切换到另一个状态时，都必须显示的保存或者重新装入相应的计算状态。这里，每个计算都有一个被保存的状态，存在一个会发生且使得相关状态发生改变的事件集合，我们把这类设计称为<code>有限状态机(finite-state machine)</code>，有限状态机被广泛的应用在计算机科学中。</p>
+<blockquote>
+<p>这三种解决方案各有各的特性，多线程使得顺序进程的思想得以保留下来，并且实现了并行性，但是顺序进程会阻塞系统调用；单线程服务器保留了阻塞系统的简易性，但是却放弃了性能。有限状态机的处理方法运用了非阻塞调用和中断，通过并行实现了高性能，但是给编程增加了困难。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>特性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单线程</td>
+<td>无并行性，性能较差，阻塞系统调用</td>
+</tr>
+<tr>
+<td>多线程</td>
+<td>有并行性，阻塞系统调用</td>
+</tr>
+<tr>
+<td>有限状态机</td>
+<td>并行性，非阻塞系统调用、中断</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h4 id="线程模型">线程模型</h4>
+<p>理解进程的另一个角度是，用某种方法把相关的资源集中在一起。进程有存放程序正文和数据以及其他资源的地址空间。这些资源包括打开的文件、子进程、即将发生的定时器、信号处理程序、账号信息等。把这些信息放在进程中会比较容易管理。</p>
+<p>另一个概念是，进程中拥有一个<code>执行的线程</code>，通常简写为 <code>线程(thread)</code>。线程会有<code>程序计数器</code>，用来记录接着要执行哪一条指令；线程还拥有<code>寄存器</code>，用来保存线程当前正在使用的变量；线程还会有<code>堆栈</code>，用来记录程序的执行路径。<code>尽管线程必须在某个进程中执行</code>，但是进程和线程完完全全是两个不同的概念，并且他们可以分开处理。<code>进程用于把资源集中在一起，而线程则是 CPU 上调度执行的实体。</code></p>
+<p>线程给进程模型增加了一项内容，即在同一个进程中，允许彼此之间有较大的独立性且互不干扰。在一个进程中并行运行多个线程类似于在一台计算机上运行多个进程。在多个线程中，各个线程共享同一地址空间和其他资源。在多个进程中，进程共享物理内存、磁盘、打印机和其他资源。因为线程会包含有一些进程的属性，所以线程被称为<code>轻量的进程(lightweight processes)</code>。<code>多线程(multithreading)</code>一词还用于描述在同一进程中多个线程的情况。</p>
+<p>下图我们可以看到三个传统的进程，每个进程有自己的地址空间和单个控制线程。每个线程都在不同的地址空间中运行
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/671.png" alt="">
+下图中，我们可以看到有一个进程三个线程的情况。每个线程都在相同的地址空间中运行。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/672.png" alt="">
+线程不像是进程那样具备较强的独立性。同一个进程中的所有线程都会有<code>完全一样</code>的地址空间，这意味着它们也<code>共享</code>同样的<code>全局变量</code>。由于每个线程都可以访问进程地址空间内每个内存地址，因此一个线程可以读取、写入甚至擦除另一个线程的堆栈。线程之间除了共享同一内存空间外，还具有如下不同的内容
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/673.png" alt="">
+上图左边的是同一个进程中每个<code>线程共享</code>的内容，上图右边是<code>每个线程</code>中的内容。也就是说左边的列表是进程的属性，右边的列表是线程的属性。</p>
+<p>和进程一样，线程可以处于下面这几种状态：<strong>运行中、阻塞、就绪和终止（进程图中没有画）</strong>。正在运行的线程拥有 CPU 时间片并且状态是运行中。一个被阻塞的线程会等待某个释放它的事件。例如，当一个线程执行从键盘读入数据的系统调用时，该线程就被阻塞直到有输入为止。线程通常会被阻塞，直到它等待某个外部事件的发生或者有其他线程来释放它。<strong>线程之间的状态转换和进程之间的状态转换是一样的</strong>。</p>
+<p>每个线程都会有自己的堆栈，如下图所示
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/674.png" alt=""></p>
+<hr>
+<h4 id="线程系统调用">线程系统调用</h4>
+<ul>
+<li><code>thread_create</code>：创建新的线程。线程创建的函数会要求指定新创建线程的名称。创建的线程通常都返回一个线程标识符，该标识符就是新线程的名字。</li>
+<li><code>thread_exit</code>：退出。紧接着线程消失，状态变为终止，不能再进行调度</li>
+<li><code>thread_join</code>：表示一个线程可以等待另一个线程退出。这个过程阻塞调用线程直到等待特定的线程退出。在这种情况下，线程的创建和终止非常类似于进程的创建和终止。</li>
+<li><code>thread_yield</code>：它允许线程自动放弃 CPU 从而让另一个线程运行。</li>
+</ul>
+<hr>
+<h4 id="posix线程pthread">POSIX线程（Pthread）</h4>
+<p><code>POSIX线程</code>（通常称为pthread）是一种独立于语言而存在的<code>执行模型</code>，以及并行<code>执行模型</code>。它允许程序控制时间上<code>重叠</code>的多个不同的工作流程。每个工作流程都称为一个线程，可以通过调用POSIX Threads API来实现对这些流程的创建和控制。可以把它理解为线程的标准。
+POSIX Threads 的实现在许多类似且符合POSIX的操作系统上可用，例如 FreeBSD、NetBSD、OpenBSD、Linux、macOS、Android、Solaris，它在现有 Windows API 之上实现了pthread。
+IEEE 是世界上最大的技术专业组织，致力于为人类的利益而发展技术。</p>
+<table>
+<thead>
+<tr>
+<th>线程调用</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pthread_create</td>
+<td>创建一个新线程</td>
+</tr>
+<tr>
+<td>pthread_exit</td>
+<td>结束调用的线程</td>
+</tr>
+<tr>
+<td>pthread_join</td>
+<td>等待一个特定的线程退出</td>
+</tr>
+<tr>
+<td>pthread_yield</td>
+<td>释放 CPU 来运行另外一个线程</td>
+</tr>
+<tr>
+<td>pthread_attr_init</td>
+<td>创建并初始化一个线程的属性结构</td>
+</tr>
+<tr>
+<td>pthread_attr_destory</td>
+<td>删除一个线程的属性结构</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p>所有的 Pthreads 都有特定的属性，每一个都含有标识符、一组寄存器（包括程序计数器）和一组存储在结构中的属性。这个属性包括堆栈大小、调度参数以及其他线程需要的项目。</p>
+<p>新的线程会通过 <code>pthread_create</code> 创建，新创建的线程的标识符会作为函数值返回。这个调用非常像是 UNIX 中的 <code>fork</code> 系统调用（除了参数之外），其中线程标识符起着 <code>PID</code> 的作用，这么做的目的是为了和其他线程进行区分。</p>
+<p>当线程完成指派给他的工作后，会通过 <code>pthread_exit</code> 来终止。这个调用会停止线程并释放堆栈。</p>
+<p>一般一个线程在继续运行前需要等待另一个线程完成它的工作并退出。可以通过 <code>pthread_join</code> 线程调用来等待别的特定线程的终止。而要等待线程的线程标识符作为一个参数给出。</p>
+<p>有时会出现这种情况：一个线程逻辑上没有阻塞，但感觉上它已经运行了足够长的时间并且希望给另外一个线程机会去运行。这时候可以通过 <code>pthread_yield</code> 来完成。</p>
+<p>下面两个线程调用是处理属性的。<code>pthread_attr_init</code> 建立关联一个线程的属性结构并初始化成默认值，这些值（例如优先级）可以通过修改属性结构的值来改变。</p>
+<p>最后，<code>pthread_attr_destroy</code> 删除一个线程的结构，释放它占用的内存。它不会影响调用它的线程，这些线程会一直存在。</p>
+<hr>
+<h4 id="在用户空间中实现线程">在用户空间中实现线程</h4>
+<p>第一种方法是把整个线程包放在用户空间中，内核对线程一无所知，它不知道线程的存在。所有的这类实现都有同样的通用结构
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/675.png" alt=""></p>
+<p>线程在运行时系统之上运行，运行时系统是管理线程过程的集合，包括前面提到的四个过程：<strong>pthread_create, pthread_exit, pthread_join 和 pthread_yield。</strong></p>
+<blockquote>
+<p><code>运行时系统(Runtime System)</code> 也叫做运行时环境，该运行时系统提供了程序在其中运行的环境。此环境可能会解决许多问题，包括应用程序内存的布局，程序如何访问变量，在过程之间传递参数的机制，与操作系统的接口等等。编译器根据特定的运行时系统进行假设以生成正确的代码。通常，运行时系统将负责设置和管理堆栈，并且会包含诸如垃圾收集，线程或语言内置的其他动态的功能。</p>
+</blockquote>
+<p>在用户空间管理线程时，每个进程需要有其<code>专用的线程表(thread table)</code>，用来<code>跟踪</code>该进程中的线程。这些表和内核中的<code>进程表</code>类似，不过它仅仅记录各个线程的属性，如每个线程的程序<strong>计数器、堆栈指针、寄存器和状态</strong>。该线程表由运行时系统统一管理。当一个线程转换到就绪状态或阻塞状态时，在该线程表中存放重新启动该线程的所有信息，与内核在进程表中存放的信息完全一样。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>考虑如果在线程完成时或者是在调用 <code>pthread_yield</code> 时，必要时会进程线程切换，然后线程的信息会被保存在运行时环境所提供的线程表中，然后，线程调度程序来选择另外一个需要运行的线程。保存线程的状态和调度程序都是<code>本地过程</code>，<strong>所以启动他们比进行内核调用效率更高。因而不需要切换到内核，也就不需要上下文切换，也不需要对内存高速缓存进行刷新，因为线程调度非常便捷，因此效率比较高。</strong></li>
+<li>在用户空间实现线程还有一个优势就是<strong>它允许每个进程有自己定制的调度算法</strong>。</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li><code>无法堵塞系统调用</code>：假设在还没有任何键盘输入之前，一个线程读取键盘，让线程进行系统调用是不可能的，因为这会停止所有的线程。所以，<strong>使用线程的一个目标是能够让线程进行阻塞调用，并且要避免被阻塞的线程影响其他线程。</strong></li>
+<li><code>缺页中断</code>：计算机并不会把所有的程序都一次性的放入内存中，如果某个程序发生函数调用或者跳转指令到了一条不在内存的指令上，就会发生页面故障，而操作系统将到磁盘上取回这个丢失的指令，这就称为缺页故障。而在对所需的指令进行读入和执行时，相关的进程就会被阻塞。如果只有一个线程引起页面故障，内核由于甚至不知道有线程存在，通常会把整个进程阻塞直到磁盘 I/O 完成为止，尽管其他的线程是可以运行的。</li>
+<li><code>无法调度线程</code>：如果一个线程开始运行，该线程所在进程中的其他线程都不能运行，除非第一个线程自愿的放弃 CPU，在一个单进程内部，没有时钟中断，所以不可能使用轮转调度的方式调度线程。除非其他线程能够以自己的意愿进入运行时环境，否则调度程序没有可以调度线程的机会。</li>
+</ul>
+<hr>
+<h4 id="在内核中实现线程">在内核中实现线程</h4>
+<p>现在我们考虑使用内核来实现线程的情况，此时不再需要运行时环境了。另外，每个进程中也没有线程表。相反，在内核中会有用来记录系统中所有线程的线程表。当某个线程希望创建一个新线程或撤销一个已有线程时，它会进行一个系统调用，这个系统调用通过对线程表的更新来完成线程创建或销毁工作。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/676.png" alt="">
+内核中的线程表持有每个线程的寄存器、状态和其他信息。这些信息和用户空间中的线程信息相同，但是位置却被放在了内核中而不是用户空间中。另外，内核还维护了一张进程表用来跟踪系统状态。</p>
+<p>所有能够阻塞的调用都会通过系统调用的方式来实现，当一个线程阻塞时，内核可以进行选择，是运行在同一个进程中的另一个线程（如果有就绪线程的话）还是运行一个另一个进程中的线程。但是在用户实现中，运行时系统始终运行自己的线程，直到内核剥夺它的 CPU 时间片（或者没有可运行的线程存在了）为止。</p>
+<p>由于在内核中创建或者销毁线程的开销比较大，所以某些系统会采用可循环利用的方式来回收线程。当某个线程被销毁时，就把它标志为不可运行的状态，但是其内部结构没有受到影响。稍后，在必须创建一个新线程时，就会重新启用旧线程，把它标志为可用状态。</p>
+<p>如果某个进程中的线程造成缺页故障后，内核很容易的就能检查出来是否有其他可运行的线程，如果有的话，在等待所需要的页面从磁盘读入时，就选择一个可运行的线程运行。这样做的缺点是系统调用的代价比较大，所以如果线程的操作（创建、终止）比较多，就会带来很大的开销。</p>
+<hr>
+<h4 id="混合实现">混合实现</h4>
+<p>结合用户空间和内核空间的优点，设计人员采用了一种<code>内核级线程</code>的方式，然后将用户级线程与某些或者全部内核线程多路复用起来
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/677.png" alt="">
+在这种模型中，编程人员可以自由控制用户线程和内核线程的数量，具有很大的灵活度。采用这种方法，内核只识别内核级线程，并对其进行调度。其中一些内核级线程会被多个用户级线程多路复用。</p>
+<hr>
+<h4 id="线程总结">线程总结</h4>
+<p><strong>1. 多线程之间共享同一块地址空间和所有可用数据的能力，比进程更加轻量级，创建时间比进程块10-100倍</strong></p>
+<p><strong>2. 进程中拥有一个执行的线程，通常简写为线程(thread)。线程会有程序计数器、寄存器、堆栈。</strong></p>
+<p><strong>3. 进程用于把资源集中在一起，而线程则是 CPU 上调度执行的实体。</strong></p>
+<hr>
+<h3 id="进程间通信">进程间通信</h3>
+<p>进程是需要频繁的和其他进程进行交流的。例如，在一个 shell 管道中，第一个进程的输出必须传递给第二个进程，这样沿着管道进行下去。因此，进程之间如果需要通信的话，必须要使用一种良好的数据结构以至于不能被中断。下面有三个 <code>进程间通信(Inter Process Communication, IPC)</code> 的问题。</p>
+<ul>
+<li><code>第一个问题</code>：一个进程如何传递消息给其他进程。</li>
+<li><code>第二个问题</code>：如何确保两个或多个线程之间不会相互干扰。例如，两个航空公司都试图为不同的顾客抢购飞机上的最后一个座位。</li>
+<li><code>第三个问题</code>：数据的先后顺序的问题，如果进程 A 产生数据并且进程 B 打印数据。则进程 B 打印数据之前需要先等 A 产生数据后才能够进行打印。
+需要注意的是，这三个问题中的后面两个问题同样也适用于<code>线程</code></li>
+</ul>
+<hr>
+<h4 id="竞争条件">竞争条件</h4>
+<p>在一些操作系统中，协作的进程可能共享一些彼此都能读写的公共资源。公共资源可能在内存中也可能在一个共享文件。为了讲清楚进程间是如何通信的，这里我们举一个例子：一个后台打印程序。当一个进程需要打印某个文件时，它会将文件名放在一个<code>特殊的后台目录(spooler directory)</code>中。另一个进程 <code>打印后台进程(printer daemon) </code>会定期的检查是否需要文件被打印，如果有的话，就打印并将该文件名从目录下删除。</p>
+<p>假设我们的后台目录有非常多的 <code>槽位(slot)</code>，编号依次为 0，1，2，…，每个槽位存放一个文件名。同时假设有两个共享变量：out，指向下一个需要打印的文件；in，指向目录中下个空闲的槽位。可以把这两个文件保存在一个所有进程都能访问的文件中，该文件的长度为两个字。在某一时刻，0 至 3 号槽位空，4 号至 6 号槽位被占用。在同一时刻，进程 A 和 进程 B 都决定将一个文件排队打印，情况如下
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/678.png" alt="">
+<strong>假设</strong>：进程 A 读到 in 的值为 7，将 7 存在一个局部变量 <code>next_free_slot</code> 中。此时发生一次时钟中断，CPU 认为进程 A 已经运行了足够长的时间，决定切换到进程 B 。进程 B 也读取 in 的值，发现是 7，然后进程 B 将 7 写入到自己的局部变量 <code>next_free_slot</code> 中，在这一时刻两个进程都认为下一个可用槽位是 7 。</p>
+<p>进程 B 现在继续运行，它会将打印文件名写入到 slot 7 中，然后把 in 的指针更改为 8 ，然后进程 B 离开去做其他的事情</p>
+<p>现在进程 A 开始恢复运行，由于进程 A 通过检查 <code>next_free_slot</code>也发现 slot 7 的槽位是空的，于是将打印文件名存入 slot 7 中，然后把 in 的值更新为 8 ，由于 slot 7 这个槽位中已经有进程 B 写入的值，所以进程 A 的打印文件名会把进程 B 的文件覆盖，由于打印机内部是无法发现是哪个进程更新的，它的功能比较局限，所以这时候进程 B 永远无法打印输出，类似这种情况，即两个或多个线程同时对一共享数据进行修改，从而影响程序运行的正确性时，这种就被称为<code>竞态条件(race condition)</code>。</p>
+<hr>
+<h4 id="临界区">临界区</h4>
+<p>不仅共享资源会造成竞态条件，事实上共享文件、共享内存也会造成竞态条件、那么该如何避免呢？或许一句话可以概括说明：<strong>禁止一个或多个进程在同一时刻对共享资源（包括共享内存、共享文件等）进行读写</strong>。换句话说，我们需要一种 <code>互斥(mutual exclusion) 条件</code>，这也就是说，如果一个进程在某种方式下使用共享变量和文件的话，除该进程之外的其他进程就<code>禁止</code>做这种事（访问统一资源）。上面问题的纠结点在于，在进程 A 对共享变量的使用未结束之前进程 B 就使用它。在任何操作系统中，为了实现互斥操作而选用适当的原语是一个主要的设计问题。</p>
+<p>避免竞争问题的条件可以用一种抽象的方式去描述。大部分时间，进程都会忙于内部计算和其他不会导致竞争条件的计算。然而，有时候进程会访问共享内存或文件，或者做一些能够导致竞态条件的操作。我们把对共享内存进行访问的程序片段称作 <code>临界区域(critical region)</code> 或 <code>临界区(critical section)</code>。如果我们能够正确的操作，使两个不同进程不可能同时处于临界区，就能避免竞争条件，这也是从操作系统设计角度来进行的。</p>
+<p>尽管上面这种设计避免了竞争条件，但是不能确保并发线程同时访问共享数据的正确性和高效性。一个好的解决方案，应该包含下面<code>四种条件</code></p>
+<p><strong>1. 任何时候两个进程不能同时处于临界区</strong></p>
+<p><strong>2. 不应对 CPU 的速度和数量做任何假设</strong></p>
+<p><strong>3. 位于临界区外的进程不得阻塞其他进程</strong></p>
+<p><strong>4. 不能使任何进程无限等待进入临界区</strong></p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/679.webp" alt="">
+从抽象的角度来看，我们通常希望进程的行为如上图所示，在 t1 时刻，进程 A 进入临界区，在 t2 的时刻，进程 B 尝试进入临界区，因为此时进程 A 正在处于临界区中，所以进程 B 会阻塞直到 t3 时刻进程 A 离开临界区，此时进程 B 能够允许进入临界区。最后，在 t4 时刻，进程 B 离开临界区，系统恢复到没有进程的原始状态。</p>
+<hr>
+<h4 id="忙等互斥">忙等互斥</h4>
+<p>实现互斥的几种设计，在这些方案中，当一个进程正忙于更新其关键区域的共享内存时，没有其他进程会进入其关键区域，也不会造成影响。</p>
+<ul>
+<li><strong><code>屏蔽中断</code></strong></li>
+</ul>
+<p>在单处理器系统上，最简单的解决方案是让每个进程在进入临界区后<code>立即屏蔽</code>所有中断，并在离开临界区之前<code>重新启用</code>它们。
+屏蔽中断后，时钟中断也会被屏蔽。CPU <strong>只有发生时钟中断或其他中断时才会进行进程切换</strong>。这样，在屏蔽中断后 CPU 不会切换到其他进程。
+所以，一旦某个进程屏蔽中断之后，它就可以检查和修改共享内存，而不用担心其他进程介入访问共享数据。</p>
+<p>当进程进入临界区域后，用户进程关闭中断，如果经过一段较长时间后进程没有离开，那么中断不就一直启用不了，那么可能会造成整个系统的<code>终止</code>。
+<strong>而且如果是多处理器的话，屏蔽中断仅仅对执行 disable 指令的 CPU 有效。其他 CPU 仍将继续运行，并可以访问共享内存。</strong></p>
+<p>另一方面，对内核来说，当它在执行更新变量或列表的几条指令期间将中断屏蔽是很方便的。例如，如果多个进程处理就绪列表中的时候发生中断，
+则可能会发生竞态条件的出现。所以，屏蔽中断对于操作系统本身来说是一项很有用的技术，但是对于用户线程来说，屏蔽中断却不是一项通用的互斥机制。</p>
+<ul>
+<li><strong><code>锁变量</code></strong></li>
+</ul>
+<p>寻找一种软件层面解决方案。考虑有单个<code>共享的（锁）变量</code>，初始为值为 0 。当一个线程想要进入关键区域时，它首先会查看锁的值是否为 0 ，如果锁的值是 0 ，进程会把它设置为 1 并让进程进入关键区域。如果锁的状态是 1，进程会等待直到锁变量的值变为 0 。因此，锁变量的值是 0 则意味着没有线程进入关键区域。如果是 1 则意味着有进程在关键区域内。我们对上图修改后，如下所示</p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/680.jpeg" alt=""></p>
+<p>假设一个进程读出锁变量的值并发现它为 0 ，而恰好在它将其设置为 1 之前，另一个进程调度运行，读出锁的变量为0 ，并将锁的变量设置为 1 。然后第一个线程运行，把锁变量的值再次设置为 1，此时，临界区域就会有两个进程在同时运行。</p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/681.jpeg" alt=""></p>
+<p>多重检查依然是无法解决这个问题<strong>在进入前检查一次，在要离开的关键区域再检查一次</strong>因为在第二次检查期间其他线程仍有可能修改锁变量的值，换句话说，这种 set-before-check 不是一种 原子性 操作，所以同样还会发生<strong>竞争条件</strong>。</p>
+<ul>
+<li><strong><code>严格轮训</code></strong></li>
+</ul>
+<p>进程1代码</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>TRUE<span style="color:#f92672">){</span>
+  <span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>turn <span style="color:#f92672">!=</span> 0<span style="color:#f92672">){</span>
+    <span style="color:#75715e">/* 进入关键区域 */</span>
+    critical_region<span style="color:#f92672">();</span>
+    turn <span style="color:#f92672">=</span> 1<span style="color:#f92672">;</span>
+    <span style="color:#75715e">/* 离开关键区域 */</span>
+    noncritical_region<span style="color:#f92672">();</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>进程2代码</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>TRUE<span style="color:#f92672">){</span>
+  <span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>turn <span style="color:#f92672">!=</span> 1<span style="color:#f92672">){</span>
+    critical_region<span style="color:#f92672">();</span>
+    turn <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+    noncritical_region<span style="color:#f92672">();</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>在上面代码中，<code>变量 turn</code>，初始值为 0 ，用于记录轮到那个进程进入临界区，并检查或更新共享内存。开始时，进程 0 检查 turn，发现其值为 0 ，于是进入临界区。进程 1 也发现其值为 0 ，所以在一个等待循环中不停的测试 turn，看其值何时变为 1。连续检查一个变量直到某个值出现为止，这种方法称为 <code>忙等待(busywaiting)</code>。由于这种方式浪费 CPU 时间，所以这种方式通常应该要避免。只有在有理由认为等待时间是非常短的情况下，才能够使用忙等待。用于忙等待的锁，称为 <code>自旋锁(spinlock)</code>。</p>
+<p>进程 0 离开临界区时，它将 turn 的值设置为 1，以便允许进程 1 进入其临界区。假设进程 1 很快便离开了临界区，则此时两个进程都处于临界区之外，turn 的值又被设置为 0 。现在进程 0 很快就执行完了整个循环，它退出临界区，并将 turn 的值设置为 1。此时，turn 的值为 1，两个进程都在其临界区外执行。</p>
+<p>突然，进程 0 结束了非临界区的操作并返回到循环的开始。但是，这时它不能进入临界区，因为 turn 的当前值为 1，此时进程 1 还忙于非临界区的操作，进程 0 只能继续 while 循环，直到进程 1 把 turn 的值改为 0 。这说明，在一个进程比另一个进程执行速度慢了很多的情况下，轮流进入临界区并不是一个好的方法。</p>
+<p>这种情况违反了前面的叙述 3 ，即 位于临界区外的进程不得阻塞其他进程，进程 0 被一个临界区外的进程阻塞。由于违反了第三条，所以也不能作为一个好的方案。</p>
+<ul>
+<li><strong><code>Peterson 解法</code></strong></li>
+</ul>
+<p>荷兰数学家 T.Dekker 通过将锁变量与警告变量相结合，最早提出了一个不需要严格轮换的软件互斥算法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#960050;background-color:#1e0010">#</span>define FALSE 0
+<span style="color:#960050;background-color:#1e0010">#</span>define TRUE  1
+<span style="color:#75715e">/* 进程数量 */</span>
+<span style="color:#960050;background-color:#1e0010">#</span>define N     2                                                    
+
+<span style="color:#75715e">/* 现在轮到谁 */</span>
+<span style="color:#66d9ef">int</span> turn<span style="color:#f92672">;</span>                    
+
+<span style="color:#75715e">/* 所有值初始化为 0 (FALSE) */</span>
+<span style="color:#66d9ef">int</span> interested<span style="color:#f92672">[</span>N<span style="color:#f92672">];</span>                                            
+
+<span style="color:#75715e">/* 进程是 0 或 1 */</span>
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">enter_region</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> process<span style="color:#f92672">){</span>                    
+
+  <span style="color:#75715e">/* 另一个进程号 */</span>
+  <span style="color:#66d9ef">int</span> other<span style="color:#f92672">;</span>                                                        
+
+  <span style="color:#75715e">/* 另一个进程 */</span>
+  other <span style="color:#f92672">=</span> 1 <span style="color:#f92672">-</span> process<span style="color:#f92672">;</span>                
+
+  <span style="color:#75715e">/* 表示愿意进入临界区 */</span>
+  interested<span style="color:#f92672">[</span>process<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> TRUE<span style="color:#f92672">;</span>                        
+  turn <span style="color:#f92672">=</span> process<span style="color:#f92672">;</span>
+
+  <span style="color:#75715e">/* 空循环 */</span>
+  <span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>turn <span style="color:#f92672">==</span> process 
+        <span style="color:#f92672">&amp;&amp;</span> interested<span style="color:#f92672">[</span>other<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">){}</span> 
+
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">leave_region</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> process<span style="color:#f92672">){</span>
+
+  <span style="color:#75715e">/* 表示离开临界区 */</span>
+  interested<span style="color:#f92672">[</span>process<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> FALSE<span style="color:#f92672">;</span>                 
+<span style="color:#f92672">}</span>
+</code></pre></div><p>在使用共享变量时（即进入其临界区）之前，各个进程使用各自的进程号 0 或 1 作为参数来调用 <code>enter_region</code>，这个函数调用在需要时将使进程等待，直到能够安全的临界区。在完成对共享变量的操作之后，进程将调用 <code>leave_region</code> 表示操作完成，并且允许其他进程进入。</p>
+<p>现在来看看这个办法是如何工作的。一开始，没有任何进程处于临界区中，现在进程 0 调用 <code>enter_region</code>。它通过设置数组元素和将 turn 置为 0 来表示它希望进入临界区。由于进程 1 并不想进入临界区，所以 <code>enter_region</code> 很快便返回。如果进程现在调用 <code>enter_region</code>，进程 1 将在此处挂起直到 interested[0] 变为 FALSE，这种情况只有在进程 0 调用 <code>leave_region</code> 退出临界区时才会发生。</p>
+<p>那么上面讨论的是顺序进入的情况，现在来考虑一种两个进程同时调用 <code>enter_region</code> 的情况。它们都将自己的进程存入 turn，但只有最后保存进去的进程号才有效，前一个进程的进程号因为重写而丢失。假如进程 1 是最后存入的，则 turn 为 1 。当两个进程都运行到 while 的时候，进程 0 将不会循环并进入临界区，而进程 1 将会无限循环且不会进入临界区，直到进程 0 退出位置。</p>
+<ul>
+<li><strong><code>TSL 指令</code></strong></li>
+</ul>
+<p>通过硬件帮助的方案。一些计算机，特别是那些设计为多处理器的计算机，都会有下面这条指令</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">TSL RX<span style="color:#f92672">,</span>LOCK    
+</code></pre></div><p>称为 <code>测试并加锁(test and set lock)</code>，它将一个内存字 lock 读到寄存器 <code>RX</code> 中，然后在该内存地址上存储一个非零值。读写指令能保证是一体的，不可分割的，一同执行的。在这个指令结束之前其他处理器均不允许访问内存。执行 TSL 指令的 CPU 将会锁住内存总线，用来禁止其他 CPU 在这个指令结束之前访问内存。</p>
+<p>很重要的一点是锁住内存总线和禁用中断不一样。禁用中断并不能保证一个处理器在读写操作之间另一个处理器对内存的读写。也就是说，在处理器 1 上屏蔽中断对处理器 2 没有影响。让处理器 2 远离内存直到处理器 1 完成读写的最好的方式就是锁住总线。这需要一个特殊的硬件（基本上，一根总线就可以确保总线由锁住它的处理器使用，而其他的处理器不能使用）</p>
+<p>为了使用 TSL 指令，要使用一个共享变量 lock 来协调对共享内存的访问。当 lock 为 0 时，任何进程都可以使用 TSL 指令将其设置为 1，并读写共享内存。当操作结束时，进程使用 <code>move</code> 指令将 lock 的值重新设置为 0 。</p>
+<hr>
+<h4 id="睡眠与唤醒">睡眠与唤醒</h4>
+<p>上面解法中的 Peterson 、TSL 和 XCHG 解法都是正确的，但是它们都有忙等待的缺点。<strong>这些解法的本质上都是一样的，先检查是否能够进入临界区，若不允许，则该进程将原地等待，直到允许为止。</strong></p>
+<p>这种方式不但浪费了 CPU 时间，而且还可能引起意想不到的结果。考虑一台计算机上有两个进程，这两个进程具有不同的优先级，H 是属于优先级比较高的进程，L 是属于优先级比较低的进程。进程调度的规则是不论何时只要 H 进程处于就绪态 H 就开始运行。在某一时刻，L 处于临界区中，此时 H 变为就绪态，准备运行（例如，一条 I/O 操作结束）。现在 H 要开始忙等，但由于当 H 就绪时 L 就不会被调度，L 从来不会有机会离开关键区域，所以 H 会变成死循环，有时将这种情况称为优先级反转问题(priority inversion problem)。</p>
+<p>现在让我们看一下进程间的通信原语，这些原语在不允许它们进入关键区域之前会阻塞而不是浪费 CPU 时间，最简单的是 <code>sleep</code> 和 <code>wakeup</code>。Sleep 是一个能够造成调用者阻塞的系统调用，也就是说，这个系统调用会暂停直到其他进程唤醒它。wakeup 调用有一个参数，即要唤醒的进程。还有一种方式是 wakeup 和 sleep 都有一个参数，即 sleep 和 wakeup 需要匹配的内存地址。</p>
+<hr>
+<h4 id="生产者-消费者问题">生产者-消费者问题</h4>
+<p>作为这些私有原语的例子，让我们考虑<code>生产者-消费者(producer-consumer)</code> 问题，也称作 <code>有界缓冲区(bounded-buffer) </code>问题。两个进程共享一个公共的固定大小的缓冲区。其中一个是<code>生产者(producer)</code>，将信息放入缓冲区， 另一个是<code>消费者(consumer)</code>，会从缓冲区中取出。也可以把这个问题一般化为 m 个生产者和 n 个消费者的问题，但是我们这里只讨论一个生产者和一个消费者的情况，这样可以简化实现方案。</p>
+<p>如果缓冲队列已满，那么当生产者仍想要将数据写入缓冲区的时候，会出现问题。它的解决办法是让生产者睡眠，也就是阻塞生产者。等到消费者从缓冲区中取出一个或多个数据项时再唤醒它。同样的，当消费者试图从缓冲区中取数据，但是发现缓冲区为空时，消费者也会睡眠，阻塞。直到生产者向其中放入一个新的数据。</p>
+<p>这个逻辑听起来比较简单，而且这种方式也需要一种称作 <code>监听</code> 的变量，这个变量用于监视缓冲区的数据，我们暂定为 count，如果缓冲区最多存放 N 个数据项，生产者会每次判断 count 是否达到 N，否则生产者向缓冲区放入一个数据项并增量 count 的值。消费者的逻辑也很相似：首先测试 count 的值是否为 0 ，如果为 0 则消费者睡眠、阻塞，否则会从缓冲区取出数据并使 count 数量递减。每个进程也会检查检查是否其他线程是否应该被唤醒，如果应该被唤醒，那么就唤醒该线程。</p>
+<p>上面代码中会产生竞争条件，因为 count 这个变量是暴露在大众视野下的。<strong>有可能出现下面这种情况：缓冲区为空，此时消费者刚好读取 count 的值发现它为 0 。此时调度程序决定暂停消费者并启动运行生产者。生产者生产了一条数据并把它放在缓冲区中，然后增加 count 的值，并注意到它的值是 1 。由于 count 为 0，消费者必须处于睡眠状态，因此生产者调用 wakeup 来唤醒消费者。但是，消费者此时在逻辑上并没有睡眠，所以 wakeup 信号会丢失。当消费者下次启动后，它会查看之前读取的 count 值，发现它的值是 0 ，然后在此进行睡眠。不久之后生产者会填满整个缓冲区，在这之后会阻塞，这样一来两个进程将永远睡眠下去。</strong></p>
+<p>引起上面问题的本质是 唤醒尚未进行睡眠状态的进程会导致唤醒丢失。如果它没有丢失，则一切都很正常。一种快速解决上面问题的方式是增加一个唤醒等待位(wakeup waiting bit)。当一个 wakeup 信号发送给仍在清醒的进程后，该位置为 1 。之后，当进程尝试睡眠的时候，如果唤醒等待位为 1 ，则该位清除，而进程仍然保持清醒。</p>
+<p>然而，当进程数量有许多的时候，这时你可以说通过增加唤醒等待位的数量来唤醒等待位，于是就有了 2、4、6、8 个唤醒等待位，但是并没有从根本上解决问题。</p>
+<hr>
+<h4 id="信号量">信号量</h4>
+<p>信号量是 E.W.Dijkstra 在 1965 年提出的一种方法，它使用一个<code>整形变量</code>来累计唤醒次数，以供之后使用。在他的观点中，有一个新的变量类型称作 <code>信号量(semaphore)</code>。一个信号量的取值可以是 0 ，或任意正数。0 表示的是不需要任何唤醒，任意的正数表示的就是唤醒次数。</p>
+<p>Dijkstra 提出了信号量有两个操作，现在通常使用 <code>down</code> 和 <code>up</code>（分别可以用 sleep 和 wakeup 来表示）。down 这个指令的操作会检查值是否大于 0 。如果大于 0 ，则将其值减 1 ；若该值为 0 ，则进程将睡眠，而且此时 down 操作将会继续执行。检查数值、修改变量值以及可能发生的睡眠操作均为一个单一的、不可分割的 原子操作(atomic action) 完成。这会保证一旦信号量操作开始，没有其他的进程能够访问信号量，直到操作完成或者阻塞。这种原子性对于解决同步问题和避免竞争绝对必不可少。</p>
+<p><strong>原子性操作指的是在计算机科学的许多其他领域中，一组相关操作全部执行而没有中断或根本不执行。</strong></p>
+<p>up 操作会使信号量的值 + 1。如果一个或者多个进程在信号量上睡眠，无法完成一个先前的 down 操作，则由系统选择其中一个并允许该程完成 down 操作。因此，对一个进程在其上睡眠的信号量执行一次 up 操作之后，该信号量的值仍然是 0 ，但在其上睡眠的进程却少了一个。信号量的值增 1 和唤醒一个进程同样也是不可分割的。不会有某个进程因执行 up 而阻塞，正如在前面的模型中不会有进程因执行 wakeup 而阻塞是一样的道理。</p>
+<hr>
+<h4 id="互斥量">互斥量</h4>
+<p>如果不需要信号量的计数能力时，可以使用信号量的一个简单版本，称为 <code>mutex(互斥量)</code>。互斥量的优势就在于在一些共享资源和一段代码中保持互斥。由于互斥的实现既简单又有效，这使得互斥量在实现用户空间线程包时非常有用。</p>
+<p>互斥量是一个处于两种状态之一的共享变量：<code>解锁(unlocked)</code> 和 <code>加锁(locked)</code>。这样，只需要一个二进制位来表示它，不过一般情况下，通常会用一个<code>整形(integer)</code>来表示。0 表示解锁，其他所有的值表示加锁，比 1 大的值表示加锁的次数。</p>
+<p>mutex 使用两个过程，当一个线程（或者进程）需要访问关键区域时，会调用 <code>mutex_lock</code> 进行加锁。如果互斥锁当前处于解锁状态（表示关键区域可用），则调用成功，并且调用线程可以自由进入关键区域。</p>
+<p>另一方面，如果 <code>mutex</code> 互斥量已经锁定的话，调用线程会阻塞直到关键区域内的线程执行完毕并且调用了 <code>mutex_unlock</code> 。如果多个线程在 <code>mutex</code> 互斥量上阻塞，将随机选择一个线程并允许它获得锁。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/682.webp" alt="">
+由于 mutex 互斥量非常简单，所以只要有 <code>TSL</code> 或者是 <code>XCHG</code> 指令，就可以很容易地在用户空间实现它们</p>
+<hr>
+<h4 id="管程">管程</h4>
+<p>为了能够编写更加准确无误的程序，Brinch Hansen 和 Hoare 提出了一个更高级的同步原语叫做 <code>管程(monitor)</code>。
+他们两个人的提案略有不同，通过下面的描述你就可以知道。<strong>管程是程序、变量和数据结构等组成的一个集合，它们组成一个特殊的模块或者包。</strong>
+进程可以在任何需要的时候调用管程中的程序，但是它们不能从管程外部访问数据结构和程序。下面展示了一种抽象的，类似 Pascal 语言展示的简洁的管程。
+不能用 C 语言进行描述，因为管程是语言概念而 C 语言并不支持管程。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">monitor example
+    integer i<span style="color:#f92672">;</span>
+    condition c<span style="color:#f92672">;</span>
+
+    procedure <span style="color:#a6e22e">producer</span><span style="color:#f92672">();</span>
+  <span style="color:#f92672">...</span>
+    end<span style="color:#f92672">;</span>    
+
+    procedure <span style="color:#a6e22e">consumer</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">.</span>
+    end<span style="color:#f92672">;</span>
+end monitor<span style="color:#f92672">;</span>
+</code></pre></div><p>管程有一个很重要的特性，<strong>即在任何时候管程中只能有一个活跃的进程</strong>，这一特性使管程能够很方便的实现互斥操作。管程是编程语言的特性，所以编译器知道它们的特殊性，因此可以采用与其他过程调用不同的方法来处理对管程的调用。通常情况下，当进程调用管程中的程序时，该程序的前几条指令会检查管程中是否有其他活跃的进程。如果有的话，调用进程将被挂起，直到另一个进程离开管程才将其唤醒。如果没有活跃进程在使用管程，那么该调用进程才可以进入。</p>
+<p>进入管程中的互斥由编译器负责，但是一种通用做法是使用 <code>互斥量(mutex)</code> 和 <code>二进制信号量(binary semaphore)</code>。由于编译器而不是程序员在操作，因此出错的几率会大大降低。在任何时候，编写管程的程序员都无需关心编译器是如何处理的。他只需要知道将所有的临界区转换成为管程过程即可。绝不会有两个进程同时执行临界区中的代码。</p>
+<p>即使管程提供了一种简单的方式来实现互斥，但在我们看来，这还不够。因为我们还需要一种在进程无法执行被阻塞。在生产者-消费者问题中，很容易将针对缓冲区满和缓冲区空的测试放在管程程序中，但是生产者在发现缓冲区满的时候该如何阻塞呢？</p>
+<p>解决的办法是引入<code>条件变量(condition variables)</code> 以及相关的两个操作 <code>wait</code> 和 <code>signal</code>。当一个管程程序发现它不能运行时（例如，生产者发现缓冲区已满），它会在某个条件变量（如 full）上执行 <code>wait</code> 操作。这个操作造成调用进程阻塞，并且还将另一个以前等在管程之外的进程调入管程。在前面的 pthread 中我们已经探讨过条件变量的实现细节了。另一个进程，比如消费者可以通过执行 <code>signal</code> 来唤醒阻塞的调用进程。</p>
+<p><strong>下面是 Java 使用管程解决的生产者-消费者问题</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ProducerConsumer</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">// 定义缓冲区大小的长度
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> N <span style="color:#f92672">=</span> 100<span style="color:#f92672">;</span>
+  <span style="color:#75715e">// 初始化一个新的生产者线程
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> Producer p <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Producer<span style="color:#f92672">();</span>
+  <span style="color:#75715e">// 初始化一个新的消费者线程
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> Consumer c <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Consumer<span style="color:#f92672">();</span>        
+  <span style="color:#75715e">// 初始化一个管程
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> Our_monitor mon <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Our_monitor<span style="color:#f92672">();</span> 
+
+  <span style="color:#75715e">// run 包含了线程代码
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Producer</span> <span style="color:#66d9ef">extends</span> Thread<span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">(){</span>                                                
+      <span style="color:#66d9ef">int</span> item<span style="color:#f92672">;</span>
+      <span style="color:#75715e">// 生产者循环
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">while</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">){</span>                                                        
+        item <span style="color:#f92672">=</span> produce_item<span style="color:#f92672">();</span>
+        mon<span style="color:#f92672">.</span><span style="color:#a6e22e">insert</span><span style="color:#f92672">(</span>item<span style="color:#f92672">);</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">// 生产代码
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">produce_item</span><span style="color:#f92672">(){...}</span>                        
+  <span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">// run 包含了线程代码
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">consumer</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span> <span style="color:#f92672">)</span> <span style="color:#f92672">{</span>                                            
+           <span style="color:#66d9ef">int</span> item<span style="color:#f92672">;</span>
+      <span style="color:#66d9ef">while</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">){</span>
+        item <span style="color:#f92672">=</span> mon<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
+                consume_item<span style="color:#f92672">(</span>item<span style="color:#f92672">);</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">// 消费代码
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">produce_item</span><span style="color:#f92672">(){...}</span>                        
+  <span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">// 这是管程
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Our_monitor</span> <span style="color:#f92672">{</span>                                    
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> buffer<span style="color:#f92672">[]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[</span>N<span style="color:#f92672">];</span>
+    <span style="color:#75715e">// 计数器和索引
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> count <span style="color:#f92672">=</span> 0<span style="color:#f92672">,</span>lo <span style="color:#f92672">=</span> 0<span style="color:#f92672">,</span>hi <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>            
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">insert</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> val<span style="color:#f92672">){</span>
+      <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>count <span style="color:#f92672">==</span> N<span style="color:#f92672">){</span>
+        <span style="color:#75715e">// 如果缓冲区是满的，则进入休眠
+</span><span style="color:#75715e"></span>        go_to_sleep<span style="color:#f92672">();</span>                                                
+      <span style="color:#f92672">}</span>
+      <span style="color:#75715e">// 向缓冲区插入内容
+</span><span style="color:#75715e"></span>            buffer<span style="color:#f92672">[</span>hi<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> val<span style="color:#f92672">;</span>                   
+      <span style="color:#75715e">// 找到下一个槽的为止
+</span><span style="color:#75715e"></span>      hi <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>hi <span style="color:#f92672">+</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">%</span> N<span style="color:#f92672">;</span>                 
+      <span style="color:#75715e">// 缓冲区中的数目自增 1 
+</span><span style="color:#75715e"></span>      count <span style="color:#f92672">=</span> count <span style="color:#f92672">+</span> 1<span style="color:#f92672">;</span>                                            
+      <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>count <span style="color:#f92672">==</span> 1<span style="color:#f92672">){</span>
+        <span style="color:#75715e">// 如果消费者睡眠，则唤醒
+</span><span style="color:#75715e"></span>        notify<span style="color:#f92672">();</span>                                                            
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> val<span style="color:#f92672">){</span>
+      <span style="color:#66d9ef">int</span> val<span style="color:#f92672">;</span>
+      <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>count <span style="color:#f92672">==</span> 0<span style="color:#f92672">){</span>
+        <span style="color:#75715e">// 缓冲区是空的，进入休眠
+</span><span style="color:#75715e"></span>        go_to_sleep<span style="color:#f92672">();</span>                                                
+      <span style="color:#f92672">}</span>
+      <span style="color:#75715e">// 从缓冲区取出数据
+</span><span style="color:#75715e"></span>      val <span style="color:#f92672">=</span> buffer<span style="color:#f92672">[</span>lo<span style="color:#f92672">];</span>                
+      <span style="color:#75715e">// 设置待取出数据项的槽
+</span><span style="color:#75715e"></span>      lo <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>lo <span style="color:#f92672">+</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">%</span> N<span style="color:#f92672">;</span>                    
+      <span style="color:#75715e">// 缓冲区中的数据项数目减 1 
+</span><span style="color:#75715e"></span>      count <span style="color:#f92672">=</span> count <span style="color:#f92672">-</span> 1<span style="color:#f92672">;</span>                                            
+      <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>count <span style="color:#f92672">=</span> N <span style="color:#f92672">-</span> 1<span style="color:#f92672">){</span>
+        <span style="color:#75715e">// 如果生产者睡眠，唤醒它
+</span><span style="color:#75715e"></span>        notify<span style="color:#f92672">();</span>                                                            
+      <span style="color:#f92672">}</span>
+      <span style="color:#66d9ef">return</span> val<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">go_to_sleep</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">try</span><span style="color:#f92672">{</span>
+        wait<span style="color:#f92672">(</span> <span style="color:#f92672">);</span>
+      <span style="color:#f92672">}</span><span style="color:#66d9ef">catch</span><span style="color:#f92672">(</span>Interr uptedExceptionexc<span style="color:#f92672">)</span> <span style="color:#f92672">{};</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+
+<span style="color:#f92672">}</span>
+</code></pre></div><p>上面的代码中主要设计四个类，<code>外部类(outer class) </code>ProducerConsumer 创建并启动两个线程，p 和 c。第二个类和第三个类 <code>Producer</code> 和 <code>Consumer</code> 分别包含生产者和消费者代码。最后，<code>Our_monitor</code> 是管程，它有两个同步线程，用于在共享缓冲区中插入和取出数据。</p>
+<p>在前面的所有例子中，生产者和消费者线程在功能上与它们是相同的。生产者有一个无限循环，该无限循环产生数据并将数据放入公共缓冲区中；消费者也有一个等价的无限循环，该无限循环用于从缓冲区取出数据并完成一系列工作。</p>
+<p>程序中比较耐人寻味的就是 <code>Our_monitor</code> 了，它包含缓冲区、管理变量以及两个同步方法。当生产者在 insert 内活动时，它保证消费者不能在 remove 方法中运行，从而保证更新变量以及缓冲区的安全性，并且不用担心竞争条件。变量 count 记录在缓冲区中数据的数量。变量 lo 是缓冲区槽的序号，指出将要取出的下一个数据项。类似地，hi 是缓冲区中下一个要放入的数据项序号。允许 lo = hi，含义是在缓冲区中有 0 个或 N 个数据。</p>
+<p><strong>Java 中的同步方法与其他经典管程有本质差别：Java 没有内嵌的条件变量。然而，Java 提供了 wait 和 notify 分别与 sleep 和 wakeup 等价。</strong></p>
+<p><strong>通过临界区自动的互斥，管程比信号量更容易保证并行编程的正确性</strong>。但是管程也有缺点，我们前面说到过管程是一个编程语言的概念，编译器必须要识别管程并用某种方式对其互斥作出保证。<strong>C、Pascal 以及大多数其他编程语言都没有管程</strong>，所以不能依靠编译器来遵守互斥规则。</p>
+<p>与管程和信号量有关的另一个问题是，这些机制都是设计用来解决访问共享内存的一个或多个 CPU 上的互斥问题的。通过将信号量放在共享内存中并用 <code>TSL</code> 或 <code>XCHG</code> 指令来保护它们，可以避免竞争。但是如果是在分布式系统中，可能同时具有多个 CPU 的情况，并且每个 CPU 都有自己的私有内存呢，它们通过网络相连，那么这些原语将会失效。因为信号量太低级了，而管程在少数几种编程语言之外无法使用，所以还需要其他方法。</p>
+<hr>
+<h4 id="消息传递">消息传递</h4>
+<p>这种进程间通信的方法使用两个原语 <code>send</code> 和 <code>receive</code> ，它们像信号量而不像管程，是系统调用而不是语言级别。</p>
+<p>send 方法用于向一个给定的目标发送一条消息，receive 从一个给定的源接受一条消息。如果没有消息，接受者可能被阻塞，直到接受一条消息或者带着错误码返回。</p>
+<hr>
+<h4 id="屏障">屏障</h4>
+<p>最后一个同步机制是准备用于进程组而不是进程间的生产者-消费者情况的。在某些应用中划分了若干阶段，并且规定，除非所有的进程都就绪准备着手下一个阶段，否则任何进程都不能进入下一个阶段，可以通过在每个阶段的结尾安装一个 <code>屏障(barrier)</code> 来实现这种行为。当一个进程到达屏障时，它会被屏障所拦截，直到所有的屏障都到达为止。屏障可用于一组进程同步，如下图所示
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/683.jpeg" alt="">
+在上图中我们可以看到，有四个进程接近屏障，这意味着每个进程都在进行运算，但是还没有到达每个阶段的结尾。过了一段时间后，A、B、D 三个进程都到达了屏障，各自的进程被挂起，但此时还不能进入下一个阶段呢，因为进程 B 还没有执行完毕。结果，当最后一个 C 到达屏障后，这个进程组才能够进入下一个阶段。</p>
+<hr>
+<h4 id="避免锁读-复制-更新">避免锁：读-复制-更新</h4>
+<p>最快的锁是根本没有锁。问题在于没有锁的情况下，我们是否允许对共享数据结构的并发读写进行访问。答案当然是不可以。假设进程 A 正在对一个数字数组进行排序，而进程 B 正在计算其平均值，而此时你进行 A 的移动，会导致 B 会多次读到重复值，而某些值根本没有遇到过。</p>
+<p>然而，在某些情况下，我们可以允许写操作来更新数据结构，即便还有其他的进程正在使用。窍门在于确保每个读操作要么读取旧的版本，要么读取新的版本，例如下面的树
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/684.jpeg" alt="">
+上面的树中，读操作从根部到叶子遍历整个树。加入一个新节点 X 后，为了实现这一操作，我们要让这个节点在树中可见之前使它&quot;恰好正确&rdquo;：我们对节点 X 中的所有值进行初始化，包括它的子节点指针。然后通过原子写操作，使 X 称为 A 的子节点。所有的读操作都不会读到前后不一致的版本
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/685.jpeg" alt="">
+在上面的图中，我们接着移除 B 和 D。首先，将 A 的左子节点指针指向 C 。所有原本在 A 中的读操作将会后续读到节点 C ，而永远不会读到 B 和 D。也就是说，它们将只会读取到新版数据。同样，所有当前在 B 和 D 中的读操作将继续按照原始的数据结构指针并且读取旧版数据。所有操作均能正确运行，我们不需要锁住任何东西。而不需要锁住数据就能够移除 B 和 D 的主要原因就是 <code>读-复制-更新(Ready-Copy-Update,RCU)</code>，将更新过程中的移除和再分配过程分离开。</p>
+<hr>
+<h3 id="调度">调度</h3>
+<p>当一个计算机是多道程序设计系统时，会频繁的有很多进程或者线程来同时竞争 CPU 时间片。当两个或两个以上的进程/线程处于就绪状态时，就会发生这种情况。如果只有一个 CPU 可用，那么必须选择接下来哪个进程/线程可以运行。
+操作系统中有一个叫做 <code>调度程序(scheduler)</code> 的角色存在，它就是做这件事儿的，该程序使用的算法叫做 <code>调度算法(scheduling algorithm)</code> 。</p>
+<p>尽管有一些不同，但许多适用于进程调度的处理方法同样也适用于线程调度。当内核管理线程的时候，调度通常会以线程级别发生，很少或者根本不会考虑线程属于哪个进程。下面我们会首先专注于进程和线程的调度问题，然后会明确的介绍线程调度以及它产生的问题。</p>
+<hr>
+<h4 id="进程行为">进程行为</h4>
+<p>几乎所有的进程（磁盘或网络）I/O 请求和计算都是交替运行的</p>
+<p>如下图所示，CPU 不停顿的运行一段时间，然后发出一个系统调用等待 I/O 读写文件。完成系统调用后，CPU 又开始计算，直到它需要读更多的数据或者写入更多的数据为止。当一个进程等待外部设备完成工作而被阻塞时，才是 I/O 活动。</p>
+<p>下面<code> a 是 CPU 密集型进程</code>；<code>b 是 I/O 密集型进程进程</code>，a 因为在计算的时间上花费时间更长，因此称为<code>计算密集型(compute-bound)</code> 或者 <code>CPU 密集型(CPU-bound)</code>，b 因为I/O 发生频率比较快因此称为 <code>I/O 密集型(I/O-bound)</code>。计算密集型进程有较长的 CPU 集中使用和较小频度的 I/O 等待。I/O 密集型进程有较短的 CPU 使用时间和较频繁的 I/O 等待。注意到上面两种进程的区分关键在于 CPU 的时间占用而不是 I/O 的时间占用。I/O 密集型的原因是因为它们没有在 I/O 之间花费更多的计算、而不是 I/O 请求时间特别长。无论数据到达后需要花费多少时间，它们都需要花费相同的时间来发出读取磁盘块的硬件请求。</p>
+<p>值得注意的是，随着 CPU 的速度越来越快，更多的进程倾向于 I/O 密集型。这种情况出现的原因是 CPU 速度的提升要远远高于硬盘。这种情况导致的结果是，未来对 I/O 密集型进程的调度处理似乎更为重要。这里的基本思想是，如果需要运行 I/O 密集型进程，那么就应该让它尽快得到机会，以便发出磁盘请求并保持磁盘始终忙碌。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/686.png" alt=""></p>
+<hr>
+<h4 id="何时调度">何时调度</h4>
+<p>第一和调度有关的问题是<code>何时进行调度决策</code>。存在着需要调度处理的各种情形。首先，在创建一个新进程后，需要决定是运行父进程还是子进程。因为二者的进程都处于就绪态下，这是正常的调度决策，可以任意选择，也就是说，调度程序可以任意的选择子进程或父进程开始运行。</p>
+<p>第二在进程退出时需要作出调度决定。因为此进程不再运行（因为它将不再存在），因此必须从就绪进程中选择其他进程运行。如果没有进程处于就绪态，系统提供的<code>空闲进程</code>通常会运行</p>
+<p>第三种情况是，当进程阻塞在 I/O 、信号量或其他原因时，必须选择另外一个进程来运行。有时，阻塞的原因会成为选择进程运行的关键因素。例如，如果 A 是一个重要进程，并且它正在等待 B 退出关键区域，让 B 退出关键区域从而使 A 得以运行。但是调度程序一般不会对这种情况进行考量。</p>
+<p>第四点，当 I/O 中断发生时，可以做出调度决策。如果中断来自 I/O 设备，而 I/O 设备已经完成了其工作，那么那些等待 I/O 的进程现在可以继续运行。由调度程序来决定是否准备运行新的进程还是重新运行已经中断的进程。</p>
+<p>如果硬件时钟以 50 或 60 Hz 或其他频率提供周期性中断，可以在每个时钟中断或第 k 个时钟中断处做出调度决策。根据如何处理时钟中断可以把调度算法可以分为两类。<code>非抢占式(nonpreemptive) </code>调度算法挑选一个进程，让该进程运行直到被阻塞（阻塞在 I/O 上或等待另一个进程），或者直到该进程自动释放 CPU。即使该进程运行了若干个小时后，它也不会被强制挂起。这样会在时钟中断发生时不会进行调度。在处理完时钟中断后，如果没有更高优先级的进程等待，则被中断的进程会继续执行。</p>
+<p>另外一种情况是<code>抢占式</code>调度算法，它会选择一个进程，并使其在最大固定时间内运行。如果在时间间隔结束后仍在运行，这个进程会被挂起，调度程序会选择其他进程来运行（前提是存在就绪进程）。进行抢占式调度需要在时间间隔结束时发生时钟中断，以将 CPU 的控制权交还给调度程序。如果没有可用的时钟，那么非抢占式就是唯一的选择。</p>
+<hr>
+<h4 id="调度算法的目标">调度算法的目标</h4>
+<p>为了设计调度算法，有必要考虑一下什么是好的调度算法。有一些目标取决于环境（批处理、交互式或者实时）蛋大部分是适用于所有情况的，下面是一些需要考量的因素
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/687.jpeg" alt=""></p>
+<hr>
+<h4 id="批处理中的调度">批处理中的调度</h4>
+<ul>
+<li><strong><code>先来先服务</code></strong></li>
+</ul>
+<p>最简单的非抢占式调度算法的设计就是 <code>先来先服务(first-come,first-serverd)</code>。使用此算法，将按照请求顺序为进程分配 CPU。
+最基本的，会有一个就绪进程的等待队列。当第一个任务从外部进入系统时，将会立即启动并允许运行任意长的时间。它不会因为运行时间太长而中断。
+当其他作业进入时，它们排到就绪队列尾部。当正在运行的进程阻塞，处于等待队列的第一个进程就开始运行。当一个阻塞的进程重新处于就绪态时，
+它会像一个新到达的任务，会排在队列的末尾，即排在所有进程最后。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/688.jpeg" alt=""></p>
+<p><code>这个算法的优点</code>在于易于理解和编程，在这个算法中，一个单链表记录了所有就绪进程。要选取一个进程运行，只要从该队列的头部移走一个进程即可；要添加一个新的作业或者阻塞一个进程，只要把这个作业或进程附加在队列的末尾即可。这是很简单的一种实现。</p>
+<p>不过，<code>先来先服务也是有缺点的</code>，那就是没有优先级的关系，试想一下，如果有 100 个 I/O 进程正在排队，第 101 个是一个 CPU 密集型进程，那岂不是需要等 100 个 I/O 进程运行完毕才会等到一个 CPU 密集型进程运行，这在实际情况下根本不可能，所以需要优先级或者抢占式进程的出现来优先选择重要的进程运行。</p>
+<ul>
+<li><strong><code>最短作业优先</code></strong></li>
+</ul>
+<p>适用于运行时间可以预知的另一个非抢占式的批处理调度算法 <code>最短作业优先(Shortest Job First)</code>，我们假设运行时间已知。例如，一家保险公司，因为每天要做类似的工作，所以人们可以相当精确地预测处理 1000 个索赔的一批作业需要多长时间。当输入队列中有若干个同等重要的作业被启动时，调度程序应使用最短优先作业算法
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/689.png" alt="">
+如上图 a 所示，这里有 4 个作业 A、B、C、D ，运行时间分别为 8、4、4、4 分钟。若按图中的次序运行，则 A 的周转时间为 8 分钟，B 为 12 分钟，C 为 16 分钟，D 为 20 分钟，平均时间内为 14 分钟。</p>
+<p>现在考虑使用最短作业优先算法运行 4 个作业，如上图 b 所示，目前的周转时间分别为 4、8、12、20，平均为 11 分钟，可以证明最短作业优先是最优的。考虑有 4 个作业的情况，其运行时间分别为 a、b、c、d。第一个作业在时间 a 结束，第二个在时间 a + b 结束，以此类推。平均周转时间为 (4a + 3b + 2c + d) / 4 。显然 a 对平均值的影响最大，所以 a 应该是最短优先作业，其次是 b，然后是 c ，最后是 d 它就只能影响自己的周转时间了。</p>
+<ul>
+<li><strong><code>最短剩余时间优先</code></strong></li>
+</ul>
+<p>最短作业优先的抢占式版本被称作为 <code>最短剩余时间优先(Shortest Remaining Time Next)</code> 算法。使用这个算法，调度程序总是选择剩余运行时间最短的那个进程运行。当一个新作业到达时，其整个时间同当前进程的剩余时间做比较。如果新的进程比当前运行进程需要更少的时间，当前进程就被挂起，而运行新的进程。这种方式能够使短期作业获得良好的服务。</p>
+<hr>
+<h4 id="交互式系统中的调度">交互式系统中的调度</h4>
+<p>交互式系统中在个人计算机、服务器和其他系统中都是很常用。</p>
+<ul>
+<li><strong><code>轮训调度</code></strong></li>
+</ul>
+<p>一种最古老、最简单、最公平并且最广泛使用的算法就是 <code>轮询算法(round-robin)</code>。每个进程都会被分配一个时间段，称为<code>时间片(quantum)</code>，在这个时间片内允许进程运行。如果时间片结束时进程还在运行的话，则抢占一个 CPU 并将其分配给另一个进程。如果进程在时间片结束前阻塞或结束，则 CPU 立即进行切换。轮询算法比较容易实现。调度程序所做的就是维护一个可运行进程的列表，就像下图中的 a，当一个进程用完时间片后就被移到队列的末尾，就像下图的 b。</p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/690.png" alt=""></p>
+<p>时间片轮询调度中唯一有意思的一点就是时间片的长度。从一个进程切换到另一个进程需要一定的时间进行管理处理，包括保存寄存器的值和内存映射、更新不同的表格和列表、清除和重新调入内存高速缓存等。这种切换称作 <code>进程间切换(process switch)</code> 和 <code>上下文切换(context switch)</code>。如果进程间的切换时间需要 1ms，其中包括内存映射、清除和重新调入高速缓存等，再假设时间片设为 4 ms，那么 CPU 在做完 4 ms 有用的工作之后，CPU 将花费 1 ms 来进行进程间的切换。因此，CPU 的时间片会浪费 20% 的时间在管理开销上。耗费巨大。</p>
+<p>为了提高 CPU 的效率，我们把时间片设置为 100 ms。现在时间的浪费只有 1%。但是考虑会发现下面的情况，如果在一个非常短的时间内到达 50 个请求，并且对 CPU 有不同的需求，此时会发生什么？50 个进程都被放在可运行进程列表中。如果 CP画U 是空闲的，第一个进程会立即开始执行，第二个直到 100 ms 以后才会启动，以此类推。不幸的是最后一个进程需要等待 5 秒才能获得执行机会。大部分用户都会觉得对于一个简短的指令运行 5 秒中是很慢的。如果队列末尾的某些请求只需要几号秒钟的运行时间的话，这种设计就非常糟糕了。</p>
+<p>另外一个因素是如果时间片设置长度要大于 CPU 使用长度，那么抢占就不会经常发生。相反，在时间片用完之前，大多数进程都已经阻塞了，那么就会引起进程间的切换。消除抢占可提高性能，因为进程切换仅在逻辑上必要时才发生，即流程阻塞且无法继续时才发生。</p>
+<p>结论可以表述如下：将上下文切换时间设置得太短会导致过多的进程切换并降低 CPU 效率，但设置时间太长会导致一个短请求很长时间得不到响应。最好的切换时间是在 20 - 50 毫秒之间设置。</p>
+<ul>
+<li><strong><code>优先级调度</code></strong></li>
+</ul>
+<p>轮询调度假设了所有的进程是同等重要的。但事实情况可能不是这样。例如，在一所大学中的等级制度，首先是院长，然后是教授、秘书、后勤人员，最后是学生。这种将外部情况考虑在内就实现了<code>优先级调度(priority scheduling)</code>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/691.png" alt=""></p>
+<ul>
+<li><strong><code>多级队列</code></strong></li>
+</ul>
+<p>最早使用优先级调度的系统是<code> CTSS(Compatible TimeSharing System)</code>。CTSS 是一种兼容分时系统，它有一个问题就是进程切换太慢，其原因是 IBM 7094 内存只能放进一个进程。</p>
+<p>CTSS 在每次切换前都需要将当前进程换出到磁盘，并从磁盘上读入一个新进程。CTSS 的设计者很快就认识到，为 CPU 密集型进程设置较长的时间片比频繁地分给他们很短的时间要更有效（减少交换次数）。另一方面，如前所述，长时间片的进程又会影响到响应时间，解决办法是设置优先级类。属于最高优先级的进程运行一个时间片，次高优先级进程运行 2 个时间片，再下面一级运行 4 个时间片，以此类推。当一个进程用完分配的时间片后，它被移到下一类。</p>
+<ul>
+<li><strong><code>最短进程优先</code></strong></li>
+</ul>
+<p>对于批处理系统而言，由于最短作业优先常常伴随着最短响应时间，所以如果能够把它用于交互式进程，那将是非常好的。在某种程度上，的确可以做到这一点。交互式进程通常遵循下列模式：等待命令、执行命令、等待命令、执行命令。。。如果我们把每个命令的执行都看作一个分离的作业，那么我们可以通过首先运行最短的作业来使响应时间最短。这里唯一的问题是如何从当前可运行进程中找出最短的那一个进程。</p>
+<p>一种方式是根据进程过去的行为进行推测，并执行估计运行时间最短的那一个。假设每个终端上每条命令的预估运行时间为 <code>T0</code>，现在假设测量到其下一次运行时间为 <code>T1</code>，可以用两个值的加权来改进估计时间，即<code>aT0+ (1- 1)T1</code>。通过选择 a 的值，可以决定是尽快忘掉老的运行时间，还是在一段长时间内始终记住它们。当 a = 1/2 时，可以得到下面这个序列</p>
+<ul>
+<li><strong><code>保证调度</code></strong></li>
+</ul>
+<p>一种完全不同的调度方法是对用户做出明确的性能保证。一种实际而且容易实现的保证是：若用户工作时有 n 个用户登录，则每个用户将获得 CPU 处理能力的 1/n。类似地，在一个有 n 个进程运行的单用户系统中，若所有的进程都等价，则每个进程将获得 1/n 的 CPU 时间。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/692.png" alt=""></p>
+<ul>
+<li><strong><code>彩票调度</code></strong></li>
+</ul>
+<p>对用户进行承诺并在随后兑现承诺是一件好事，不过很难实现。但是存在着一种简单的方式，有一种既可以给出预测结果而又有一种比较简单的实现方式的算法，就是<code> 彩票调度(lottery scheduling)</code>算法。</p>
+<p>其基本思想是为进程提供各种系统资源（例如 CPU 时间）的彩票。当做出一个调度决策的时候，就随机抽出一张彩票，拥有彩票的进程将获得该资源。在应用到 CPU 调度时，系统可以每秒持有 50 次抽奖，每个中奖者将获得比如 20 毫秒的 CPU 时间作为奖励。</p>
+<p>George Orwell 关于 所有的<strong>进程是平等的，但是某些进程能够更平等一些</strong>。一些重要的进程可以给它们额外的彩票，以便增加他们赢得的机会。如果出售了 100 张彩票，而且有一个进程持有了它们中的 20 张，它就会有 20% 的机会去赢得彩票中奖。在长时间的运行中，它就会获得 20% 的CPU。相反，对于优先级调度程序，很难说明拥有优先级 40 究竟是什么意思，这里的规则很清楚，拥有彩票 f 份额的进程大约得到系统资源的 f 份额。</p>
+<p>如果希望进程之间协作的话可以交换它们之间的票据。例如，客户端进程给服务器进程发送了一条消息后阻塞，客户端进程可能会把自己所有的票据都交给服务器，来增加下一次服务器运行的机会。当服务完成后，它会把彩票还给客户端让其有机会再次运行。事实上，如果没有客户机，服务器也根本不需要彩票。</p>
+<ul>
+<li><strong><code>公平分享调度</code></strong></li>
+</ul>
+<p>到目前为止，我们假设被调度的都是各个进程自身，而不用考虑该进程的拥有者是谁。结果是，如果用户 1 启动了 9 个进程，而用户 2 启动了一个进程，使用轮转或相同优先级调度算法，那么用户 1 将得到 90 % 的 CPU 时间，而用户 2 将之得到 10 % 的 CPU 时间。</p>
+<p>为了阻止这种情况的出现，一些系统在调度前会把进程的拥有者考虑在内。在这种模型下，每个用户都会分配一些CPU 时间，而调度程序会选择进程并强制执行。因此如果两个用户每个都会有 50% 的 CPU 时间片保证，那么无论一个用户有多少个进程，都将获得相同的 CPU 份额。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/6934.png" alt=""></p>
+<hr>
+<h4 id="实时系统中的调度">实时系统中的调度</h4>
+<p><code>实时系统(real-time)</code> 是一个时间扮演了重要作用的系统。典型的，一种或多种外部物理设备发给计算机一个服务请求，而计算机必须在一个确定的时间范围内恰当的做出反应。例如，在 CD 播放器中的计算机会获得从驱动器过来的位流，然后必须在非常短的时间内将位流转换为音乐播放出来。如果计算时间过长，那么音乐就会听起来有异常。再比如说医院特别护理部门的病人监护装置、飞机中的自动驾驶系统、列车中的烟雾警告装置等，在这些例子中，正确但是却缓慢的响应要比没有响应甚至还糟糕。</p>
+<p>实时系统可以分为两类，<code>硬实时(hard real time)</code> 和 <code>软实时(soft real time)</code> 系统，<strong>前者意味着必须要满足绝对的截止时间；后者的含义是虽然不希望偶尔错失截止时间，但是可以容忍</strong>。在这两种情形中，实时都是通过把程序划分为一组进程而实现的，其中每个进程的行为是可预测和提前可知的。这些进程一般寿命较短，并且极快的运行完成。在检测到一个外部信号时，调度程序的任务就是按照满足所有截止时间的要求调度进程。</p>
+<p>实时系统中的事件可以按照响应方式进一步分类为<code>周期性(以规则的时间间隔发生)事件</code>或 <code>非周期性(发生时间不可预知)事件</code>。一个系统可能要响应多个周期性事件流，根据每个事件处理所需的时间，可能甚至无法处理所有事件。例如，如果有 m 个周期事件，事件 i 以周期 Pi 发生，并需要 Ci 秒 CPU 时间处理一个事件，那么可以处理负载的条件是</p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/693.png" alt=""></p>
+<p>只有满足这个条件的实时系统称为<code>可调度的</code>，这意味着它实际上能够被实现。一个不满足此检验标准的进程不能被调度，因为这些进程共同需要的 CPU 时间总和大于 CPU 能提供的时间。</p>
+<p>举一个例子，考虑一个有三个周期性事件的软实时系统，其周期分别是 100 ms、200 m 和 500 ms。如果这些事件分别需要 50 ms、30 ms 和 100 ms 的 CPU 时间，那么该系统时可调度的，因为 0.5 + 0.15 + 0.2 &lt; 1。如果此时有第四个事件加入，其周期为 1 秒，那么此时这个事件如果不超过 150 ms，那么仍然是可以调度的。忽略上下文切换的时间。</p>
+<p>实时系统的调度算法可以是静态的或动态的。前者在系统开始运行之前做出调度决策；后者在运行过程中进行调度决策。只有在可以提前掌握所完成的工作以及必须满足的截止时间等信息时，静态调度才能工作，而动态调度不需要这些限制。</p>
+<hr>
+<h3 id="调度策略和机制">调度策略和机制</h3>
+<p><strong>思考一个问题</strong>：一个数据库管理系统进程会有很多子进程。每一个子进程可能处理不同的请求，或者每个子进程实现不同的功能（如请求分析、磁盘访问等）。主进程完全可能掌握哪一个子进程最重要（或最紧迫），而哪一个最不重要。但是，以上讨论的调度算法中没有一个算法从用户进程接收有关的调度决策信息，这就导致了调度程序很少能够做出最优的选择。</p>
+<p><strong>解决问题的办法是将 <code>调度机制(scheduling mechanism)</code> 和 <code>调度策略(scheduling policy) 分开</code>，这是长期一贯的原则</strong>。这也就意味着调度算法在某种方式下被参数化了，但是参数可以被用户进程填写。让我们首先考虑数据库的例子。假设内核使用优先级调度算法，并提供了一条可供进程设置优先级的系统调用。这样，尽管父进程本身并不参与调度，但它可以控制如何调度子进程的细节。调度机制位于内核，而调度策略由用户进程决定，调度策略和机制分离是一种关键性思路。</p>
+<hr>
+<h3 id="线程调度">线程调度</h3>
+<p>当若干进程都有多个线程时，就存在两个层次的并行：进程和线程。在这样的系统中调度处理有本质的差别，这取决于所支持的是用户级线程还是内核级线程（或两者都支持）。</p>
+<p>首先考虑用户级线程，由于内核并不知道有线程存在，所以内核还是和以前一样地操作，选取一个进程，假设为 A，并给予 A 以时间片控制。A 中的线程调度程序决定哪个线程运行。假设为 A1。由于多道线程并不存在时钟中断，所以这个线程可以按其意愿任意运行多长时间。如果该线程用完了进程的全部时间片，内核就会选择另一个进程继续运行。</p>
+<p>在进程 A 终于又一次运行时，线程 A1 会接着运行。该线程会继续耗费 A 进程的所有时间，直到它完成工作。不过，线程运行不会影响到其他进程。其他进程会得到调度程序所分配的合适份额，不会考虑进程 A 内部发生的事情。</p>
+<p>现在考虑 A 线程每次 CPU 计算的工作比较少的情况，例如：在 50 ms 的时间片中有 5 ms 的计算工作。于是，每个线程运行一会儿，然后把 CPU 交回给线程调度程序。这样在内核切换到进程 B 之前，就会有序列 A1,A2,A3,A1,A2,A3,A1,A2,A3,A1 。 如下所示</p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/694.jpeg" alt=""></p>
+<p>运行时系统使用的调度算法可以是上面介绍算法的任意一种。从实用方面考虑，轮转调度和优先级调度更为常用。唯一的局限是，缺乏一个时钟中断运行过长的线程。但由于线程之间的合作关系，这通常也不是问题。</p>
+<p>现在考虑使用内核线程的情况，内核选择一个特定的线程运行。它不用考虑线程属于哪个进程，不过如果有必要的话，也可以这么做。对被选择的线程赋予一个时间片，而且如果超过了时间片，就会强制挂起该线程。一个线程在 50 ms 的时间片内，5 ms 之后被阻塞，在 30 ms 的时间片中，线程的顺序会是 A1,B1,A2,B2,A3,B3。如下图所示</p>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/695.jpeg" alt=""></p>
+<p>用户级线程和内核级线程之间的主要差别在于<code>性能</code>。用户级线程的切换需要少量的机器指令（想象一下Java程序的线程切换），而内核线程需要完整的上下文切换，修改内存映像，使高速缓存失效，这会导致了若干数量级的延迟。另一方面，在使用内核级线程时，一旦线程阻塞在 I/O 上就不需要在用户级线程中那样将整个进程挂起。</p>
+<p>从进程 A 的一个线程切换到进程 B 的一个线程，其消耗要远高于运行进程 A 的两个线程（涉及修改内存映像，修改高速缓存），内核对这种切换的消耗是了解到，可以通过这些信息作出决定。</p>
+<hr>
+<h4 id="参考">参考</h4>
+<p>《现代操作系统 第四版》</p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzU2NDg0OTgyMA==&amp;mid=2247485619&amp;idx=1&amp;sn=819fffc4380b4e976f541def5ed805f3&amp;chksm=fc45f540cb327c560e4eb5747183faec42fcc77c6061effaf36e28faef689f920a54d5a78eeb&amp;scene=21#wechat_redirect">写给大忙人看的进程和线程</a></p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu/" data-toggle="tooltip" data-placement="top" title="计算机之CPU">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" data-toggle="tooltip" data-placement="top" title="计算机之内存管理">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu/"><i class="fa fa-link"></i>计算机之CPU</a></li>
+         
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%9F%BA%E7%A1%80/"><i class="fa fa-link"></i>计算机之基础</a></li>
+         
+        <li><a href="/blog/%E8%87%AA%E5%AD%A6%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%8C%87%E5%8D%97/"><i class="fa fa-link"></i>自学计算机科学指南</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

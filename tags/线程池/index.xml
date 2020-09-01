@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>线程池 on 拳拳到肉</title>
+    <link>/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/</link>
+    <description>Recent content in 线程池 on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 15 Feb 2020 19:12:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>FutureTask 源码分析</title>
+      <link>/blog/futuretask-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sat, 15 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/futuretask-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>FutureTask 是一个可以取消的异步计算任务，实现Future，Runnable。提供超时控制、可以获取线程执行后的返回结果、可以取消。</description>
+    </item>
+    
+    <item>
+      <title>ThreadPoolExecutor 源码分析</title>
+      <link>/blog/threadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sat, 18 Jan 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/threadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ThreadPoolExecutor中常用参数有哪些，作用是什么？任务提交后，ThreadPoolExecutor会按照什么策略去创建线程用于执行提交任务？</description>
+    </item>
+    
+    <item>
+      <title>ScheduledThreadPoolExecutor 源码分析</title>
+      <link>/blog/scheduledthreadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 05 Jan 2020 12:12:42 +0800</pubDate>
+      
+      <guid>/blog/scheduledthreadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ScheduledThreadPoolExecutor 定义了一个延迟队列 DelayedWorkQueue，这个队列是基于二叉堆来实现的，每次都会把最快要执行的任务放入堆顶(最小堆)。</description>
+    </item>
+    
+  </channel>
+</rss>

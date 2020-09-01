@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kafka 日志模块（三）索引 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Kafka">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Kafka 日志模块（三）索引" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%89%E7%B4%A2%E5%BC%95//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="1. 概述 在 Kafka 日志模块（二）LogSegment 一文中说过，每次添加 log 的时候都会，添加相对应的索引，索引是用来快速定义 message (通过二分查找)。 2. 源码">
+  <meta property="og:description" content="1. 概述 在 Kafka 日志模块（二）LogSegment 一文中说过，每次添加 log 的时候都会，添加相对应的索引，索引是用来快速定义 message (通过二分查找)。 2. 源码">
+  <meta name="twitter:description" content="1. 概述 在 Kafka 日志模块（二）LogSegment 一文中说过，每次添加 log 的时候都会，添加相对应的索引，索引是用来快速定义 message (通过二分查找)。 2. 源码">
+  <meta property="og:description" content="1. 概述 在 Kafka 日志模块（二）LogSegment 一文中说过，每次添加 log 的时候都会，添加相对应的索引，索引是用来快速定义 message (通过二分查找)。 2. 源码" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（三）索引 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（三）索引 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 日志模块（三）索引 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（三）索引 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（三）索引 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 日志模块（三）索引 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（三）索引 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 日志模块（三）索引 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 日志模块（三）索引 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Kafka 日志模块（三）索引</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年5月3日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            4600字 | 阅读大约需要10分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/kafka/"><i>#kafka</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="1-概述">1. 概述</h3>
+<p>在 <a href="http://www.sirann.cn/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%BA%8Clogsegment/">Kafka 日志模块（二）LogSegment</a> 一文中说过，每次添加 <code>log</code> 的时候都会，添加相对应的索引，索引是用来快速定义 <code>message</code> (通过<code>二分查找</code>)。</p>
+<hr>
+<h3 id="2-源码分析">2. 源码分析</h3>
+<p>与索引相关的一些类：
+<img src="http://img.sirann.cn//siran/20200504160922.png" alt=""></p>
+<ul>
+<li><code>LazyIndex</code>：它定义了 <code>AbstractIndex</code> 上的一个包装类，实现索引项<code>延迟加载</code>。这个类主要是为了提高性能。</li>
+<li><code>AbstractIndex</code>：它定义了最顶层的抽象类，这个类封装了所有索引类型的公共操作。</li>
+<li><code>OffsetIndex</code>：定义位移索引，保存<code>“&lt; 位移值，文件磁盘物理位置 &gt;”</code>对。</li>
+<li><code>TimeIndex</code>：定义时间戳索引，保存<code>“&lt; 时间戳，位移值 &gt;”</code>对。</li>
+<li><code>TransactionIndex</code>：定义事务索引，为已中止事务（Aborted Transcation）保存重要的元数据信息。只有启用 Kafka 事务后，这个索引才有可能出现。本篇不会对事务索引进行分析。</li>
+</ul>
+<hr>
+<h4 id="21-abstractindex">2.1 AbstractIndex</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AbstractIndex</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@volatile</span> var file<span style="color:#f92672">:</span> File<span style="color:#f92672">,</span> val baseOffset<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span> val maxIndexSize<span style="color:#f92672">:</span> Int <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">,</span>
+                             val writable<span style="color:#f92672">:</span> Boolean<span style="color:#f92672">)</span> <span style="color:#66d9ef">extends</span> Closeable <span style="color:#f92672">{</span>
+
+  <span style="color:#66d9ef">protected</span> def entrySize<span style="color:#f92672">:</span> Int
+  <span style="color:#66d9ef">private</span><span style="color:#f92672">[</span><span style="color:#66d9ef">this</span><span style="color:#f92672">]</span> var _maxEntries<span style="color:#f92672">:</span> Int <span style="color:#f92672">=</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">()</span> <span style="color:#f92672">/</span> entrySize
+  <span style="color:#66d9ef">protected</span> var _entries<span style="color:#f92672">:</span> Int <span style="color:#f92672">=</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">()</span> <span style="color:#f92672">/</span> entrySize
+<span style="color:#f92672">}</span>                                 
+</code></pre></div><ul>
+<li><code>file</code> ：每个索引对象在磁盘上都对应了一个索引文件。</li>
+<li><code>baseOffset</code> ：索引对象对应日志段对象的起始位移值。
+<blockquote>
+<p>举个例子：如果你查看 Kafka 日志路径的话，就会发现，日志文件和索引文件都是成组出现的。比如说，如果日志文件是 <code>00000000000000000123.log</code>，正常情况下，一定还有一组索引文件 <code>00000000000000000123.index</code>、<code>00000000000000000123.timeindex</code> 等。这里的 <code>&quot;123&quot;</code> 就是这组文件的起始位移值，也就是 <code>baseOffset</code> 值。</p>
+</blockquote>
+</li>
+<li><code>maxIndexSize</code> ：它控制索引文件的最大长度，通过 <code>segment.index.bytes</code> 进行设置，默认 10MB</li>
+<li><code>writable</code> ：索引文件打开方式
+<ul>
+<li><code>True</code> 表示以“<code>读写</code>”方式打开</li>
+<li><code>False</code> 表示以“<code>只读</code>”方式打开</li>
+</ul>
+</li>
+<li><code>entrySize</code>：表示不同索引项的大小。
+<ul>
+<li><code>OffsetIndex</code> ： 8</li>
+</ul>
+<blockquote>
+<p>在 OffsetIndex 中，位移值用 4 个字节来表示，物理磁盘位置也用 4 个字节来表示，所以总共是 8 个字节。你可能会说，位移值不是长整型吗，应该是 8 个字节才对啊。还记得 AbstractIndex 已经保存了 baseOffset 了吗？这里的位移值，实际上是相对于 baseOffset 的相对位移值，即真实位移值减去 baseOffset 的值。</p>
+</blockquote>
+<ul>
+<li><code>TimeIndex</code> ：12</li>
+</ul>
+<blockquote>
+<p>TimeIndex 中的时间戳类型是长整型，占用 8 个字节，位移依然使用相对位移值，占用 4 个字节，因此总共需要 12 个字节。</p>
+</blockquote>
+</li>
+<li><code>_maxEntries</code>：最大索引项个数</li>
+<li><code>_entries</code>：索引项个数</li>
+</ul>
+<hr>
+<h4 id="211-mappedbytebuffer">2.1.1 MappedByteBuffer</h4>
+<p>MMAP 内存映射，实现<code>零拷贝</code>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@volatile</span>
+  <span style="color:#66d9ef">protected</span> var mmap<span style="color:#f92672">:</span> MappedByteBuffer <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//① 创建索引文件  
+</span><span style="color:#75715e"></span>    val newlyCreated <span style="color:#f92672">=</span> file<span style="color:#f92672">.</span><span style="color:#a6e22e">createNewFile</span><span style="color:#f92672">()</span>
+    <span style="color:#75715e">//② 以 writable 指定的方式（读写方式或只读方法）打开索引文件
+</span><span style="color:#75715e"></span>    val raf <span style="color:#f92672">=</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>writable<span style="color:#f92672">)</span> <span style="color:#66d9ef">new</span> RandomAccessFile<span style="color:#f92672">(</span>file<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;rw&#34;</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">new</span> RandomAccessFile<span style="color:#f92672">(</span>file<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;r&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">/* pre-allocate the file if necessary */</span>
+      <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>newlyCreated<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 预设的索引文件大小不能太小，如果连一个索引项都保存不了，直接抛出异常  
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>maxIndexSize <span style="color:#f92672">&lt;</span> entrySize<span style="color:#f92672">)</span>
+          <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Invalid max index size: &#34;</span> <span style="color:#f92672">+</span> maxIndexSize<span style="color:#f92672">)</span>
+        <span style="color:#75715e">// ③ 设置索引文件长度，roundDownToExactMultiple计算的是不超过maxIndexSize的最大整数倍entrySize 比如maxIndexSize=1234567，entrySize=8，那么调整后的文件长度为1234560
+</span><span style="color:#75715e"></span>        raf<span style="color:#f92672">.</span><span style="color:#a6e22e">setLength</span><span style="color:#f92672">(</span>roundDownToExactMultiple<span style="color:#f92672">(</span>maxIndexSize<span style="color:#f92672">,</span> entrySize<span style="color:#f92672">))</span>
+      <span style="color:#f92672">}</span>
+
+      <span style="color:#75715e">/* memory-map the file */</span>
+      <span style="color:#75715e">//④ 更新索引长度字段_length
+</span><span style="color:#75715e"></span>      _length <span style="color:#f92672">=</span> raf<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">()</span>
+      <span style="color:#75715e">//⑤ 创建MappedByteBuffer对象
+</span><span style="color:#75715e"></span>      val idx <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>writable<span style="color:#f92672">)</span>
+          raf<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>FileChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">MapMode</span><span style="color:#f92672">.</span><span style="color:#a6e22e">READ_WRITE</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> _length<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">else</span>
+          raf<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>FileChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">MapMode</span><span style="color:#f92672">.</span><span style="color:#a6e22e">READ_ONLY</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> _length<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+      <span style="color:#75715e">/* set the position in the index for the next entry */</span>
+      <span style="color:#75715e">//⑥ 如果是新创建的索引文件，将MappedByteBuffer对象的当前位置置成0 如果索引文件已存在，将MappedByteBuffer对象的当前位置设置成最后一个索引项所在的位置
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>newlyCreated<span style="color:#f92672">)</span>
+        idx<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">(</span>0<span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">else</span>
+        <span style="color:#75715e">// if this is a pre-existing index, assume it is valid and set position to last entry
+</span><span style="color:#75715e"></span>        idx<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">(</span>roundDownToExactMultiple<span style="color:#f92672">(</span>idx<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">(),</span> entrySize<span style="color:#f92672">))</span>
+        <span style="color:#75715e">// ⑦ 返回创建的MappedByteBuffer对象
+</span><span style="color:#75715e"></span>      idx
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 关闭打开索引文件句柄
+</span><span style="color:#75715e"></span>      CoreUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">swallow</span><span style="color:#f92672">(</span>raf<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">(),</span> AbstractIndex<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 创建索引文件</li>
+<li>② 以 <code>writable</code> 指定的方式（读写方式或只读方法）打开索引文件</li>
+<li>③ 设置索引文件长度， <code>roundDownToExactMultiple</code> 计算的是不超过maxIndexSize的最大整数倍entrySize 比如maxIndexSize=1234567，entrySize=8，那么调整后的文件长度为1234560</li>
+<li>④ 更新索引长度字段<code>_length</code></li>
+<li>⑤ 创建 <code>MappedByteBuffer</code> 对象</li>
+<li>⑥ 如果是新创建的索引文件，将 <code>MappedByteBuffer</code> 对象的当前位置置成0 如果索引文件已存在，将 <code>MappedByteBuffer</code> 对象的当前位置设置成最后一个索引项所在的位置</li>
+<li>⑦ 返回创建的 <code>MappedByteBuffer</code> 对象</li>
+</ul>
+<p><code>AbstractIndex</code> 中最重要的就是这个 <code>mmap</code> 变量了。事实上，AbstractIndex 继承类实现添加索引项的主要逻辑，也就是向 <code>mmap</code> 中添加对应的字段。</p>
+<hr>
+<h4 id="212-indexslotrangefor">2.1.2 indexSlotRangeFor</h4>
+<p>索引中最重要的方法，通过<code>二分查找</code>，获取小于给定offset最大的offset和对应的position。</p>
+<p>在<code>2.5.0</code>版本中，kafka 通过改进了这个二分搜索，将索引项分成两个部分：<code>热区(Warm Area)</code> 和 <code>冷区(Cold Area)</code>，然后分别在这两个区域内执行二分查找。
+<img src="http://img.sirann.cn//siran/20200504201651.png" alt=""></p>
+<ul>
+<li>它能保证那些经常需要被访问的 <code>Page</code> 组合是固定的。</li>
+<li>查询最热那部分数据所遍历的 <code>Page</code> 永远是固定的，因此大概率在页缓存中，从而避免无意义的 <code>Page Fault</code>。</li>
+</ul>
+<p><strong>Kafka 通过冷热区改进原本二分查找的原因：</strong></p>
+<ul>
+<li>大多数操作系统使用页缓存来实现内存映射，而目前几乎所有的操作系统都使用 <code>LRU（Least Recently Used）</code>或类似于 LRU 的机制来管理页缓存。</li>
+<li>Kafka 写入索引文件的方式是在文件<code>末尾追加写入</code>，而几乎所有的索引查询都集中在索引的尾部。这么来看的话，LRU 机制是非常适合 Kafka 的索引访问场景的。</li>
+<li>但，这里有个问题是，当 Kafka 在查询索引的时候，原版的二分查找算法并没有考虑到缓存的问题，因此很可能会导致一些不必要的<code>缺页中断（Page Fault）</code>。</li>
+<li>此时，Kafka 线程会被阻塞，等待对应的索引项从物理磁盘中读出并放入到页缓存中。</li>
+</ul>
+<blockquote>
+<p>下面我举个例子来说明一下这个情况。假设 Kafka 的某个索引占用了操作系统页缓存 13 个页（Page），如果待查找的位移值位于最后一个页上，也就是 Page 12，那么标准的二分查找算法会依次读取页号 <code>0、6、9、11</code> 和 <code>12</code>，具体的推演流程如下所示：</p>
+</blockquote>
+<p><img src="http://img.sirann.cn//siran/20200504204537.png" alt=""></p>
+<ul>
+<li>通常来说，一个页上保存了成百上千的索引项数据。随着索引文件不断被写入，<code>Page #12</code> 不断地被填充新的索引项。</li>
+<li>如果此时索引查询方都来自 <code>ISR</code> 副本或 <code>Lag</code> 很小的消费者，那么这些查询大多集中在对 <code>Page #12</code> 的查询，</li>
+<li>因此，<code>Page #0、6、9、11、12</code> 一定经常性地被源码访问。也就是说，这些页一定保存在页缓存上。</li>
+<li>后面当新的索引项填满了 <code>Page #12</code>，页缓存就会申请一个新的 <code>Page</code> 来保存索引项，即 <code>Page #13</code>。</li>
+<li>现在，最新索引项保存在 <code>Page #13</code> 中。如果要查找最新索引项，原版二分查找算法将会依次访问 <code>Page #0、7、10、12</code> 和 <code>13</code>。</li>
+<li>此时，问题来了：<code>Page 7</code>和 <code>10</code> 已经很久没有被访问过了，它们大概率不在页缓存中，因此，一旦索引开始征用 <code>Page #13</code>，就会发生 <code>Page Fault</code>，等待那些冷页数据从磁盘中加载到页缓存。</li>
+</ul>
+<blockquote>
+<p>根据国外用户的测试，这种加载过程可能长达 1 秒。显然，这是一个普遍的问题，即每当索引文件占用 Page 数发生变化时，就会强行变更二分查找的搜索路径，从而出现不在页缓存的冷数据必须要加载到页缓存的情形，而这种加载过程是非常耗时的。</p>
+</blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> def <span style="color:#a6e22e">indexSlotRangeFor</span><span style="color:#f92672">(</span>idx<span style="color:#f92672">:</span> ByteBuffer<span style="color:#f92672">,</span> target<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span> searchEntity<span style="color:#f92672">:</span> IndexSearchEntity<span style="color:#f92672">):</span> <span style="color:#f92672">(</span>Int<span style="color:#f92672">,</span> Int<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// check if the index is empty
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// ① 如果索引为空，直接返回&lt;-1,-1&gt; 对
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>_entries <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#f92672">(-</span>1<span style="color:#f92672">,</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">)</span>
+
+    <span style="color:#75715e">// 二分查找算法
+</span><span style="color:#75715e"></span>    def <span style="color:#a6e22e">binarySearch</span><span style="color:#f92672">(</span>begin<span style="color:#f92672">:</span> Int<span style="color:#f92672">,</span> end<span style="color:#f92672">:</span> Int<span style="color:#f92672">)</span> <span style="color:#f92672">:</span> <span style="color:#f92672">(</span>Int<span style="color:#f92672">,</span> Int<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">// binary search for the entry
+</span><span style="color:#75715e"></span>      var lo <span style="color:#f92672">=</span> begin
+      var hi <span style="color:#f92672">=</span> end
+      <span style="color:#a6e22e">while</span><span style="color:#f92672">(</span>lo <span style="color:#f92672">&lt;</span> hi<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        val mid <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>lo <span style="color:#f92672">+</span> hi <span style="color:#f92672">+</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&gt;&gt;&gt;</span> 1
+        val found <span style="color:#f92672">=</span> parseEntry<span style="color:#f92672">(</span>idx<span style="color:#f92672">,</span> mid<span style="color:#f92672">)</span>
+        <span style="color:#75715e">// 查找的位移值不能小于当前最小位移值
+</span><span style="color:#75715e"></span>        val compareResult <span style="color:#f92672">=</span> compareIndexEntry<span style="color:#f92672">(</span>found<span style="color:#f92672">,</span> target<span style="color:#f92672">,</span> searchEntity<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>compareResult <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span>
+          hi <span style="color:#f92672">=</span> mid <span style="color:#f92672">-</span> 1
+        <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span><span style="color:#f92672">(</span>compareResult <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span>
+          lo <span style="color:#f92672">=</span> mid
+        <span style="color:#66d9ef">else</span>
+          <span style="color:#a6e22e">return</span> <span style="color:#f92672">(</span>mid<span style="color:#f92672">,</span> mid<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+      <span style="color:#f92672">(</span>lo<span style="color:#f92672">,</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>lo <span style="color:#f92672">==</span> _entries <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">-</span>1 <span style="color:#66d9ef">else</span> lo <span style="color:#f92672">+</span> 1<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">//② 确认热区首个索引项位于哪个槽，_warmEntries 就是所谓的分割线，固定为8
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 如果是OffsetIndex，_warmEntries = 8192 / 8 = 1024，即第1024个槽 
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 如果是TimeIndex，_warmEntries = 8192 / 12 = 682，即第682个槽
+</span><span style="color:#75715e"></span>    val firstHotEntry <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> _entries <span style="color:#f92672">-</span> 1 <span style="color:#f92672">-</span> _warmEntries<span style="color:#f92672">)</span>
+    <span style="color:#75715e">// check if the target offset is in the warm section of the index
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//③ 判断 target 位移值在热区还是冷区
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>compareIndexEntry<span style="color:#f92672">(</span>parseEntry<span style="color:#f92672">(</span>idx<span style="color:#f92672">,</span> firstHotEntry<span style="color:#f92672">),</span> target<span style="color:#f92672">,</span> searchEntity<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+       <span style="color:#75715e">// 如果在热区，搜索热区 
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">return</span> binarySearch<span style="color:#f92672">(</span>firstHotEntry<span style="color:#f92672">,</span> _entries <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// check if the target offset is smaller than the least offset
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//④ 确保 target 位移值不能小于当前最小位移值
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>compareIndexEntry<span style="color:#f92672">(</span>parseEntry<span style="color:#f92672">(</span>idx<span style="color:#f92672">,</span> 0<span style="color:#f92672">),</span> target<span style="color:#f92672">,</span> searchEntity<span style="color:#f92672">)</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#f92672">(-</span>1<span style="color:#f92672">,</span> 0<span style="color:#f92672">)</span>
+
+    <span style="color:#75715e">//⑤ 如果在冷区，搜索冷区。
+</span><span style="color:#75715e"></span>    binarySearch<span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> firstHotEntry<span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span>    
+</code></pre></div><hr>
+<h4 id="22-offsetindex">2.2 OffsetIndex</h4>
+<p><code>AbstractIndex</code> 的实现类，OffsetIndex</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">OffsetIndex</span><span style="color:#f92672">(</span>_file<span style="color:#f92672">:</span> File<span style="color:#f92672">,</span> baseOffset<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span> maxIndexSize<span style="color:#f92672">:</span> Int <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">,</span> writable<span style="color:#f92672">:</span> Boolean <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">AbstractIndex</span><span style="color:#f92672">(</span>_file<span style="color:#f92672">,</span> baseOffset<span style="color:#f92672">,</span> maxIndexSize<span style="color:#f92672">,</span> writable<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#f92672">import</span> OffsetIndex._
+
+  override def entrySize <span style="color:#f92672">=</span> 8
+</code></pre></div><ul>
+<li><code>file</code> ：每个索引对象在磁盘上都对应了一个索引文件。</li>
+<li><code>baseOffset</code> ：索引对象对应日志段对象的起始位移值。
+<blockquote>
+<p>举个例子，如果你查看 Kafka 日志路径的话，就会发现，日志文件和索引文件都是成组出现的。比如说，如果日志文件是 00000000000000000123.log，正常情况下，一定还有一组索引文件 00000000000000000123.index、00000000000000000123.timeindex 等。这里的“123”就是这组文件的起始位移值，也就是 baseOffset 值。</p>
+</blockquote>
+</li>
+<li><code>maxIndexSize</code> ：它控制索引文件的最大长度，通过 <code>segment.index.bytes</code> 进行设置，默认 10MB</li>
+<li><code>writable</code> ：索引文件打开方式
+<ul>
+<li><code>True</code> 表示以“读写”方式打开</li>
+<li><code>False</code> 表示以“只读”方式打开</li>
+</ul>
+</li>
+<li><code>entrySize</code>：表示不同索引项的大小。
+<blockquote>
+<p>在 OffsetIndex 中，位移值用 4 个字节来表示，物理磁盘位置也用 4 个字节来表示，所以总共是 8 个字节。你可能会说，位移值不是长整型吗，应该是 8 个字节才对啊。还记得 AbstractIndex 已经保存了 baseOffset 了吗？这里的位移值，实际上是相对于 baseOffset 的相对位移值，即真实位移值减去 baseOffset 的值。</p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<h4 id="221-append">2.2.1 append</h4>
+<p><strong>添加索引操作流程图：</strong>
+<img src="http://img.sirann.cn//siran/20200504163720.png" alt=""></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>offset<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span> position<span style="color:#f92672">:</span> Int<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    inLock<span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//① 判断索引文件是否未写满
+</span><span style="color:#75715e"></span>      require<span style="color:#f92672">(!</span>isFull<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Attempt to append to a full index (size = &#34;</span> <span style="color:#f92672">+</span> _entries <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;).&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#75715e">//② 必须满足以下条件之一才允许写入索引项
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">//1. 当前索引文件为空
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">//2. 要写入的位移大于当前所有已写入的索引项的位移 — kafka 规定索引项中的位移必须是单调增加的
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>_entries <span style="color:#f92672">==</span> 0 <span style="color:#f92672">||</span> offset <span style="color:#f92672">&gt;</span> _lastOffset<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        trace<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Adding index entry $offset =&gt; $position to ${file.getAbsolutePath}&#34;</span><span style="color:#f92672">)</span>
+        <span style="color:#75715e">//③ 在 mmap 中写入物理位置信息
+</span><span style="color:#75715e"></span>        mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">putInt</span><span style="color:#f92672">(</span>relativeOffset<span style="color:#f92672">(</span>offset<span style="color:#f92672">))</span>
+        mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">putInt</span><span style="color:#f92672">(</span>position<span style="color:#f92672">)</span>
+        <span style="color:#75715e">//④ 更新其他元数据统计信息，如当前索引项计数器 _entries 和当前索引项最新位移值 _lastOffset
+</span><span style="color:#75715e"></span>        _entries <span style="color:#f92672">+=</span> 1
+        _lastOffset <span style="color:#f92672">=</span> offset
+        <span style="color:#75715e">//⑤ 执行校验，写入索引项格式必须符合要求，即索引项个数 * 单个索引项占用字节数匹配当前文件物理大小，否则说明文件已损坏
+</span><span style="color:#75715e"></span>        require<span style="color:#f92672">(</span>_entries <span style="color:#f92672">*</span> entrySize <span style="color:#f92672">==</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">(),</span> entries <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; entries but file position in index is &#34;</span> <span style="color:#f92672">+</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 如果第 ② 步中两个条件都不满足，不能执行写入索引项操作，抛出异常
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> InvalidOffsetException<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Attempt to append an offset ($offset) to position $entries no larger than&#34;</span> <span style="color:#f92672">+</span>
+          s<span style="color:#e6db74">&#34; the last offset appended (${_lastOffset}) to ${file.getAbsolutePath}.&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 判断索引文件是否未写满</li>
+<li>② 必须满足以下条件之一才允许写入索引项
+<ul>
+<li>
+<ol>
+<li>当前索引文件为空</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>要写入的位移大于当前所有已写入的索引项的位移 — kafka 规定索引项中的位移必须是单调增加的</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>③ 在 mmap 中写入物理位置信息</li>
+<li>④ 更新其他元数据统计信息，如当前索引项计数器 <code>_entries</code> 和当前索引项最新位移值 <code>_lastOffset</code></li>
+<li>⑤ 执行校验，写入索引项格式必须符合要求，即<code>索引项个数</code> * <code>单个索引项占用字节数</code>匹配当前文件物理大小，否则说明文件已损坏</li>
+</ul>
+<hr>
+<h4 id="222-lookup">2.2.2 lookup</h4>
+<p>找到小于给定的 offset 的最大的 offset 的 物理地址。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  def <span style="color:#a6e22e">lookup</span><span style="color:#f92672">(</span>targetOffset<span style="color:#f92672">:</span> Long<span style="color:#f92672">):</span> OffsetPosition <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//加锁
+</span><span style="color:#75715e"></span>    maybeLock<span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//创建一个副本
+</span><span style="color:#75715e"></span>      val idx <span style="color:#f92672">=</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">duplicate</span>
+      <span style="color:#75715e">//二分查找
+</span><span style="color:#75715e"></span>      val slot <span style="color:#f92672">=</span> largestLowerBoundSlotFor<span style="color:#f92672">(</span>idx<span style="color:#f92672">,</span> targetOffset<span style="color:#f92672">,</span> IndexSearchType<span style="color:#f92672">.</span><span style="color:#a6e22e">KEY</span><span style="color:#f92672">)</span>
+      <span style="color:#75715e">//如果找到则调用 parseEntry 方法 返回offset和postition的映射关系
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">//如果找不到则返回 baseOffset, 0
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>slot <span style="color:#f92672">==</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">)</span>
+        OffsetPosition<span style="color:#f92672">(</span>baseOffset<span style="color:#f92672">,</span> 0<span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">else</span>
+        parseEntry<span style="color:#f92672">(</span>idx<span style="color:#f92672">,</span> slot<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="23-timeindex">2.3 TimeIndex</h4>
+<p>TimeIndex 索引和 OffsetIndex 一样。</p>
+<h4 id="231-maybeappend">2.3.1 maybeAppend</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">maybeAppend</span><span style="color:#f92672">(</span>timestamp<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span> offset<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span> skipFullCheck<span style="color:#f92672">:</span> Boolean <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    inLock<span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>skipFullCheck<span style="color:#f92672">)</span>
+        require<span style="color:#f92672">(!</span>isFull<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Attempt to append to a full time index (size = &#34;</span> <span style="color:#f92672">+</span> _entries <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;).&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#75715e">// We do not throw exception when the offset equals to the offset of last entry. That means we are trying
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// to insert the same time index entry as the last entry.
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// If the timestamp index entry to be inserted is the same as the last entry, we simply ignore the insertion
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// because that could happen in the following two scenarios:
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// 1. A log segment is closed.
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// 2. LogSegment.onBecomeInactiveSegment() is called when an active log segment is rolled.
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>_entries <span style="color:#f92672">!=</span> 0 <span style="color:#f92672">&amp;&amp;</span> offset <span style="color:#f92672">&lt;</span> lastEntry<span style="color:#f92672">.</span><span style="color:#a6e22e">offset</span><span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> InvalidOffsetException<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Attempt to append an offset ($offset) to slot ${_entries} no larger than&#34;</span> <span style="color:#f92672">+</span>
+          s<span style="color:#e6db74">&#34; the last offset appended (${lastEntry.offset}) to ${file.getAbsolutePath}.&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>_entries <span style="color:#f92672">!=</span> 0 <span style="color:#f92672">&amp;&amp;</span> timestamp <span style="color:#f92672">&lt;</span> lastEntry<span style="color:#f92672">.</span><span style="color:#a6e22e">timestamp</span><span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Attempt to append a timestamp ($timestamp) to slot ${_entries} no larger&#34;</span> <span style="color:#f92672">+</span>
+          s<span style="color:#e6db74">&#34; than the last timestamp appended (${lastEntry.timestamp}) to ${file.getAbsolutePath}.&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#75715e">// We only append to the time index when the timestamp is greater than the last inserted timestamp.
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// If all the messages are in message format v0, the timestamp will always be NoTimestamp. In that case, the time
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// index will be empty.
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>timestamp <span style="color:#f92672">&gt;</span> lastEntry<span style="color:#f92672">.</span><span style="color:#a6e22e">timestamp</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        trace<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Adding index entry $timestamp =&gt; $offset to ${file.getAbsolutePath}.&#34;</span><span style="color:#f92672">)</span>
+        mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">putLong</span><span style="color:#f92672">(</span>timestamp<span style="color:#f92672">)</span>
+        mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">putInt</span><span style="color:#f92672">(</span>relativeOffset<span style="color:#f92672">(</span>offset<span style="color:#f92672">))</span>
+        _entries <span style="color:#f92672">+=</span> 1
+        _lastEntry <span style="color:#f92672">=</span> TimestampOffset<span style="color:#f92672">(</span>timestamp<span style="color:#f92672">,</span> offset<span style="color:#f92672">)</span>
+        require<span style="color:#f92672">(</span>_entries <span style="color:#f92672">*</span> entrySize <span style="color:#f92672">==</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">(),</span> _entries <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; entries but file position in index is &#34;</span> <span style="color:#f92672">+</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="232-lookup">2.3.2 lookup</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">lookup</span><span style="color:#f92672">(</span>targetTimestamp<span style="color:#f92672">:</span> Long<span style="color:#f92672">):</span> TimestampOffset <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    maybeLock<span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      val idx <span style="color:#f92672">=</span> mmap<span style="color:#f92672">.</span><span style="color:#a6e22e">duplicate</span>
+      val slot <span style="color:#f92672">=</span> largestLowerBoundSlotFor<span style="color:#f92672">(</span>idx<span style="color:#f92672">,</span> targetTimestamp<span style="color:#f92672">,</span> IndexSearchType<span style="color:#f92672">.</span><span style="color:#a6e22e">KEY</span><span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>slot <span style="color:#f92672">==</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">)</span>
+        TimestampOffset<span style="color:#f92672">(</span>RecordBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_TIMESTAMP</span><span style="color:#f92672">,</span> baseOffset<span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">else</span>
+        parseEntry<span style="color:#f92672">(</span>idx<span style="color:#f92672">,</span> slot<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<p>参考自：Kafka核心源码解读</p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%BA%8Clogsegment/" data-toggle="tooltip" data-placement="top" title="Kafka 日志模块（二）LogSegment">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E5%9B%9Blogmanager/" data-toggle="tooltip" data-placement="top" title="Kafka 日志模块（四）LogManager">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%BA%8Clogsegment/"><i class="fa fa-link"></i>Kafka 日志模块（二）LogSegment</a></li>
+         
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%80log/"><i class="fa fa-link"></i>Kafka 日志模块（一）Log</a></li>
+         
+        <li><a href="/blog/kafka-%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83-log-%E8%BE%93%E5%87%BA%E9%97%AE%E9%A2%98/"><i class="fa fa-link"></i>Kafka 源码环境 Log 输出问题</a></li>
+         
+        <li><a href="/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%89kafka-server-start.sh/"><i class="fa fa-link"></i>Kafka 服务端（三）kafka-server-start.sh</a></li>
+         
+        <li><a href="/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BA%8Ckafkaapis/"><i class="fa fa-link"></i>Kafka 服务端（二）KafkaApis</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

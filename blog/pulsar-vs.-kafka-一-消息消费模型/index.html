@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pulsar VS. Kafka (一): 消息消费模型 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="消息中间件, Pulsar">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Pulsar VS. Kafka (一): 消息消费模型" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="Pulsar的特性包括消息的持久化存储，多租户，多机房互联互备，加密和安全性等。有比较强的健壮性，高可用性和可预测的延迟等。">
+  <meta property="og:description" content="Pulsar的特性包括消息的持久化存储，多租户，多机房互联互备，加密和安全性等。有比较强的健壮性，高可用性和可预测的延迟等。">
+  <meta name="twitter:description" content="Pulsar的特性包括消息的持久化存储，多租户，多机房互联互备，加密和安全性等。有比较强的健壮性，高可用性和可预测的延迟等。">
+  <meta property="og:description" content="Pulsar的特性包括消息的持久化存储，多租户，多机房互联互备，加密和安全性等。有比较强的健壮性，高可用性和可预测的延迟等。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka (一): 消息消费模型 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka (一): 消息消费模型 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Pulsar VS. Kafka (一): 消息消费模型 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka (一): 消息消费模型 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka (一): 消息消费模型 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Pulsar VS. Kafka (一): 消息消费模型 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka (一): 消息消费模型 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka (一): 消息消费模型 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Pulsar VS. Kafka (一): 消息消费模型 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Pulsar VS. Kafka (一): 消息消费模型</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月4日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            5600字 | 阅读大约需要12分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/pulsar/"><i>#Pulsar</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="简述">简述</h3>
+<p>Pulsar是一个<code>Pub/Sub</code> 模式的消息中间件，但是现在Pulsar逐渐的发展成了一个<code>Event Streaming Platform</code></p>
+<p>它与Kafka有很多类似的地方，但是又有些不同。Pulsar的特性包括消息的持久化存储，多租户，多机房互联互备，加密和安全性等。有比较强的健壮性，高可用性和可预测的延迟等。</p>
+<p>而在Kafka中<code>多租户</code>的概念是没有的，在消息的 <code>ack</code> 和 <code>message Retention</code> 设计上也有所不同以及<code>消费模式</code>等。</p>
+<hr>
+<h3 id="architecture-overview">Architecture Overview</h3>
+<p>Pulsar 的架构如下图：</p>
+<p><img src="/img/blog/pulsar/architecture.png" alt=""></p>
+<hr>
+<h4 id="broker">Broker</h4>
+<p>Broker 用来接收与发送消息，生产方连接到 broker 去生产消息，消费方连接到 broker 去消费消息。
+在Broker 中有两个重要的<code>组件</code></p>
+<ul>
+<li><code>HTTP 服务器</code>用来接收<code>Pulsar admin</code> 发来的请求来控制Pulsar如果熟悉kafka的话类比kafka中的admin 和处理Producer 与Consumer来寻找Topic的<code>lookup</code>请求</li>
+<li><code>Dispatcher</code> 它是基于自定义二进制协议的异步TCP服务器用于所有数据传输的。lookup请求也可以通过TPC来发送</li>
+</ul>
+<p><strong><code>note：</code> 与kafka中的broker的区别在于Pulsar broker 是<code>无状态</code>的。</strong></p>
+<hr>
+<h4 id="zookeeper">Zookeeper</h4>
+<p>Pulsar使用<code>Zookeeper</code>来存储元数据，集群配置，协调，并且在<code>Producer</code> 和<code>Consumer</code>发送lookup请求来寻找topic，也是在zk中寻找。</p>
+<hr>
+<h4 id="bookkeeper">BookKeeper</h4>
+<p>跟kafka的不同在于Pulsar 把整个存储层抽象化了 broker本身不会存储数据，而是通过<code>BookKeeper</code>来存储数据，所以说只要不断增加<code>BookKeeper</code>集群中的实例那么可以无限制的存储。</p>
+<hr>
+<h4 id="load-balancer">Load Balancer</h4>
+<p>多个<code>Pulsar instance</code> 有很多<code>租户(NameSpace)</code>，每个租户下又有很多topic，要根据一定<code>策略</code>把这些topic均匀的分布在每个<code>Pulsar instance</code>(一致性hash)，而处理这些分配的操作的则是由<code>Load Balancer</code>来完成。
+与kafka不同是，kafka默认是<code>轮训</code>分配，当然也可以自定义分配策略根据每个消息<code>key</code>，Pulsar也支持自定义分配</p>
+<hr>
+<h4 id="service-discovery">Service Discovery</h4>
+<p>在<code>Pulsar Cluster</code>中，Producer 与 Consumer 接发消息都要指定一个topic，那么你并不知道这个topic经过<code>load balancer</code> 之后分配到了那个broker上。所以一开始接发消息的时候，随机给集群中的一台broker发送lookup请求，
+然后服务器接受到之后，去Zookeeper中查找并返回给客户端，这时客户端就会发起TCP长链接随后就是正常的接发消息了。这个过程就是<code>Service Discovery</code></p>
+<hr>
+<h4 id="消息消费模型">消息消费模型</h4>
+<p><strong>队列模型</strong></p>
+<p>队列模型主要是采用无序或者共享的方式来消费消息。通过队列模型，用户可以创建多个消费者从单个管道中接收消息；
+当一条消息从队列发送出来后，多个消费者中的<code>只有一个</code>（任何一个都有可能）接收和消费这条消息。消息系统的具体实现决定了最终哪个消费者实际接收到消息。</p>
+<p>队列模型通常与无状态应用程序一起结合使用。无状态应用程序不关心排序，但它们确实需要能够确认（ack）或删除单条消息，以及尽可能地扩展消费并行性的能力。
+典型的基于队列模型的消息系统包括RabbitMQ和RocketMQ。</p>
+<p><img src="/img/blog/pulsar/queue.png" alt=""></p>
+<p><code>消息处理的瓶颈在于消费这个队列的消费者数量即可以添加消费者实例来增加整个消费的能力但是顺序性无法保证</code></p>
+<hr>
+<p><strong>流式模型</strong></p>
+<p>相比之下，流模型要求消息的消费严格排序或独占消息消费。对于一个管道，使用流式模型，<code>始终只会有一个</code>消费者使用和消费消息。
+消费者按照消息写入管道的确切顺序接收从管道发送的消息。</p>
+<p>流模型通常与有状态应用程序相关联。有状态的应用程序更加关注消息的顺序及其状态。消息的消费顺序决定了有状态应用程序的状态。消息的顺序将影响应用程序处理逻辑的正确性。
+典型的基于队列模型的消息系统就是Kafka。</p>
+<p><img src="/img/blog/pulsar/stream.png" alt=""></p>
+<p><code>消息处理的瓶颈在于分区数量即可以添加分区数量来增加整个消费的能力单分区里的顺序可以保证</code></p>
+<hr>
+<h4 id="pulsar-的消息消费模型">Pulsar 的消息消费模型</h4>
+<p>Pulsar通过<code>Subscription</code>，抽象出了统一的: <code>producer-topic-subscription-consumer</code> 消费模型。Pulsar的消息模型既支持<code>队列模型</code>，也支持<code>流模型</code>。</p>
+<p>在Pulsar的消息消费模型中，Topic是用于发送消息的通道。每一个Topic对应着BookKeeper中的一个分布式日志。发布者发布的每条消息只在Topic中存储一次；存储的过程中，BookKeeper会将消息复制存储在多个存储节点<code>Bookie</code>上；Topic中的每条消息，可以根据消费者的订阅需求，多次被使用，每个订阅(<code>Subscription</code>)对应一个消费者组（<code>Consumer Group</code>）。</p>
+<p>主题（Topic）是消费消息的真实来源。尽管消息仅在主题（Topic）上存储一次，但是用户可以有不同的订阅方式来消费这些消息：</p>
+<ul>
+<li>消费者被组合在一起以消费消息，每个消费组是一个订阅(<code>Subscription</code>)。</li>
+<li>每个Topic可以有不同的消费组。</li>
+<li>每组消费者都是对主题的一个订阅。</li>
+<li>每组消费者可以拥有自己不同的消费方式： 独占（Exclusive），故障切换（Failover），共享（Share）和 Key-Share。
+<img src="/img/blog/pulsar/pulsar-subscription-modes.png" alt=""></li>
+</ul>
+<hr>
+<p><strong>Exclusive Mode（Stream流模型）</strong></p>
+<p>在<code>Exclusive订阅</code>中，一个<code>消费组</code>（Subscription）只能有<code>一个</code>消费者来消费 Topic 中的消息。如图所示，如果另一个消费者A-1想要附加到这个消费组A(Subscription A)中，会被<code>拒绝</code>。这种模式就为 Pulsar 订阅模式中的<code>独占订阅（Exclusive）</code>。
+<img src="/img/blog/pulsar/pulsar-exclusive-subscriptions.png" alt=""></p>
+<hr>
+<p><strong>Failover Mode（Stream流模型）</strong></p>
+<p><code>Failover</code>订阅，多个消费者可以附加到同一订阅。 但是，一个订阅中的所有消费者，只会有<code>一个</code>消费者被选为该订阅的<code>主消费者</code>。 其他消费者将被指定为故障转移消费者。
+当主消费者断开连接时，分区将被重新分配给其中一个故障转移消费者，而新分配的消费者将成为新的主消费者。 发生这种情况时，所有未确认（ack）的消息都将传递给<code>新的主消费者</code>。 这类似于Kafka中的<code>Consumer Partition Rebalance</code>。(<code>当有Consumer 加入或者退出消费组的时候会触发Rebalance</code>)</p>
+<p>下图是<code>Failover</code>的示例。 消费者B-0和B-1通过订阅B订阅消费消息。B-0是主消费者并接收所有消息。 B-1是故障转移消费者，如果消费者B-0出现故障，它将接管消费。
+<img src="/img/blog/pulsar/pulsar-failover-subscriptions.png" alt=""></p>
+<hr>
+<p><strong>Share Mode（Queue队列模型）</strong></p>
+<p><code>Share</code>订阅，在同一个订阅背后，用户按照应用的需求挂载任意多的消费者。 订阅中的所有消息以循环分发形式发送给订阅背后的多个消费者，并且一个消息仅传递给一个消费者。
+当消费者断开连接时，所有传递给它但是未被确认（ack）的消息将被重新分配和组织，以便发送给该订阅上剩余的剩余消费者。</p>
+<p>下图是<code>Share</code>订阅的示例。 消费者C-1，C-2和C-3都在同一主题上消费消息。 每个消费者接收大约所有消息的1/3。
+如果想提高消费的速度，用户不需要不增加分区数量(<code>Stream流模型需要增加分区来提交消费速度</code>)，只需要在同一个订阅中添加更多的消费者。
+<img src="/img/blog/pulsar/pulsar-shared-subscriptions.png" alt=""></p>
+<hr>
+<p><strong>Key-Share Mode（Stream流和Queue队列结合的模型）</strong></p>
+<p>Key_Shared 订阅模式是 2.4.0 以后一个新订阅模式。类似于共享订阅，但又不是按照循环模式，是按照 key 进行分发，比如同一特征（奇数、偶数等）。总的来说是融合了 Failover 的有序性和 Shared 的消费扩展性、更均衡的一种订阅模式。
+<img src="/img/blog/pulsar/pulsar-key-shared-subscriptions.png" alt=""></p>
+<hr>
+<p><strong>订阅模式的选择</strong></p>
+<p><code>Exclusion</code>和<code>Failover</code>订阅，仅允许一个消费者来使用和消费，每个对主题的订阅。这两种模式都按主题分区顺序使用消息。它们最适用于需要严格消息顺序的流（Stream）用例。</p>
+<p><code>Share</code>订阅允许每个主题分区有多个消费者。同一订阅中的每个消费者仅接收主题分区的一部分消息。共享订阅最适用于不需要保证消息顺序的队列（Queue）的使用模式，并且可以按照需要任意扩展消费者的数量。</p>
+<p>而<code>Key-Share</code>订阅可以按照<code>key</code>进行指定规则的分发，从而达到<code>Share</code>订阅无法满足的消息顺序性。</p>
+<p>Pulsar中的订阅(<code>Subscription</code>)实际上与Kafka中的<code>Consumer Group</code>的概念类似。创建订阅的操作很轻量化，而且具有高度可扩展性，用户可以根据应用的需要创建任意数量的订阅。
+对同一主题的不同订阅，也可以采用不同的订阅类型。比如用户可以在同一主题上可以提供一个包含3个消费者的<code>Failover</code>订阅，同时也提供一个包含20个消费者的<code>Share</code>订阅，并且可以在不改变分区数量的情况下，向<code>Share</code>订阅添加更多的消费者。</p>
+<p>除了统一消息API之外，由于Pulsar主题分区实际上是存储在BookKeeper中，它还提供了一个读取API（Reader），类似于消费者API（但Reader没有游标管理），以便用户完全控制如何使用Topic中的消息。</p>
+<hr>
+<h4 id="pulsar-的消息确认ack">Pulsar 的消息确认（ACK）</h4>
+<p>由于分布式系统的特性，当使用分布式消息系统时，可能会发生故障。比如在消费者从消息系统中的主题消费消息的过程中，消费消息的消费者和服务于主题分区的消息代理（Broker）都可能发生错误。消息确认（ACK）的目的就是保证当发生这样的故障后，消费者能够从上一次停止的地方恢复消费，保证既不会丢失消息，也不会重复处理已经确认（ACK）的消息。
+在Kafka中，恢复点通常称为Offset，更新恢复点的过程称为消息确认或提交Offset。</p>
+<p>在Pulsar中，每个订阅中都使用一个专门的数据结构&ndash;游标（Cursor）来跟踪订阅中的每条消息的确认（ACK）状态。每当消费者在主题分区上确认消息时，游标都会更新。更新游标可确保消费者不会再次收到消息。</p>
+<p>Pulsar提供两种消息确认方法，<code>单条确认</code>（Individual Ack）和<code>累积确认</code>（Cumulative Ack）。通过累积确认，消费者只需要确认它收到的最后一条消息。主题分区中的所有消息（包括）提供消息ID将被标记为已确认，并且不会再次传递给消费者。累积确认与Apache Kafka中的Offset更新类似。</p>
+<p>Pulsar可以支持消息的单条确认，也就是选择性确认。消费者可以单独确认一条消息。 被确认后的消息将不会被重新传递。</p>
+<blockquote>
+<p>下图说明了单条确认和累积确认的差异（灰色框中的消息被确认并且不会被重新传递）。在图的上半部分，它显示了累计确认的一个例子，M12之前的消息被标记为acked。在图的下半部分，它显示了单独进行acking的示例。仅确认消息M7和M12 - 在消费者失败的情况下，除了M7和M12之外，其他所有消息将被重新传送。</p>
+</blockquote>
+<p><img src="/img/blog/pulsar/ack.jpg" alt="">
+独占订阅或故障切换订阅的消费者能够对消息进行单条确认和累积确认；共享订阅的消费者只允许对消息进行单条确认。单条确认消息的能力为处理消费者故障提供了更好的体验。对于某些应用来说，处理一条消息可能需要很长时间或者非常昂贵，防止重新传送已经确认的消息非常重要。</p>
+<p>这个管理Ack的专门的数据结构&ndash;游标（Cursor），由Broker来管理，利用BookKeeper的Ledger提供存储。</p>
+<p>Pulsar提供了灵活的消息消费订阅类型和消息确认方法，通过简单的统一的API，就可以支持各种消息和流的使用场景。</p>
+<hr>
+<h4 id="pulsar-的消息保留retention">Pulsar 的消息保留（Retention）</h4>
+<p>在消息被确认后，Pulsar的Broker会更新对应的游标。当Topic里面中的一条消息，被所有的订阅都确认ack后，才能删除这条消息。Pulsar还允许通过设置保留时间，将消息保留更长时间，即使所有订阅已经确认消费了它们。</p>
+<blockquote>
+<p>下图说明了如何在有2个订阅的主题中保留消息。订阅A在M6和订阅B已经消耗了M10之前的所有消息之前已经消耗了所有消息。这意味着M6之前的所有消息（灰色框中）都可以安全删除。订阅A仍未使用M6和M9之间的消息，无法删除它们。如果主题配置了消息保留期，则消息M0到M5将在配置的时间段内保持不变，即使A和B已经确认消费了它们。</p>
+</blockquote>
+<p><img src="/img/blog/pulsar/retention-expiry.png" alt=""></p>
+<p>在消息保留策略中，Pulsar还支持消息生存时间（TTL）。如果消息未在配置的TTL时间段内被任何消费者使用，则消息将自动标记为已确认。 消息保留期消息TTL之间的区别在于：消息保留期作用于标记为已确认并设置为已删除的消息，而TTL作用于未ack的消息。</p>
+<blockquote>
+<p>上面的图例中说明了Pulsar中的TTL。 例如，如果订阅B没有活动消费者，则在配置的TTL时间段过后，消息M10将自动标记为已确认，即使没有消费者实际读取该消息。</p>
+</blockquote>
+<hr>
+<h4 id="pulsar-vs-kafka">Pulsar VS. Kafka</h4>
+<p><strong>模型概念</strong></p>
+<p>Kafka： Producer - topic - <code>consumer group</code> - consumer；</p>
+<p>Pulsar：Producer - topic - <code>subscription</code> - consumer。</p>
+<p><strong>消费模式</strong></p>
+<p>Kafka： 主要集中在流（Stream）模式，对单个partition是独占消费，没有共享（Queue）的消费模式，想要提交消费能力只能增加<code>partition数量</code>；</p>
+<p>Pulsar：提供了统一的消息模型和API。流（Stream）模式 &ndash; 独占和故障切换订阅方式；队列（Queue）模式 &ndash; 共享订阅的方式；流(Stream)模式和队列(Queue)模式结合的 &ndash; key-share订阅</p>
+<p><strong>消息确认（Ack）</strong></p>
+<p>Kafka： 使用偏移Offset；</p>
+<p>Pulsar：使用专门的Cursor管理。累积确认和Kafka效果一样；提供单条或选择性确认。</p>
+<p><strong>消息保留</strong></p>
+<p>Kafka：根据设置的保留期来删除消息。有可能消息没被消费，过期后被删除。 不支持TTL。</p>
+<p>Pulsar：消息只有被所有订阅消费后才会删除，不会丢失数据。也允许设置保留期，保留被消费的数据。支持TTL。</p>
+<p><strong>对比总结：</strong></p>
+<p>Pulsar将高性能的流（Kafka所追求的）和灵活的传统队列（RabbitMQ所追求的）结合到一个统一的消息模型和API中。 Pulsar使用统一的API为用户提供一个支持流和队列的系统，且具有同样的高性能。</p>
+<hr>
+<p>本文参考自Pulsar社区，如果对Pulsar感兴趣，可通过下列方式参与Pulsar社区：</p>
+<ul>
+<li>
+<p>Pulsar Slack频道:
+<a href="https://apache-pulsar.slack.com/">https://apache-pulsar.slack.com/</a></p>
+<p>可自行在这里注册：
+<a href="https://apache-pulsar.herokuapp.com/">https://apache-pulsar.herokuapp.com/</a></p>
+</li>
+<li>
+<p>Pulsar邮件列表: <a href="http://pulsar.incubator.apache.org/contact">http://pulsar.incubator.apache.org/contact</a></p>
+</li>
+</ul>
+<p>有关Apache Pulsar项目的常规信息，请访问官网：
+<a href="http://pulsar.incubator.apache.org/">http://pulsar.incubator.apache.org/</a>
+此外也可关注Twitter帐号@apache_pulsar。</p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" data-toggle="tooltip" data-placement="top" title="Condition 源码分析">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/pulsar-vs.-kafka%E4%BA%8C-%E4%BB%A5segment%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84/" data-toggle="tooltip" data-placement="top" title="Pulsar VS. Kafka（二）: 以Segment为中心的架构">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

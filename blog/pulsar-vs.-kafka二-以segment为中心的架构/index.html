@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pulsar VS. Kafka（二）: 以Segment为中心的架构 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="消息中间件, Pulsar">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Pulsar VS. Kafka（二）: 以Segment为中心的架构" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/pulsar-vs.-kafka%E4%BA%8C-%E4%BB%A5segment%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="Pulsar的分层架构 Pulsar和其他消息系统最根本的不同是采用分层架构。Pulsar集群由两层组成：无状态服务层，由一组接收和传递消息的">
+  <meta property="og:description" content="Pulsar的分层架构 Pulsar和其他消息系统最根本的不同是采用分层架构。Pulsar集群由两层组成：无状态服务层，由一组接收和传递消息的">
+  <meta name="twitter:description" content="Pulsar的分层架构 Pulsar和其他消息系统最根本的不同是采用分层架构。Pulsar集群由两层组成：无状态服务层，由一组接收和传递消息的">
+  <meta property="og:description" content="Pulsar的分层架构 Pulsar和其他消息系统最根本的不同是采用分层架构。Pulsar集群由两层组成：无状态服务层，由一组接收和传递消息的" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka（二）: 以Segment为中心的架构 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka（二）: 以Segment为中心的架构 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Pulsar VS. Kafka（二）: 以Segment为中心的架构 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka（二）: 以Segment为中心的架构 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka（二）: 以Segment为中心的架构 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Pulsar VS. Kafka（二）: 以Segment为中心的架构 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka（二）: 以Segment为中心的架构 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Pulsar VS. Kafka（二）: 以Segment为中心的架构 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Pulsar VS. Kafka（二）: 以Segment为中心的架构 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Pulsar VS. Kafka（二）: 以Segment为中心的架构</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月4日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            3900字 | 阅读大约需要8分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/pulsar/"><i>#Pulsar</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="pulsar的分层架构">Pulsar的分层架构</h3>
+<p>Pulsar和其他消息系统最根本的不同是采用分层架构。Pulsar集群由两层组成：无状态服务层，由一组接收和传递消息的Broker组成；以及一个有状态持久层，由一组名为bookies的BookKeeper存储节点组成，可持久化地存储消息。</p>
+<p>下图显示了 Pulsar的部署。
+<img src="/img/blog/pulsar/640.webp" alt=""></p>
+<hr>
+<h3 id="broker层--无状态服务层">Broker层&ndash;无状态服务层</h3>
+<p>Broker集群在 Pulsar 中形成无状态服务层。服务层是&quot;<code>无状态的</code>&rdquo;，因为Broker并不会在本地存储任何消息。所有存储的工作都由<code>BookKeeper</code>来进行存储。每个主题分区（<code>Topic Partition</code>）由Pulsar分配给某个Broker，该Broker称为该主题分区的所有者。 Pulsar生产者和消费者连接到主题分区的所有者Broker，以向所有者代理发送消息并消费消息。</p>
+<p>如果一个Broker失败，Pulsar会自动将其拥有的主题分区移动到群集中剩余的某一个可用Broker中。这里要说的一件事是：由于Broker是<code>无状态的</code>，当发生Topic的迁移时，Pulsar只是将<code>所有权</code>从一个Broker转移到另一个Broker，在这个过程中，<code>不会有任何数据复制发生</code>。</p>
+<p>熟悉Kafka的都知道，kafka 是基于<code>本地日志的</code>，它的<code>Leader Broker</code> 会把本地日志复制给集群中的其他节点，那么如果有Broker宕机了，会进行Rebalance。在数据重新复制期间，分区通常不可用，直到数据重新复制完成。</p>
+<hr>
+<h3 id="bookkeeper层--持久化存储层">BookKeeper层&ndash;持久化存储层</h3>
+<p>BookKeeper是Pulsar的<code>持久化存储层</code>。Pulsar中的<code>每个主题分区</code>本质上都是存储在BookKeeper中的<code>分布式日志</code>。</p>
+<p>每个分布式日志又被分为<code>Segment分段</code>。 每个Segment分段作为BookKeeper中的一个Ledger，均匀分布并存储在BookKeeper群集中的多个Bookie（<code>Apache BookKeeper的存储节点</code>）中。
+Segment的创建时机包括以下几种：<code>基于配置的Segment大小</code>；<code>基于配置的滚动时间</code>；或者<code>当Segment的所有者被切换。</code></p>
+<p>通过<code>Segment分段</code>的方式，主题分区中的消息可以<code>均匀</code>和<code>平衡</code>地分布在群集中的所有Bookie中。 这意味着主题分区的大小不仅受一个节点容量的限制； 相反，它可以扩展到整个BookKeeper集群的总容量。</p>
+<p>下面的图说明了一个分为x个Segment段的主题分区。 每个Segment段存储3个副本。 所有Segment都分布并存储在4个Bookie中。</p>
+<p><img src="/img/blog/pulsar/641.webp" alt=""></p>
+<hr>
+<h3 id="segment为中心的存储">Segment为中心的存储</h3>
+<p><code>存储服务的分层的架构</code> 和 <code>以Segment为中心的存储</code> 是Pulsar（使用Apache BookKeeper）的两个关键设计理念。 这两个基础为Pulsar提供了许多重要的好处：</p>
+<ul>
+<li>无限制的主题分区存储</li>
+<li>即时扩展、无需数据迁移
+<ul>
+<li>无缝Broker 故障恢复</li>
+<li>无缝集群扩展</li>
+<li>无缝的存储（Bookie）故障恢复</li>
+</ul>
+</li>
+<li>独立的可扩展性</li>
+</ul>
+<h4 id="无限制的主题分区存储">无限制的主题分区存储</h4>
+<p>由于在Pulsar中整个<code>存储层</code>都被抽象了出来，主题分区被分割成Segment并在<code>Apache BookKeeper</code>中以<code>分布式方式存储</code>，因此主题分区的容量不受任何单一节点容量的限制。
+相反，主题分区可以扩展到整个BookKeeper集群的总容量，只需添加Bookie节点即可扩展集群容量。 这是Apache Pulsar支持存储<code>无限大小的流数据</code>，
+并能够以高效，分布式方式处理数据的关键。 使用Apache BookKeeper的分布式日志存储，对于<code>统一消息服务和存储</code>至关重要。</p>
+<h4 id="即时扩展无需数据迁移">即时扩展、无需数据迁移</h4>
+<p>由于<code>消息服务</code>和<code>消息存储</code>分为两层，因此将主题分区从一个Broker移动到另一个Broker几乎可以瞬时内完成，而<code>无需任何数据重新平衡</code>（将数据从一个节点重新复制到另一个节点）。
+只需要把这个主题分区的所有权转移到另一个Broker就可以，这一特性对于高可用的许多方面至关重要，例如集群扩展；对Broker和Bookie失败的快速应对。</p>
+<ul>
+<li>
+<h4 id="无缝broker-故障恢复">无缝Broker 故障恢复</h4>
+</li>
+</ul>
+<p><code>下图说明了</code>Pulsar如何处理Broker失败的示例。 在例子中<code>Broker 2</code>因某种原因（例如停电）而断开。 Pulsar检测到<code>Broker 2</code>已关闭，并立即将<code>Topic1-Part2</code>的所有权从<code>Broker 2</code>转移到<code>Broker 3</code>。
+在Pulsar中<code>数据存储</code>和<code>数据服务分离</code>，所以当代理3接管<code>Topic1-Part2</code>的所有权时，它<code>不需要复制Partiton的数据</code>。 如果有新数据到来，它立即附加并存储为<code>Topic1-Part2</code>中的<code>Segment x + 1</code>。
+Segment x + 1被分发并存储在Bookie1, 2和4上。因为它不需要重新复制数据，所以所有权转移立即发生而不会牺牲主题分区的可用性。
+<img src="/img/blog/pulsar/642.webp" alt=""></p>
+<ul>
+<li>
+<h4 id="无缝集群扩展">无缝集群扩展</h4>
+</li>
+</ul>
+<p>下图说明了Pulsar如何处理集群的<code>容量扩展</code>。 当Broker 2将消息写入<code>Topic1-Part2</code>的Segment X时，将Bookie X和Bookie Y添加到集群中。 Broker 2立即发现新加入的<code>Bookies X和Y</code>。
+然后Broker将尝试将<code>Segment X + 1</code>和<code>X + 2</code>的消息存储到新添加的Bookie中。 新增加的Bookie立刻被使用起来，流量立即增加，而不会重新复制任何数据。
+除了机架感知和区域感知策略之外，Apache BookKeeper还提供<code>资源感知</code>的<code>放置策略</code>，以确保流量在群集中的所有存储节点之间保持平衡。
+<img src="/img/blog/pulsar/643.webp" alt=""></p>
+<ul>
+<li>
+<h4 id="无缝的存储bookie故障恢复">无缝的存储（Bookie）故障恢复</h4>
+</li>
+</ul>
+<p>下图说明了Pulsar（通过Apache BookKeeper）如何处理bookie的磁盘故障。 这里有一个磁盘故障导致存储在bookie 2上的Segment 4被破坏。Apache BookKeeper后台会检测到这个错误并进行复制修复。</p>
+<p>Apache BookKeeper中的副本修复是<code>Segment（甚至是Entry）</code>级别的<code>多对多快速修复</code>，这比重新复制整个主题分区要精细，只会<code>复制必须的数据</code>。 这意味着Apache BookKeeper可以从bookie 3和bookie 4读取Segment 4中的消息，并在bookie 1处修复Segment 4。所有的副本修复都在后台进行，对Broker和应用透明。
+即使有Bookie节点出错的情况发生时，通过添加新的可用的Bookie来替换失败的Bookie，所有Broker都可以继续接受写入，而不会牺牲主题分区的可用性。
+<img src="/img/blog/pulsar/644.webp" alt=""></p>
+<h4 id="独立的可扩展性">独立的可扩展性</h4>
+<p>由于消息服务层和持久存储层是分开的，因此Apache Pulsar可以独立地扩展<code>存储层</code>和<code>服务层</code>。这种独立的扩展，更具成本效益：</p>
+<p>当需要支持更多的<code>消费者或生产者</code>时，您可以简单地添加更多的<code>Broker</code>。主题分区将立即在Brokers中做<code>平衡迁移</code>，一些主题分区的所有权立即转移到新的Broker。</p>
+<p>当您需要<code>更多存储空间</code>来将消息保存更长时间时，只需添加更多<code>Bookie</code>。通过智能资源感知和数据放置，流量将自动切换到新的Bookie中。 Apache Pulsar中不会涉及到不必要的数据搬迁，不会将旧数据从现有存储节点重新复制到新存储节点。</p>
+<hr>
+<h3 id="和kafka对比">和Kafka对比</h3>
+<p>Kafka和Pulsar都有类似的消息概念。 客户端通过主题与消息系统进行交互。 每个主题都可以分为多个分区。 然而，Pulsar和Kafka之间的根本区别在于Kafka是以<code>分区为存储中心</code>，而Pulsar是以<code>Segment为存储中心</code>。</p>
+<p>下面的图显示了以<code>分区为中心</code>和以<code>Segment</code>为中心的系统之间的差异。
+<img src="/img/blog/pulsar/645.webp" alt="">
+在Kafka中，分区只能存储在<code>单个节点</code>上并<code>复制到其他节点</code>，其容量受最小节点容量的限制。这意味着容量扩展需要对分区<code>重新平衡</code>，这反过来又需要重新<code>复制整个分区</code>，以平衡新添加的代理的数据和流量。
+重新传输数据非常昂贵且容易出错，并且会消耗网络带宽和I/O。维护人员在执行此操作时必须非常小心，以避免破坏生产系统。</p>
+<p>Kafka中分区数据的重新拷贝不仅发生在以分区为中心的系统中的群集扩展上。许多其他事情也会触发数据重新拷贝，例如<code>副本故障，磁盘故障或计算机的故障</code>。在数据重新复制期间，分区通常不可用，直到数据重新复制完成。例如，如果将分区配置为存储为3个副本，这时，如果丢失了一个副本，则必须重新复制完整个分区后，分区才可以再次可用。</p>
+<p>在用户遇到故障之前，通常会忽略这种缺陷，因为许多情况下，在短时间内仅是对内存中缓存数据的读取。当数据被保存到磁盘后，用户将越来越多地不可避免地遇到数据丢失，故障恢复的问题，特别是在需要将数据长时间保存的场合。</p>
+<p>相反，在Pulsar中，同样是以<code>分区为逻辑单元</code>，但是以<code>Segment为物理存储单元</code>。分区随着时间的推移会进行分段，并在整个集群中<code>均衡分布</code>，旨在有效地迅速地扩展。
+Pulsar是以Segment为中心的，因此在扩展容量时<code>不需要数据重新平衡和拷贝</code>，旧数据不会被重新复制，这要归功于在BookKeeper中使用可扩展的以Segment为中心的分布式日志存储系统。</p>
+<p>通过利用分布式日志存储，Pulsar可以最大化Segment放置选项，<code>实现高写入和高读取可用性</code>。 例如，使用BookKeeper，副本设置等于2，只要任何2个Bookie启动，就可以对主题分区进行写入。 对于读取可用性，只要主题分区的副本集中有1个处于活动状态，用户就可以读取它，而不会出现任何不一致。</p>
+<hr>
+<p>本文参考自Pulsar社区，如果对Pulsar感兴趣，可通过下列方式参与Pulsar社区：</p>
+<ul>
+<li>
+<p>Pulsar Slack频道:
+<a href="https://apache-pulsar.slack.com/">https://apache-pulsar.slack.com/</a></p>
+<p>可自行在这里注册：
+<a href="https://apache-pulsar.herokuapp.com/">https://apache-pulsar.herokuapp.com/</a></p>
+</li>
+<li>
+<p>Pulsar邮件列表: <a href="http://pulsar.incubator.apache.org/contact">http://pulsar.incubator.apache.org/contact</a></p>
+</li>
+</ul>
+<p>有关Apache Pulsar项目的常规信息，请访问官网：
+<a href="http://pulsar.incubator.apache.org/">http://pulsar.incubator.apache.org/</a>
+此外也可关注Twitter帐号@apache_pulsar。</p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B/" data-toggle="tooltip" data-placement="top" title="Pulsar VS. Kafka (一): 消息消费模型">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/pulsar-message-lifecycle/" data-toggle="tooltip" data-placement="top" title="Pulsar - Message Lifecycle">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/pulsar-message-lifecycle/"><i class="fa fa-link"></i>Pulsar - Message Lifecycle</a></li>
+         
+        <li><a href="/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B/"><i class="fa fa-link"></i>Pulsar VS. Kafka (一): 消息消费模型</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

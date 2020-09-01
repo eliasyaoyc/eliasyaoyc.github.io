@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>并发编程 on 拳拳到肉</title>
+    <link>/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/</link>
+    <description>Recent content in 并发编程 on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Mon, 23 Mar 2020 11:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>println、sleep、Integer与线程安全的一些故事</title>
+      <link>/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/</link>
+      <pubDate>Mon, 23 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/</guid>
+      <description>看到一篇文章增加了我对JMM的认知，故做此记录。 设计一个程序定义一个 boolean 型的 flag 并设置为 false。主线程一直循环，直到 flag 变为 true。 子线程休</description>
+    </item>
+    
+    <item>
+      <title>synchronized 的实现原理</title>
+      <link>/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Fri, 20 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</guid>
+      <description>synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成 mointorenter 和 mointerexit 字节码指令，这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。</description>
+    </item>
+    
+    <item>
+      <title>volatile 解析</title>
+      <link>/blog/volatile-%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Fri, 20 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/volatile-%E8%A7%A3%E6%9E%90/</guid>
+      <description>在多线程并发编程中synchronized 和 volatile 扮演着很重要的角色，volatile是轻量级的 synchronized,它能保证共享变量在多处理器下的可见性</description>
+    </item>
+    
+    <item>
+      <title>并发集合——ConcurrentHashMap 源码分析</title>
+      <link>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrenthashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Thu, 19 Mar 2020 10:30:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrenthashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ConcurrentHashMap是HashMap的线程安全版本，内部也是使用（数组 + 链表 + 红黑树）的结构来存储元素。</description>
+    </item>
+    
+    <item>
+      <title>并发集合——ConcurrentSkipListMap 源码分析</title>
+      <link>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrentskiplistmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Thu, 19 Mar 2020 10:30:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrentskiplistmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>跳表是一个随机化的数据结构，实质就是一种可以进行二分查找的有序链表。</description>
+    </item>
+    
+    <item>
+      <title>Java内存模型详解</title>
+      <link>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</guid>
+      <description>操作系统为了方便用户使用对硬件进行抽象，屏蔽各种细节的处理，而Java内存模型是在硬件内存模型上的更高层的抽象，它屏蔽了各种硬件和操作系统访问的差异性，保证了Java程序在各种平台下对内存的访问都能达到一致的效果。</description>
+    </item>
+    
+    <item>
+      <title>AtomicStampedReference 详解</title>
+      <link>/blog/atomicstampedreference-%E8%AF%A6%E8%A7%A3/</link>
+      <pubDate>Thu, 05 Mar 2020 12:37:42 +0800</pubDate>
+      
+      <guid>/blog/atomicstampedreference-%E8%AF%A6%E8%A7%A3/</guid>
+      <description>AtomicStampedReference是jdk1.5出的一个类，用于解决其他原子类无法解决的ABA问题。</description>
+    </item>
+    
+    <item>
+      <title>LongAdder 详解</title>
+      <link>/blog/longadder-%E8%AF%A6%E8%A7%A3/</link>
+      <pubDate>Thu, 05 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/blog/longadder-%E8%AF%A6%E8%A7%A3/</guid>
+      <description>LongAdder 类是jdk1.8新增的原子类，在多线程环境下，它的性能比普通的Atomic类性能高很多，继承 Striped64，通过Striped64的Cell来实现功能，并且在ConcurrentHashMap中也用了Striped64的Cell。</description>
+    </item>
+    
+    <item>
+      <title>Condition 源码分析</title>
+      <link>/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 01 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效。</description>
+    </item>
+    
+    <item>
+      <title>FutureTask 源码分析</title>
+      <link>/blog/futuretask-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sat, 15 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/futuretask-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>FutureTask 是一个可以取消的异步计算任务，实现Future，Runnable。提供超时控制、可以获取线程执行后的返回结果、可以取消。</description>
+    </item>
+    
+    <item>
+      <title>CountDownLatch 源码分析</title>
+      <link>/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 05 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>CountDownLatch是通过一个计数器来实现的，计数器的初始值为线程的数量。每当一个线程完成了自己的任务后，计数器的值就会减1。当计数器值到达0时，它表示所有的线程已经完成了任务，然后在闭锁上等待的线程就可以恢复执行任务。</description>
+    </item>
+    
+    <item>
+      <title>ReentrantReadWriteLock 源码分析</title>
+      <link>/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 05 Feb 2020 11:12:42 +0800</pubDate>
+      
+      <guid>/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ReentrantReadWriteLock 是什么?</description>
+    </item>
+    
+    <item>
+      <title>CyclicBarrier 源码分析</title>
+      <link>/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Tue, 04 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>CyclicBarrier(回声栅栏)根据Javadoc描述，它会阻塞一组线程直到这些线程同时达到某个条件才继续执行。它就像一个栅栏一样，当一组线程都到达了栅栏处才继续往下走。</description>
+    </item>
+    
+    <item>
+      <title>ThreadPoolExecutor 源码分析</title>
+      <link>/blog/threadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sat, 18 Jan 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/threadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ThreadPoolExecutor中常用参数有哪些，作用是什么？任务提交后，ThreadPoolExecutor会按照什么策略去创建线程用于执行提交任务？</description>
+    </item>
+    
+    <item>
+      <title>ReentrantLock 源码分析</title>
+      <link>/blog/reentrantlock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 05 Jan 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/reentrantlock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>通常使用锁就是 synchronized，经过 jdk 的一系列优化引入偏向锁、轻量级锁、重量级锁等概念，性能也是有很大的提高。</description>
+    </item>
+    
+    <item>
+      <title>ScheduledThreadPoolExecutor 源码分析</title>
+      <link>/blog/scheduledthreadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 05 Jan 2020 12:12:42 +0800</pubDate>
+      
+      <guid>/blog/scheduledthreadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ScheduledThreadPoolExecutor 定义了一个延迟队列 DelayedWorkQueue，这个队列是基于二叉堆来实现的，每次都会把最快要执行的任务放入堆顶(最小堆)。</description>
+    </item>
+    
+    <item>
+      <title>Semaphore 源码分析</title>
+      <link>/blog/semaphore-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Tue, 05 Jun 2018 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/semaphore-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>基于微服务的架构是未来的趋势，但是实现这种架构会面临许多困难。现代应用架构远比过去的架构复杂，因此实现微服务架构将会带来了一系列特殊的挑战，而服务网格可以帮我们解决很多问题。</description>
+    </item>
+    
+  </channel>
+</rss>

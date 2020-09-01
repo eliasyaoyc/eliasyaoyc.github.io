@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Condition 源码分析 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="AQS, Jdk源码, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Condition 源码分析" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效。">
+  <meta property="og:description" content="Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效。">
+  <meta name="twitter:description" content="Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效。">
+  <meta property="og:description" content="Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Condition 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Condition 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Condition 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Condition 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Condition 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Condition 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Condition 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Condition 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Condition 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Condition 源码分析</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月1日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            6000字 | 阅读大约需要12分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b">并发编程</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/aqs/"><i>#AQS</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="简述">简述</h3>
+<p><strong>Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Condition</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">await</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> InterruptedException<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">awaitUninterruptibly</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">awaitNanos</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> nanosTimeout<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">await</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> time<span style="color:#f92672">,</span> TimeUnit unit<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">awaitUntil</span><span style="color:#f92672">(</span>Date deadline<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">signal</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">signalAll</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>常用的方法是await()、signal()和signalAll()，Condition与Object类中的方法对应wait()、notify() 和 notifyAll()
+简单来说，Condition需要和Lock一起使用，在不使用Lock时，使用关键字synchronized时的代码如下：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">synchronized</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">){</span> 
+    obj<span style="color:#f92672">.</span><span style="color:#a6e22e">wait</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">synchronized</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">){</span> 
+    obj<span style="color:#f92672">.</span><span style="color:#a6e22e">notify</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>使用Lock：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">lock<span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">();</span> 
+condition<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">();</span> 
+lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+lock<span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">();</span> 
+condition<span style="color:#f92672">.</span><span style="color:#a6e22e">signal</span><span style="color:#f92672">();</span> 
+lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+</code></pre></div><p><strong>从代码上可以看出，使用synchronized关键字时，所有没有获取锁的线程都会等待，这时相当于只有1个等待队列；而在实际应用中可能有时需要多个等待队列，比如ReentrantReadWriteLock中的ReadLock和WriteLock。
+Lock中的等待队列和Condition中的等待队列是分开的，例如在独占模式下，Lock的独占保证了在同一时刻只会有一个线程访问临界区，也就是lock()方法返回后，Condition中的等待队列保存着被阻塞的线程，也就是调用await()方法后阻塞的线程。
+所以使用lock比使用synchronized关键字更加灵活。</strong></p>
+<hr>
+<h3 id="condition的使用">Condition的使用</h3>
+<p><strong>在Condition接口的javadoc中的例子，代码如下：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BoundedBuffer</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">final</span> Lock lock <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReentrantLock<span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">final</span> Condition notFull  <span style="color:#f92672">=</span> lock<span style="color:#f92672">.</span><span style="color:#a6e22e">newCondition</span><span style="color:#f92672">();</span> 
+    <span style="color:#66d9ef">final</span> Condition notEmpty <span style="color:#f92672">=</span> lock<span style="color:#f92672">.</span><span style="color:#a6e22e">newCondition</span><span style="color:#f92672">();</span> 
+     
+    <span style="color:#66d9ef">final</span> Object<span style="color:#f92672">[]</span> items <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[</span>100<span style="color:#f92672">];</span>
+    <span style="color:#66d9ef">int</span> putptr<span style="color:#f92672">,</span> takeptr<span style="color:#f92672">,</span> count<span style="color:#f92672">;</span>
+     
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>Object x<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        lock<span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>count <span style="color:#f92672">==</span> items<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span>
+                notFull<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">();</span>
+            items<span style="color:#f92672">[</span>putptr<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> x<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(++</span>putptr <span style="color:#f92672">==</span> items<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> putptr <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+            <span style="color:#f92672">++</span>count<span style="color:#f92672">;</span>
+            notEmpty<span style="color:#f92672">.</span><span style="color:#a6e22e">signal</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+            lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+     
+    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">take</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        lock<span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>count <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+                notEmpty<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">();</span>
+            Object x <span style="color:#f92672">=</span> items<span style="color:#f92672">[</span>takeptr<span style="color:#f92672">];</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(++</span>takeptr <span style="color:#f92672">==</span> items<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> takeptr <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+            <span style="color:#f92672">--</span>count<span style="color:#f92672">;</span>
+            notFull<span style="color:#f92672">.</span><span style="color:#a6e22e">signal</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">return</span> x<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+            lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>代码很简单，定义了一个数组items，put用于向items中添加数据，take用于从items中取出数据，count代表当前items中存放了多少个对象，putptr表示下一个需要添加的索引，takeptr表示下一个需要取出的索引，这样就实现了数组的循环添加和取出数据的功能。put和take的具体功能如下：</strong></p>
+<ul>
+<li><code>put</code>
+<ul>
+<li>当count与items的长度相同时，表示数组已满，则调用notFull.await()来等待同时释放了当前线程的锁；</li>
+<li>当线程被唤醒时，将x添加到putptr索引的位置；</li>
+<li>如果当前putptr的位置是最后一个，则下一个索引的位置从0开始；</li>
+<li>调用notEmpty.signal();通知其他线程可以从数组中取出数据了。</li>
+</ul>
+</li>
+<li><code>take</code>
+<ul>
+<li>当count为0时，表示数组是空的，则调用notEmpty.await()来等待同时释放了当前线程的锁；</li>
+<li>当线程被唤醒时，将x添加到takeptr索引的位置；</li>
+<li>如果当前takeptr的位置是最后一个，则下一个索引的位置从0开始；</li>
+<li>调用notFull.signal();通知其他线程可以向数组中添加数据了。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="源码分析">源码分析</h3>
+<p><strong>Condition必须被绑定到一个独占锁上使用，在ReentrantLock中，有一个newCondition方法，该方法调用了Sync中的newCondition方法，看下Sync中newCondition的实现：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> ConditionObject <span style="color:#a6e22e">newCondition</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ConditionObject<span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>ConditionObject是在AQS中定义的，它实现了Condition接口，自然也就实现了上述的Condition接口中的方法。该类有两个重要的变量：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/** First node of condition queue. */</span>
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">transient</span> Node firstWaiter<span style="color:#f92672">;</span>
+<span style="color:#75715e">/** Last node of condition queue. */</span>
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">transient</span> Node lastWaiter<span style="color:#f92672">;</span>
+</code></pre></div><p><strong>这里的firstWaiter和lastWaiter是不是和之前说过的head和tail有些类似，而且都是Node类型的。
+对于Condition来说，它是不与独占模式或共享模式使用相同的队列的，它有自己的队列，所以这两个变量表示了队列的头节点和尾节点。</strong></p>
+<hr>
+<h4 id="await-方法">await 方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">await</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//&lt;1&gt; 判断线程是否已经中断并且归位，如果线程已经中断了那就抛出中断异常
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">interrupted</span><span style="color:#f92672">())</span>
+                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> InterruptedException<span style="color:#f92672">();</span>
+            <span style="color:#75715e">//&lt;2&gt; 根据当前线程创建一个Node添加到Condition队列中，等待唤醒
+</span><span style="color:#75715e"></span>            Node node <span style="color:#f92672">=</span> addConditionWaiter<span style="color:#f92672">();</span>
+            <span style="color:#75715e">//&lt;3&gt; 释放当前线程lock， 从AQS的队列中移出
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">int</span> savedState <span style="color:#f92672">=</span> fullyRelease<span style="color:#f92672">(</span>node<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">int</span> interruptMode <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+            <span style="color:#75715e">//&lt;4&gt; 循环判断当前线程的Node是否在Sync队列中，如果不在，则park
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>isOnSyncQueue<span style="color:#f92672">(</span>node<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                LockSupport<span style="color:#f92672">.</span><span style="color:#a6e22e">park</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+                <span style="color:#75715e">//&lt;5&gt; checkInterruptWhileWaiting方法根据中断发生的时机返回后续需要处理这次中断的方式，如果发生中断，退出循环
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>interruptMode <span style="color:#f92672">=</span> checkInterruptWhileWaiting<span style="color:#f92672">(</span>node<span style="color:#f92672">))</span> <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//&lt;5&gt; acquireQueued获取锁并返回线程是否中断
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//    如果线程被中断，并且中断的方式不是抛出异常，则设置中断后续的处理方式设置为REINTERRUPT
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>acquireQueued<span style="color:#f92672">(</span>node<span style="color:#f92672">,</span> savedState<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span> interruptMode <span style="color:#f92672">!=</span> THROW_IE<span style="color:#f92672">)</span>
+                interruptMode <span style="color:#f92672">=</span> REINTERRUPT<span style="color:#f92672">;</span>
+            <span style="color:#75715e">//&lt;6&gt; 从头到尾遍历Condition队列，移除被cancel的节点
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>node<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#75715e">// clean up if cancelled
+</span><span style="color:#75715e"></span>                unlinkCancelledWaiters<span style="color:#f92672">();</span>
+            <span style="color:#75715e">//&lt;7&gt; 如果线程已经被中断，则根据之前获取的interruptMode的值来判断是继续中断还是抛出异常
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>interruptMode <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span>
+                reportInterruptAfterWait<span style="color:#f92672">(</span>interruptMode<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><blockquote>
+<p>await方法首先根据当前线程创建了一个Node，然后释放当前线程的独占锁。这里的savedState表示当前线程已经加锁的次数（ReentrantLock为重入锁）。while循环其实就是一直判断，当前的线程是否又被添加到了Sync队列中，如果已经在Sync队列中，则退出循环。</p>
+<p>什么时候会把当前线程又加入到Sync队列中呢？当然是调用signal方法的时候，因为这里需要唤醒之前调用await方法的线程。</p>
+<p>这里还需要注意的是，如果在park的状态下，这时线程中断了，park方法会返回，然后判断后续对此次中断的处理方式：抛出InterruptedException或者继续中断。</p>
+</blockquote>
+<hr>
+<h4 id="addconditionwaiter-方法">addConditionWaiter 方法</h4>
+<p><strong>创建waiter节点到队列中</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> Node <span style="color:#a6e22e">addConditionWaiter</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            Node t <span style="color:#f92672">=</span> lastWaiter<span style="color:#f92672">;</span>
+            <span style="color:#75715e">// If lastWaiter is cancelled, clean out.
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//&lt;1&gt; 如果最后一个节点被取消了，那么从头到尾遍历Condition队列，移除被cancel的节点
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>t <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> t<span style="color:#f92672">.</span><span style="color:#a6e22e">waitStatus</span> <span style="color:#f92672">!=</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">CONDITION</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                unlinkCancelledWaiters<span style="color:#f92672">();</span>
+                t <span style="color:#f92672">=</span> lastWaiter<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//&lt;2&gt; 创建节点加入队列
+</span><span style="color:#75715e"></span>            Node node <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Node<span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">(),</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">CONDITION</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>t <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                firstWaiter <span style="color:#f92672">=</span> node<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">else</span>
+                t<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span> <span style="color:#f92672">=</span> node<span style="color:#f92672">;</span>
+            lastWaiter <span style="color:#f92672">=</span> node<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">return</span> node<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="fullyrelease-方法">fullyRelease 方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">fullyRelease</span><span style="color:#f92672">(</span>Node node<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">boolean</span> failed <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//&lt;1&gt; 获取ReentrantLock中的state的值 
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">int</span> savedState <span style="color:#f92672">=</span> getState<span style="color:#f92672">();</span>
+            <span style="color:#75715e">//&lt;2&gt; 调用ReentrantLock中的release方法
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>release<span style="color:#f92672">(</span>savedState<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                failed <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span> savedState<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalMonitorStateException<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>failed<span style="color:#f92672">)</span>
+                node<span style="color:#f92672">.</span><span style="color:#a6e22e">waitStatus</span> <span style="color:#f92672">=</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">CANCELLED</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>因为是可重入的原因，只有在state为0的时候才会真的释放锁，所以在fullyRelease方法中，需要将之前加入的锁的次数全部释放，目的是将该线程从Sync队列中移出。</strong></p>
+<hr>
+<h4 id="isonsyncqueue-方法">isOnSyncQueue 方法</h4>
+<p><strong>该方法判断当前线程的node是否在Sync队列中。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isOnSyncQueue</span><span style="color:#f92672">(</span>Node node<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//&lt;1&gt; 如果当前线程node的状态是CONDITION或者node.prev为null时说明已经在Condition队列中了，所以返回false；
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>node<span style="color:#f92672">.</span><span style="color:#a6e22e">waitStatus</span> <span style="color:#f92672">==</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">CONDITION</span> <span style="color:#f92672">||</span> node<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//&lt;2&gt; 如果node.next不为null，说明在Sync队列中，返回true；
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>node<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#75715e">// If has successor, it must be on queue
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">/*
+</span><span style="color:#75715e">         * node.prev can be non-null, but not yet on queue because
+</span><span style="color:#75715e">         * the CAS to place it on queue can fail. So we have to
+</span><span style="color:#75715e">         * traverse from tail to make sure it actually made it.  It
+</span><span style="color:#75715e">         * will always be near the tail in calls to this method, and
+</span><span style="color:#75715e">         * unless the CAS failed (which is unlikely), it will be
+</span><span style="color:#75715e">         * there, so we hardly ever traverse much.
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#75715e">//&lt;3&gt; 如果两个if都未返回时，可以断定node的prev一定不为null，next一定为null，这个时候可以认为node正处于放入Sync队列的执行CAS操作执行过程中。
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//而这个CAS操作有可能失败，所以通过findNodeFromTail再尝试一次判断。
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> findNodeFromTail<span style="color:#f92672">(</span>node<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="findnodefromtail-方法">findNodeFromTail 方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">findNodeFromTail</span><span style="color:#f92672">(</span>Node node<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Node t <span style="color:#f92672">=</span> tail<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(;;)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>t <span style="color:#f92672">==</span> node<span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>t <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+            t <span style="color:#f92672">=</span> t<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>该方法就是从Sync队列尾部开始判断，因为在isOnSyncQueue方法调用该方法时，node.prev一定不为null。但这时的node可能还没有完全添加到Sync队列中（因为node.next是null），这时可能是在自旋中。记得之前说过的enq方法吗，signal的时候会调用这个方法：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> Node <span style="color:#a6e22e">enq</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> Node node<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#f92672">(;;)</span> <span style="color:#f92672">{</span>
+        Node t <span style="color:#f92672">=</span> tail<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>t <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// Must initialize
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>compareAndSetHead<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Node<span style="color:#f92672">()))</span>
+                tail <span style="color:#f92672">=</span> head<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            node<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span> <span style="color:#f92672">=</span> t<span style="color:#f92672">;</span>
+            <span style="color:#75715e">// 执行findNodeFromTail方法时可能一直在此自旋
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>compareAndSetTail<span style="color:#f92672">(</span>t<span style="color:#f92672">,</span> node<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                t<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> node<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span> t<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>所以，这时如果CAS还未成功，那只好返回false了</strong></p>
+<hr>
+<h4 id="checkinterruptwhilewaiting-方法">checkInterruptWhileWaiting 方法</h4>
+<p><strong>如果当前线程被中断，则调用transferAfterCancelledWait方法判断后续的处理应该是抛出InterruptedException还是重新中断。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">checkInterruptWhileWaiting</span><span style="color:#f92672">(</span>Node node<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">interrupted</span><span style="color:#f92672">()</span> <span style="color:#f92672">?</span>
+                <span style="color:#f92672">(</span>transferAfterCancelledWait<span style="color:#f92672">(</span>node<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> THROW_IE <span style="color:#f92672">:</span> REINTERRUPT<span style="color:#f92672">)</span> <span style="color:#f92672">:</span>
+                0<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="transferaftercancelledwait-方法">transferAfterCancelledWait 方法</h4>
+<p><strong>该方法是判断，在线程中断的时候，是否这时有signal方法的调用。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">transferAfterCancelledWait</span><span style="color:#f92672">(</span>Node node<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//&lt;1&gt; 如果执行成功，则说明中断发生时，没有signal的调用，因为signal方法会将状态设置为0
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>compareAndSetWaitStatus<span style="color:#f92672">(</span>node<span style="color:#f92672">,</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">CONDITION</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//&lt;2&gt; 如果第&lt;1&gt;步执行成功，则将node添加到Sync队列中，并返回true，表示中断在signal之前
+</span><span style="color:#75715e"></span>            enq<span style="color:#f92672">(</span>node<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">/*
+</span><span style="color:#75715e">         * If we lost out to a signal(), then we can&#39;t proceed
+</span><span style="color:#75715e">         * until it finishes its enq().  Cancelling during an
+</span><span style="color:#75715e">         * incomplete transfer is both rare and transient, so just
+</span><span style="color:#75715e">         * spin.
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#75715e">//&lt;3&gt; 如果第&lt;1&gt;步失败，则检查当前线程的node是否已经在Sync队列中了，如果不在Sync队列中，则让步给其他线程执行，直到当前的node已经被signal方法添加到Sync队列中
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>isOnSyncQueue<span style="color:#f92672">(</span>node<span style="color:#f92672">))</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">yield</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><blockquote>
+<p>如果第一次CAS失败了，则不能判断当前线程是先进行了中断还是先进行了signal方法的调用，可能是先执行了signal然后中断，也可能是先执行了中断，后执行了signal，当然，这两个操作肯定是发生在CAS之前。这时需要做的就是等待当前线程的node被添加到Sync队列后，也就是enq方法返回后，返回false告诉checkInterruptWhileWaiting方法返回REINTERRUPT，后续进行重新中断。</p>
+<p>简单来说，该方法的返回值代表当前线程是否在park的时候被中断唤醒，如果为true表示中断在signal调用之前，signal还未执行，否则表示signal已经执行过了。</p>
+<p>根据await的语义，在await时遇到中断要抛出InterruptedException，返回true则使上层方法checkInterruptWhileWaiting返回THROW_IE，否则返回REINTERRUPT。</p>
+</blockquote>
+<hr>
+<h4 id="unlinkcancelledwaiters-方法">unlinkCancelledWaiters 方法</h4>
+<p><strong>该方法就是从头到尾遍历Condition队列，移除状态为非CONDITION的节点。因为在执行该方法时已经获取了独占锁，所以不需考虑多线程问题。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">unlinkCancelledWaiters</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            Node t <span style="color:#f92672">=</span> firstWaiter<span style="color:#f92672">;</span>
+            Node trail <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>t <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                Node next <span style="color:#f92672">=</span> t<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>t<span style="color:#f92672">.</span><span style="color:#a6e22e">waitStatus</span> <span style="color:#f92672">!=</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">CONDITION</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    t<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>trail <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                        firstWaiter <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">else</span>
+                        trail<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>next <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                        lastWaiter <span style="color:#f92672">=</span> trail<span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">else</span>
+                    trail <span style="color:#f92672">=</span> t<span style="color:#f92672">;</span>
+                t <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="reportinterruptafterwait-方法">reportInterruptAfterWait 方法</h4>
+<p><strong>如果当前线程被中断，则在await方法中调用次方法该方法根据interruptMode来确定是应该抛出InterruptedException还是继续中断。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">reportInterruptAfterWait</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> interruptMode<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>interruptMode <span style="color:#f92672">==</span> THROW_IE<span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> InterruptedException<span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>interruptMode <span style="color:#f92672">==</span> REINTERRUPT<span style="color:#f92672">)</span>
+                selfInterrupt<span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="awaitnanos-方法">awaitNanos 方法</h4>
+<p><strong>与#await方法类似，提供超时</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">awaitNanos</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> nanosTimeout<span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">interrupted</span><span style="color:#f92672">())</span>
+                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> InterruptedException<span style="color:#f92672">();</span>
+            Node node <span style="color:#f92672">=</span> addConditionWaiter<span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">int</span> savedState <span style="color:#f92672">=</span> fullyRelease<span style="color:#f92672">(</span>node<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> deadline <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> nanosTimeout<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">int</span> interruptMode <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>isOnSyncQueue<span style="color:#f92672">(</span>node<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>nanosTimeout <span style="color:#f92672">&lt;=</span> 0L<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    transferAfterCancelledWait<span style="color:#f92672">(</span>node<span style="color:#f92672">);</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>nanosTimeout <span style="color:#f92672">&gt;=</span> spinForTimeoutThreshold<span style="color:#f92672">)</span>
+                    LockSupport<span style="color:#f92672">.</span><span style="color:#a6e22e">parkNanos</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> nanosTimeout<span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>interruptMode <span style="color:#f92672">=</span> checkInterruptWhileWaiting<span style="color:#f92672">(</span>node<span style="color:#f92672">))</span> <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                nanosTimeout <span style="color:#f92672">=</span> deadline <span style="color:#f92672">-</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>acquireQueued<span style="color:#f92672">(</span>node<span style="color:#f92672">,</span> savedState<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span> interruptMode <span style="color:#f92672">!=</span> THROW_IE<span style="color:#f92672">)</span>
+                interruptMode <span style="color:#f92672">=</span> REINTERRUPT<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>node<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                unlinkCancelledWaiters<span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>interruptMode <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span>
+                reportInterruptAfterWait<span style="color:#f92672">(</span>interruptMode<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> deadline <span style="color:#f92672">-</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="signal-方法">signal 方法</h4>
+<p><strong>在该方法中判断当前线程是否占有独占锁，然后通过firstWaiter依次唤醒Condition队列中的node，并把node添加到Sync队列中。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">signal</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>isHeldExclusively<span style="color:#f92672">())</span>
+                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalMonitorStateException<span style="color:#f92672">();</span>
+            Node first <span style="color:#f92672">=</span> firstWaiter<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>first <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                doSignal<span style="color:#f92672">(</span>first<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>在await方法中可以知道添加到Condition队列中的node每次都是添加到队列的尾部，在signal方法中是从头开始唤醒的，所以Condition是公平的，signal是按顺序来进行唤醒的。</strong></p>
+<hr>
+<h4 id="dosignal-方法">doSignal 方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSignal</span><span style="color:#f92672">(</span>Node first<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span> <span style="color:#f92672">(</span>firstWaiter <span style="color:#f92672">=</span> first<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+            lastWaiter <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        first<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>transferForSignal<span style="color:#f92672">(</span>first<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span>
+             <span style="color:#f92672">(</span>first <span style="color:#f92672">=</span> firstWaiter<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>doSignal方法先将队列前面节点依次从队列中取出，然后调用transferForSignal方法去唤醒节点，这个方法有可能失败，因为等待线程可能已经到时或者被中断，因此while循环这个操作直到成功唤醒或队列为空。</strong></p>
+<hr>
+<h4 id="transferforsignal-方法">transferForSignal 方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">transferForSignal</span><span style="color:#f92672">(</span>Node node<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">/*
+</span><span style="color:#75715e">         * If cannot change waitStatus, the node has been cancelled.
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#75715e">//&lt;1&gt; 首先尝试设置node的状态为0
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>compareAndSetWaitStatus<span style="color:#f92672">(</span>node<span style="color:#f92672">,</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">CONDITION</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">))</span>
+            <span style="color:#75715e">//&lt;2&gt; 如果设置失败，说明已经被取消，没必要再进入Sync队列了，doSignal中的循环会找到一个node再次执行
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+
+        <span style="color:#75715e">/*
+</span><span style="color:#75715e">         * Splice onto queue and try to set waitStatus of predecessor to
+</span><span style="color:#75715e">         * indicate that thread is (probably) waiting. If cancelled or
+</span><span style="color:#75715e">         * attempt to set waitStatus fails, wake up to resync (in which
+</span><span style="color:#75715e">         * case the waitStatus can be transiently and harmlessly wrong).
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#75715e">//&lt;3&gt; 如果设置成功，但之后又被取消了呢？虽然会进入到Sync队列，但在获取锁的时候会调用shouldParkAfterFailedAcquire方法，该方法中会移除此节点。
+</span><span style="color:#75715e"></span>        Node p <span style="color:#f92672">=</span> enq<span style="color:#f92672">(</span>node<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">int</span> ws <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">waitStatus</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//&lt;4&gt; 如果执行成功，则将node加入到Sync队列中，enq会返回node的前继节点p。这里的if判断只有在p节点是取消状态或者设置p节点的状态为SIGNAL失败的时候才会执行unpark。
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ws <span style="color:#f92672">&gt;</span> 0 <span style="color:#f92672">||</span> <span style="color:#f92672">!</span>compareAndSetWaitStatus<span style="color:#f92672">(</span>p<span style="color:#f92672">,</span> ws<span style="color:#f92672">,</span> Node<span style="color:#f92672">.</span><span style="color:#a6e22e">SIGNAL</span><span style="color:#f92672">))</span>
+            LockSupport<span style="color:#f92672">.</span><span style="color:#a6e22e">unpark</span><span style="color:#f92672">(</span>node<span style="color:#f92672">.</span><span style="color:#a6e22e">thread</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>什么时候compareAndSetWaitStatus(p, ws, Node.SIGNAL)会执行失败呢？如果p节点的线程在这时执行了unlock方法，就会调用unparkSuccessor方法，unparkSuccessor方法可能就将p的状态改为了0，那么执行就会失败。
+到这里，signal方法已经完成了所有的工作，唤醒的线程已经成功加入Sync队列并已经参与锁的竞争了，返回true。</strong></p>
+<hr>
+<h4 id="signalall-方法">signalAll 方法</h4>
+<blockquote>
+<p>判断当前线程是否占有独占锁，然后执行doSignalAll方法。</p>
+</blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">signalAll</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>isHeldExclusively<span style="color:#f92672">())</span>
+                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalMonitorStateException<span style="color:#f92672">();</span>
+            Node first <span style="color:#f92672">=</span> firstWaiter<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>first <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                doSignalAll<span style="color:#f92672">(</span>first<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="dosignalall-方法">doSignalAll 方法</h4>
+<p><strong>可以与doSignal方法比较一下，doSignal方法只是唤醒了一个node并加入到Sync队列中，而doSignalAll方法唤醒了所有的Condition节点，并加入到Sync队列中。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSignalAll</span><span style="color:#f92672">(</span>Node first<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            lastWaiter <span style="color:#f92672">=</span> firstWaiter <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
+                Node next <span style="color:#f92672">=</span> first<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span><span style="color:#f92672">;</span>
+                first<span style="color:#f92672">.</span><span style="color:#a6e22e">nextWaiter</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                transferForSignal<span style="color:#f92672">(</span>first<span style="color:#f92672">);</span>
+                first <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>first <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h3 id="总结">总结</h3>
+<ol>
+<li><strong>ConditionObject是AQS的内部类，它实现了Condition接口，提供了类似wait、notify和notifyAll类似的功能。</strong></li>
+<li><strong>Condition必须与一个独占锁绑定使用，在await或signal之前必须现持有独占锁。Condition队列是一个单向链表，他是公平的，按照先进先出的顺序从队列中被唤醒并添加到Sync队列中，这时便恢复了参与竞争锁的资格。</strong></li>
+<li><strong>Condition队列与Sync队列是不同的，Condition队列是单向的，队列的第一个节点firstWaiter中是可以绑定线程的；而Sync队列是双向的，队列的第一个节点head是不与线程进行绑定的。</strong></li>
+<li><strong>Condition在设计时就充分考虑了Object中的监视器方法的缺陷，设计为一个lock可以对应多个Condition，从而可以使线程分散到多个等待队列中，使得应用更为灵活，并且在实现上使用了FIFO队列来保存等待线程，确保了可以做到使用signal按FIFO方式唤醒等待线程，避免每次唤醒所有线程导致数据竞争。</strong></li>
+<li><strong>但这样也会导致Condition在使用上要比Object中的提供的监视器方法更为复杂，这时考虑使用Condition的数量、何时使用Condition以及使用哪个condition等等。由于Condition是结合Lock一起使用的，所以是否使用Condition需要和Lock一起进行综合的考虑。</strong></li>
+</ol>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/futuretask-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" data-toggle="tooltip" data-placement="top" title="FutureTask 源码分析">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B/" data-toggle="tooltip" data-placement="top" title="Pulsar VS. Kafka (一): 消息消费模型">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>CountDownLatch 源码分析</a></li>
+         
+        <li><a href="/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>ReentrantReadWriteLock 源码分析</a></li>
+         
+        <li><a href="/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>CyclicBarrier 源码分析</a></li>
+         
+        <li><a href="/blog/reentrantlock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>ReentrantLock 源码分析</a></li>
+         
+        <li><a href="/blog/semaphore-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>Semaphore 源码分析</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

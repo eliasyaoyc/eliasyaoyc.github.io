@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>计算机之内存管理 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="计算机">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="计算机之内存管理" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="内存(RAM) 是一件非常重要的资源，必须要认真对待内存。虽然目前大多数内存的增长速度要比 IBM 7094 要快的多，但是，程序大小的增长要比内存的增长还快很多。不管存储器有多大，程序大小的增长速度比内存容量的增长速度要快的多。">
+  <meta property="og:description" content="内存(RAM) 是一件非常重要的资源，必须要认真对待内存。虽然目前大多数内存的增长速度要比 IBM 7094 要快的多，但是，程序大小的增长要比内存的增长还快很多。不管存储器有多大，程序大小的增长速度比内存容量的增长速度要快的多。">
+  <meta name="twitter:description" content="内存(RAM) 是一件非常重要的资源，必须要认真对待内存。虽然目前大多数内存的增长速度要比 IBM 7094 要快的多，但是，程序大小的增长要比内存的增长还快很多。不管存储器有多大，程序大小的增长速度比内存容量的增长速度要快的多。">
+  <meta property="og:description" content="内存(RAM) 是一件非常重要的资源，必须要认真对待内存。虽然目前大多数内存的增长速度要比 IBM 7094 要快的多，但是，程序大小的增长要比内存的增长还快很多。不管存储器有多大，程序大小的增长速度比内存容量的增长速度要快的多。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之内存管理 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之内存管理 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之内存管理 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之内存管理 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之内存管理 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之内存管理 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之内存管理 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之内存管理 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之内存管理 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>计算机之内存管理</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月16日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            14900字 | 阅读大约需要30分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba">计算机</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/"><i>#计算机</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <p>内存(RAM) 是一件非常重要的资源，必须要认真对待内存。虽然目前大多数内存的增长速度要比 IBM 7094 要快的多，但是，程序大小的增长要比内存的增长还快很多。不管存储器有多大，程序大小的增长速度比内存容量的增长速度要快的多。</p>
+<p>经过多年的探索，科学家提出了一种 <code>分层存储器体系(memory hierarchy)</code>，下面是分层体系的分类
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/700.jpeg" alt="">
+位于顶层的存储器速度最快，但是相对容量最小，成本非常高。层级结构向下，其访问速度会变慢，但是容量会变大，相对造价也就越便宜。（所以个人感觉相对存储容量来说，访问速度是更重要的）</p>
+<p>操作系统中管理内存层次结构的部分称为<code>内存管理器(memory manager)</code>，<strong>它的主要工作是有效的管理内存，记录哪些内存是正在使用的，在进程需要时分配内存以及在进程完成时回收内存。所有现代操作系统都提供内存管理。</strong></p>
+<hr>
+<h3 id="无存储器抽象">无存储器抽象</h3>
+<p>最简单的存储器抽象就是<code>没有抽象</code>。早期大型计算机（20 世纪 60 年代之前），小型计算机（20 世纪 70 年代之前）
+和个人计算机（20 世纪 80 年代之前）都没有存储器抽象。<strong>每一个程序都直接访问物理内存</strong>。当一个程序执行如下命令：
+<strong>MOV REGISTER1 1000</strong></p>
+<p>计算机会把位置为 1000 的物理内存中的内容移到 <code>REGISTER1</code> 中。因此呈现给程序员的内存模型就是物理内存，内存地址从 0 开始到内存地址的最大值中，每个地址中都会包含一个 8 位位数的内存单元。</p>
+<p>所以这种情况下的计算机<strong>不可能会有两个应用程序同时在内存中</strong>。如果第一个程序向内存地址 2000 的这个位置写入了一个值，那么此值将会替换第二个程序 2000 位置上的值，<strong>所以，同时运行两个应用程序是行不通的，两个程序会立刻崩溃</strong>。</p>
+<p><strong>不过即使存储器模型就是物理内存，还是存在一些可变体的。下面展示了三种变体</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/701.png" alt=""></p>
+<p>在上图 a 中，操作系统位于 <code>RAM(Random Access Memory)</code> 的底部，或像是图 b 一样位于 <code>ROM(Read-Only Memory)</code> 顶部；而在图 c 中，设备驱动程序位于顶端的 ROM 中，而操作系统位于底部的 RAM 中。图 a 的模型以前用在大型机和小型机上，但现在已经很少使用了；图 b 中的模型一般用于掌上电脑或者是嵌入式系统中。第三种模型就应用在早期个人计算机中了。ROM 系统中的一部分成为<code> BIOS (Basic Input Output System)</code>。模型 a  和 c 的缺点是用户程序中的错误可能会破坏操作系统，可能会导致灾难性的后果。</p>
+<p>按照这种方式组织系统时，通常同一个时刻只能有一个进程正在运行。一旦用户键入了一个命令，操作系统就把需要的程序从磁盘复制到内存中并执行；当进程运行结束后，操作系统在用户终端显示提示符并等待新的命令。收到新的命令后，它把新的程序装入内存，覆盖前一个程序。</p>
+<p>在没有存储器抽象的系统中实现并行性一种方式是使用<code>多线程</code>来编程。由于同一进程中的多线程内部共享同一内存映像，那么实现并行也就不是问题了。但是这种方式却并没有被广泛采纳，因为人们通常希望能够在同一时间内运行没有关联的程序，而这正是线程抽象所不能提供的。</p>
+<hr>
+<h4 id="在不使用存储器抽象的情况下运行多个程序">在不使用存储器抽象的情况下运行多个程序</h4>
+<p>但是，即便没有存储器抽象，同时运行多个程序也是有可能的。<strong>操作系统只需要把当前内存中所有内容保存到<code>磁盘</code>文件中，然后再把程序读入内存即可。只要某一时刻内存只有一个程序在运行，就不会有冲突的情况发生。</strong></p>
+<p>在额外特殊硬件的帮助下，即使没有交换功能，也可以并行的运行多个程序。IBM 360 的早期模型就是这样解决的</p>
+<blockquote>
+<p>在 IBM 360 中，内存被划分为 2KB 的区域块，每块区域被分配一个 4 位的保护键，保护键存储在 CPU 的特殊寄存器(SFR)中。一个内存为 1 MB 的机器只需要 512 个这样的 4 位寄存器，容量总共为 256 字节 (这个会算吧) PSW(Program Status Word, 程序状态字) 中有一个 4 位码。一个运行中的进程如果访问键与其 PSW 中保存的码不同，360 硬件会捕获这种情况。因为只有操作系统可以修改保护键，这样就可以防止进程之间、用户进程和操作系统之间的干扰。</p>
+</blockquote>
+<p><strong>这种解决方式是有一个缺陷。如下所示，假设有两个程序，每个大小各为 16 KB</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/702.jpeg" alt="">
+从图上可以看出，这是两个不同的 16KB 程序的装载过程，a 程序首先会跳转到地址 24，那里是一条 <code>MOV</code> 指令，然而 b 程序会首先跳转到地址 28，地址 28 是一条 <code>CMP</code> 指令。这是两个程序被先后加载到内存中的情况，假如这两个程序被同时加载到内存中并且从 0 地址处开始执行，内存的状态就如上面 c 图所示，程序装载完成开始运行，第一个程序首先从 0 地址处开始运行，执行 JMP 24 指令，然后依次执行后面的指令（许多指令没有画出），一段时间后第一个程序执行完毕，然后开始执行第二个程序。第二个程序的第一条指令是 28，这条指令会使程序跳转到第一个程序的 <code>ADD</code> 处，而不是事先设定好的跳转指令 CMP，由于这种不正确访问，可能会造成程序崩溃。</p>
+<p>上面两个程序的执行过程中有一个核心问题，那就是都引用了<code>绝对物理地址</code>，这不是我们想要看到的。我们想要的是每一个程序都会引用一个私有的本地地址。IBM 360 在第二个程序装载到内存中的时候会使用一种称为 <code>静态重定位(static relocation)</code> 的技术来修改它。它的工作流程如下：当一个程序被加载到 16384 地址时，常数 16384 被加到每一个程序地址上（所以 JMP 28会变为JMP 16412 ）。虽然这个机制在不出错误的情况下是可行的，但这不是一种通用的解决办法，同时会减慢装载速度。更近一步来讲，它需要所有可执行程序中的额外信息，以指示哪些包含（可重定位）地址，哪些不包含（可重定位）地址。毕竟，上图 b 中的 JMP 28 可以被重定向（被修改），而类似 <code>MOV REGISTER1,28</code> 会把数字 28 移到 REGISTER 中则不会重定向。所以，<code>装载器(loader)</code>需要一定的能力来辨别地址和常数。</p>
+<hr>
+<h3 id="一种存储器抽象地址空间">一种存储器抽象：地址空间</h3>
+<p><strong>把物理内存暴露给进程会有几个主要的缺点</strong>：</p>
+<ul>
+<li><code>第一个问题是</code>：如果用户程序可以寻址内存的每个字节，它们就可以很容易的破坏操作系统，从而使系统<code>停止运行</code>（除非使用 IBM 360 那种 lock-and-key 模式或者特殊的硬件进行保护）。即使在只有一个用户进程运行的情况下，这个问题也存在。</li>
+<li><code>第二个问题是</code>：这种模型想要运行多个程序是很困难的（如果只有一个 CPU 那就是顺序执行）。在个人计算机上，一般会打开很多应用程序，比如输入法、电子邮件、浏览器，这些进程在不同时刻会有一个进程正在运行，其他应用程序可以通过鼠标来唤醒。在系统中没有物理内存的情况下很难实现。</li>
+</ul>
+<hr>
+<h4 id="地址空间的概念">地址空间的概念</h4>
+<p>如果要使多个应用程序同时运行在内存中，必须要解决两个问题：<code>保护</code>和 <code>重定位</code>。</p>
+<p><strong>IBM 360 是解决方案：</strong></p>
+<ul>
+<li><code>第一种解决方式</code>是用保护密钥标记内存块，并将执行过程的密钥与提取的每个存储字的密钥进行比较。这种方式只能解决第一种问题（破坏操作系统），但是不能解决多进程在内存中同时运行的问题。</li>
+<li><code>第二种更好的方式</code>是创造一个存储器抽象：<strong>地址空间(the address space)。就像进程的概念创建了一种抽象的 CPU 来运行程序，地址空间也创建了一种抽象内存供程序使用。地址空间是进程可以用来寻址内存的地址集。每个进程都有它自己的地址空间，独立于其他进程的地址空间，但是某些进程会希望可以共享地址空间。</strong></li>
+</ul>
+<hr>
+<h4 id="基址寄存器和变址寄存器">基址寄存器和变址寄存器</h4>
+<p>最简单的办法是使用<code>动态重定位(dynamic relocation)</code>技术，它就是通过一种简单的方式将每个进程的地址空间映射到物理内存的不同区域。从 <code>CDC 6600(世界上最早的超级计算机)</code>到 <code>Intel 8088(原始 IBM PC 的核心)</code>所使用的经典办法是给每个 CPU 配置两个特殊硬件寄存器，通常叫做<code>基址寄存器(basic register)</code>和<code>变址寄存器(limit register)</code>。当使用基址寄存器和变址寄存器时，程序会装载到内存中的连续位置并且在装载期间无需重定位。当一个进程运行时，程序的起始物理地址装载到基址寄存器中，程序的长度则装载到变址寄存器中。在上图 c 中，当一个程序运行时，装载到这些硬件寄存器中的基址和变址寄存器的值分别是 0 和 16384。当第二个程序运行时，这些值分别是 16384 和 16384。如果第三个 16 KB 的程序直接装载到第二个程序的地址之上并且运行，这时基址寄存器和变址寄存器的值会是 32768 和 16384。那么我们可以总结下</p>
+<ul>
+<li><strong>基址寄存器：存储数据内存的起始位置</strong></li>
+<li><strong>变址寄存器：存储应用程序的长度。</strong></li>
+</ul>
+<p>每当进程引用内存以获取指令或读取、写入数据时，CPU 都会自动将<code>基址值</code>添加到进程生成的地址中，然后再将其发送到内存总线上。同时，它检查程序提供的地址是否大于或等于<code>变址寄存器</code> 中的值。如果程序提供的地址要超过变址寄存器的范围，那么会产生错误并中止访问。这样，对上图 c 中执行 <code>JMP 28</code> 这条指令后，硬件会把它解释为 <code>JMP 16412</code>，所以程序能够跳到 CMP 指令，过程如下
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/703.jpeg" alt="">
+使用基址寄存器和变址寄存器是给每个进程提供私有地址空间的一种非常好的方法，因为每个内存地址在送到内存之前，都会先加上基址寄存器的内容。在很多实际系统中，对基址寄存器和变址寄存器都会以一定的方式加以保护，使得只有操作系统可以修改它们。在 CDC 6600 中就提供了对这些寄存器的保护，但在 Intel 8088 中则没有，甚至没有变址寄存器。但是，Intel 8088 提供了许多基址寄存器，使程序的代码和数据可以被独立的重定位，但是对于超出范围的内存引用没有提供保护。</p>
+<p><strong>所以你可以知道使用基址寄存器和变址寄存器的缺点，在每次访问内存时，都会进行 ADD 和 CMP 运算。CMP 指令可以执行的很快，但是加法就会相对慢一些，除非使用特殊的加法电路，否则加法因进位传播时间而变慢。</strong></p>
+<hr>
+<h4 id="交换技术">交换技术</h4>
+<p>如果计算机的物理内存足够大来容纳所有的进程，那么之前提及的方案或多或少是可行的。但是实际上，所有进程需要的 <code>RAM</code> 总容量要远远高于<code>内存的容量</code>。在 Windows、OS X、或者 Linux 系统中，在计算机完成启动（Boot）后，大约有 **50 - 100 个进程随之启动。**例如，当一个 Windows 应用程序被安装后，它通常会发出命令，以便在后续系统启动时，将启动一个进程，这个进程除了检查应用程序的更新外不做任何操作。一个简单的应用程序可能会占用 <code>5 - 10MB 的内存</code>。其他后台进程会检查电子邮件、网络连接以及许多其他诸如此类的任务。这一切都会发生在第一个用户启动之前。如今，像是 <code>Photoshop</code> 这样的重要用户应用程序仅仅需要 500 MB 来启动，但是一旦它们开始处理数据就需要许多 GB 来处理。<strong>从结果上来看，将所有进程始终保持在内存中需要大量内存，如果内存不足，则无法完成。</strong></p>
+<p>所以针对上面内存不足的问题，提出了两种处理方式：<code>最简单的一种方式就是交换(swapping)技术</code>，即把一个进程完整的调入内存，然后再内存中运行一段时间，再把它放回磁盘。空闲进程会存储在磁盘中，所以这些进程在没有运行时不会占用太多内存。另外一种策略叫做<code>虚拟内存(virtual memory)</code>，虚拟内存技术能够允许应用程序部分的运行在内存中。</p>
+<p><strong>下面是一个交换过程</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/704.jpeg" alt="">
+刚开始的时候，只有进程 A 在内存中，然后从创建进程 B 和进程 C 或者从磁盘中把它们换入内存，然后在图 d 中，A 被换出内存到磁盘中，最后 A 重新进来。因为图 g 中的进程 A 现在到了不同的位置，所以在装载过程中需要被重新定位，或者在交换程序时通过软件来执行；或者在程序执行期间通过硬件来重定位。<strong>基址寄存器和变址寄存器就适用于这种情况</strong>。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/705.png" alt="">
+交换在内存创建了多个 <code>空闲区(hole)</code>，内存会把所有的空闲区尽可能向下移动合并成为一个大的空闲区。这项技术称为<code>内存紧缩(memory compaction)</code>。但是这项技术通常不会使用，因为这项技术回消耗很多 CPU 时间。例如，在一个 16GB 内存的机器上每 8ns 复制 8 字节，它紧缩全部的内存大约要花费 16s。</p>
+<p>有一个值得注意的问题是，当进程被创建或者换入内存时应该为它分配多大的内存。如果进程被创建后它的大小是固定的并且不再改变，那么分配策略就比较简单：操作系统会准确的按其需要的大小进行分配。</p>
+<p>但是如果进程的<code>数据段</code>能够自动增长，例如，通过动态分配堆中的内存，肯定会出现问题。</p>
+<hr>
+<h4 id="空闲内存管理">空闲内存管理</h4>
+<p>在进行内存动态分配时，操作系统必须对其进行管理。大致上说，有两种监控内存使用的方式</p>
+<ul>
+<li><strong><code>位图</code></strong></li>
+</ul>
+<p>使用位图方法时，内存可能被划分为小到几个字或大到几千字节的分配单元。每个分配单元对应于位图中的一位，0 表示空闲， 1 表示占用（或者相反）。一块内存区域和其对应的位图如下
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/707.jpeg" alt=""></p>
+<p>图 a 表示一段有 5 个进程和 3 个空闲区的内存，刻度为内存分配单元，阴影区表示空闲（在位图中用 0 表示）；图 b 表示对应的位图；图 c 表示用链表表示同样的信息</p>
+<p>分配单元的大小是一个重要的设计因素，分配单位越小，位图越大。然而，即使只有 4 字节的分配单元，32 位的内存也仅仅只需要位图中的 1 位。<code>32n</code> 位的内存需要 n 位的位图，所以1 个位图只占用了 1/32 的内存。如果选择更大的内存单元，位图应该要更小。如果进程的大小不是分配单元的整数倍，那么在最后一个分配单元中会有大量的内存被浪费。</p>
+<p><strong>位图提供了一种简单的方法在固定大小的内存中跟踪内存的使用情况，因为位图的大小取决于内存和分配单元的大小。这种方法有一个问题是，当决定为把具有 k 个分配单元的进程放入内存时，<code>内容管理器(memory manager)</code> 必须搜索位图，在位图中找出能够运行 k 个连续 0 位的串。在位图中找出制定长度的连续 0 串是一个很耗时的操作，这是位图的缺点。（可以简单理解为在杂乱无章的数组中，找出具有一大长串空闲的数组单元）</strong></p>
+<ul>
+<li><strong><code>空闲列表</code></strong></li>
+</ul>
+<p>另一种记录内存使用情况的方法是，维护一个记录已分配内存段和空闲内存段的链表，段会包含进程或者是两个进程的空闲区域。可用上面的图 c 来表示内存的使用情况。链表中的每一项都可以代表一个 <code>空闲区(H)</code> 或者是<code>进程(P)</code>的起始标志，长度和下一个链表项的位置。</p>
+<p>在这个例子中，<code>段链表(segment list)</code>是按照地址排序的。这种方式的优点是，当进程终止或被交换时，更新列表很简单。一个终止进程通常有两个邻居（除了内存的顶部和底部外）。相邻的可能是进程也可能是空闲区，它们有四种组合方式。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/706.jpeg" alt="">
+当按照地址顺序在链表中存放进程和空闲区时，有几种算法可以为创建的进程（或者从磁盘中换入的进程）分配内存。我们先假设内存管理器知道应该分配多少内存，最简单的算法是使用 <code>首次适配(first fit)</code>。内存管理器会沿着段列表进行扫描，直到找个一个足够大的空闲区为止。除非空闲区大小和要分配的空间大小一样，否则将空闲区分为两部分，一部分供进程使用；一部分生成新的空闲区。首次适配算法是一种速度很快的算法，因为它会尽可能的搜索链表。</p>
+<p>首次适配的一个小的变体是 <code>下次适配(next fit)</code>。它和首次匹配的工作方式相同，只有一个不同之处那就是下次适配在每次找到合适的空闲区时就会记录当时的位置，以便下次寻找空闲区时从上次结束的地方开始搜索，而不是像首次匹配算法那样每次都会从头开始搜索。Bays(1997) 证明了下次算法的性能略低于首次匹配算法。</p>
+<p>另外一个著名的并且广泛使用的算法是 <code>最佳适配(best fit)</code>。最佳适配会从头到尾寻找整个链表，找出能够容纳进程的最小空闲区。最佳适配算法会试图找出最接近实际需要的空闲区，以最好的匹配请求和可用空闲区，而不是先一次拆分一个以后可能会用到的大的空闲区。比如现在我们需要一个大小为 2 的块，那么首次匹配算法会把这个块分配在位置 5 的空闲区，而最佳适配算法会把该块分配在位置为 18 的空闲区，如下
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/708.jpeg" alt="">
+最佳适配会遍历整个链表，<strong>所以最佳适配算法的性能要比首次匹配算法差</strong>。但是令人想不到的是，最佳适配算法要比首次匹配和下次匹配算法浪费更多的内存，因为它会产生大量无用的小缓冲区，首次匹配算法生成的空闲区会更大一些。</p>
+<p>最佳适配的空闲区会分裂出很多非常小的缓冲区，为了避免这一问题，可以考虑使用 <code>最差适配(worst fit) 算法</code>。即总是分配最大的内存区域（所以你现在明白为什么最佳适配算法会分裂出很多小缓冲区了吧），使新分配的空闲区比较大从而可以继续使用。仿真程序表明最差适配算法也不是一个好主意。</p>
+<p>如果为进程和空闲区维护各自独立的链表，那么这四个算法的速度都能得到提高。这样，这四种算法的目标都是为了检查空闲区而不是进程。但这种分配速度的提高的一个不可避免的代价是增加复杂度和减慢内存释放速度，因为必须将一个回收的段从进程链表中删除并插入空闲链表区。</p>
+<p>如果进程和空闲区使用不同的链表，那么可以按照大小对空闲区链表排序，以便提高最佳适配算法的速度。在使用最佳适配算法搜索由小到大排列的空闲区链表时，只要找到一个合适的空闲区，则这个空闲区就是能容纳这个作业的最小空闲区，因此是最佳匹配。因为空闲区链表以单链表形式组织，所以不需要进一步搜索。空闲区链表按大小排序时，首次适配算法与最佳适配算法一样快，而下次适配算法在这里毫无意义。</p>
+<p>另一种分配算法是<code> 快速适配(quick fit) 算法</code>，它为那些常用大小的空闲区维护单独的链表。例如，有一个 n 项的表，该表的第一项是指向大小为 4 KB 的空闲区链表表头指针，第二项是指向大小为 8 KB 的空闲区链表表头指针，第三项是指向大小为 12 KB 的空闲区链表表头指针，以此类推。比如 21 KB 这样的空闲区既可以放在 20 KB 的链表中，也可以放在一个专门存放大小比较特别的空闲区链表中。</p>
+<p><strong>快速匹配算法寻找一个指定代销的空闲区也是十分快速的，但它和所有将空闲区按大小排序的方案一样，都有一个共同的缺点，即在一个进程终止或被换出时，寻找它的相邻块并查看是否可以合并的过程都是非常耗时的。如果不进行合并，内存将会很快分裂出大量进程无法利用的小空闲区。</strong></p>
+<hr>
+<h3 id="虚拟内存">虚拟内存</h3>
+<p>尽管<code>基址寄存器</code>和<code>变址寄存器</code>用来创建地址空间的抽象，但是这有一个其他的问题需要解决：<code>管理软件的不断增大(managing bloatware)。</code>
+虽然内存的大小增长迅速，但是软件的大小增长的要比内存还要快。</p>
+<p>这一发展的结果是，需要运行的程序往往大到内存无法容纳，而且必然需要系统能够支持多个程序同时运行，即使内存可以满足其中单独一个程序的需求，
+但是从总体上来看内存仍然满足不了日益增长的软件的需求。而交换技术并不是一个很有效的方案，在一些中小应用程序尚可使用交换，
+如果应用程序过大，难道还要每次交换几 GB 的内存？这显然是不合适的，一个典型的 SATA 磁盘的峰值传输速度高达几百兆/秒，这意味着需要好几秒才能换出或者换入一个 1 GB 的程序。</p>
+<p><code>虚拟内存(virtual memory)</code>就是来解决这个问题的，<strong>虚拟内存的基本思想是，每个程序都有自己的地址空间，这个地址空间被划分为多个称为页面(page)的块。每一页都是连续的地址范围。这些页被映射到物理内存，但并不是所有的页都必须在内存中才能运行程序。当程序引用到一部分在物理内存中的地址空间时，硬件会立刻执行必要的映射。当程序引用到一部分不在物理内存中的地址空间时，由操作系统负责将缺失的部分装入物理内存并重新执行失败的指令。</strong></p>
+<hr>
+<h4 id="分页">分页</h4>
+<p>大部分使用虚拟内存的系统中都会使用一种 <code>分页(paging) 技术</code>。在任何一台计算机上，程序会引用使用一组内存地址。当程序执行</p>
+<p><strong>MOV REG,1000</strong></p>
+<p>这条指令时，它会把内存地址为 1000 的内存单元的内容复制到 REG 中（或者相反，这取决于计算机）。地址可以通过<strong>索引、基址寄存器、段寄存器或其他方式产生</strong>。</p>
+<p>这些程序生成的地址被称为<code> 虚拟地址(virtual addresses)</code> 并形成<code>虚拟地址空间(virtual address space)</code>，在没有虚拟内存的计算机上，系统直接将虚拟地址送到内存中线上，读写操作都使用同样地址的物理内存。在使用虚拟内存时，虚拟地址不会直接发送到内存总线上。相反，会使用<code>MMU(Memory Management Unit)</code>内存管理单元把虚拟地址映射为物理内存地址，像下图这样
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/709.jpeg" alt=""></p>
+<p><strong>下面这幅图展示了这种映射是如何工作的</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/710.jpeg" alt="">
+<code>页表</code>给出<code>虚拟地址</code>与<code>物理内存地址</code>之间的映射关系。每一页起始于 4096 的倍数位置，结束于 4095 的位置，所以 4K 到 8K 实际为 4096 - 8191 ，8K - 12K 就是 8192 - 12287</p>
+<p>在这个例子中，我们可能有一个 16 位地址的计算机，地址从 0 - 64 K - 1，这些是虚拟地址。然而只有 32 KB 的物理地址。所以虽然可以编写 64 KB 的程序，但是程序无法全部调入内存运行，在磁盘上必须有一个最多 64 KB 的程序核心映像的完整副本，以保证程序片段在需要时被调入内存。</p>
+<p><strong>程序访问地址的时候会有两种情况</strong>：</p>
+<ul>
+<li><strong><code>存在映射的页如何映射</code></strong></li>
+</ul>
+<p>虚拟地址空间由固定大小的单元组成，这种固定大小的单元称为 <code>页(pages)</code>。而相对的，物理内存中也有固定大小的物理单元，称为 <code>页框(page frames)</code>。页和页框的大小一样。在上面这个例子中，页的大小为 4KB ，但是实际的使用过程中页的大小范围可能是 512 字节 - 1G 字节的大小。对应于 64 KB 的虚拟地址空间和 32 KB 的物理内存，可得到 16 个虚拟页面和 8 个页框。RAM 和磁盘之间的交换总是以整个页为单元进行交换的。</p>
+<p>程序试图访问地址时，例如执行下面这条指令</p>
+<p><strong>MOV REG, 0</strong></p>
+<p>会将虚拟地址 0 送到 MMU。MMU 看到虚拟地址落在页面 0 （0 - 4095），根据其映射结果，这一页面对应的页框 2 （8192 - 12287），因此 MMU 把地址变换为 8192 ，并把地址 8192 送到总线上。内存对 MMU 一无所知，它只看到一个对 8192 地址的读写请求并执行它。MMU 从而有效的把所有虚拟地址 0 - 4095 映射到了 8192 - 12287 的物理地址。同样的，指令</p>
+<p><strong>MOV REG, 8192</strong></p>
+<p>也被有效的转换为</p>
+<p><strong>MOV REG, 24576</strong></p>
+<p>虚拟地址 8192（在虚拟页 2 中）被映射到物理地址 24576（在物理页框 6 中）上。</p>
+<p>通过恰当的设置 MMU，可以把 16 个虚拟页面映射到 8 个页框中的任何一个。但是这并没有解决虚拟地址空间比物理内存大的问题。</p>
+<p>上图中有 8 个物理页框，于是只有 8 个虚拟页被映射到了物理内存中，在上图中用 X 号表示的其他页面没有被映射。在实际的硬件中，会使用一个 <code>在/不在(Present/absent bit)</code>位记录页面在内存中的实际存在情况。</p>
+<ul>
+<li><strong><code>未映射的页如何映射</code></strong></li>
+</ul>
+<p>当程序访问一个未映射的页面，如执行指令</p>
+<p><strong>MOV REG, 32780</strong></p>
+<p>MMU 注意到该页面没有被映射（在图中用 X 号表示），于是 CPU 会陷入(trap)到操作系统中。这个陷入称为 <code>缺页中断(page fault) </code>或者是 <code>缺页错误</code>。操作系统会选择一个很少使用的页并把它的内容写入磁盘（如果它不在磁盘上）。随后把需要访问的页面读到刚才回收的页框中，修改映射关系，然后重新启动引起陷入的指令。有点不太好理解，举个例子来看一下。</p>
+<p>例如，如果操作系统决定放弃页框 1，那么它将把虚拟机页面 8 装入物理地址 4096，并对 MMU 映射做两处修改。首先，它要将虚拟页中的 1 表项标记为未映射，使以后任何对虚拟地址 4096 - 8191 的访问都将导致陷入。随后把虚拟页面 8 的表项的叉号改为 1，因此在引起陷阱的指令重新启动时，它将把虚拟地址 32780 映射为物理地址（4096 + 12）。</p>
+<p>下面查看一下 MMU 的内部构造以便了解它们是如何工作的，以及了解为什么我们选用的页大小都是 2 的整数次幂。下图我们可以看到一个虚拟地址的例子
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/711.jpeg" alt="">
+虚拟地址 8196 （二进制 0010000000000100）用上面的页表映射图所示的 MMU 映射机制进行映射，输入的 16 位虚拟地址被分为 4 位的页号和 12 位的偏移量。4 位的页号可以表示 16 个页面，12 位的偏移可以为一页内的全部 4096 个字节。</p>
+<p>可用页号作为<code>页表(page table) </code>的索引，以得出对应于该虚拟页面的页框号。如果<code>在/不在位</code>则是 0 ，则引起一个操作系统陷入。如果该位是 1，则将在页表中查到的页框号复制到输出寄存器的高 3 位中，再加上输入虚拟地址中的低 12 位偏移量。如此就构成了 15 位的物理地址。输出寄存器的内容随即被作为物理地址送到总线。</p>
+<hr>
+<h4 id="页表">页表</h4>
+<p>在上面这个简单的例子中，虚拟地址到物理地址的映射可以总结如下：虚拟地址被分为<code>虚拟页号（高位部分）</code>和<code>偏移量（低位部分）</code>。例如，对于 16 位地址和 4 KB 的页面大小，高 4 位可以指定 16 个虚拟页面中的一页，而低 12 位接着确定了所选页面中的偏移量（0-4095）。</p>
+<p>虚拟页号可作为页表的索引用来找到虚拟页中的内容。由页表项可以找到页框号（如果有的话）。然后把页框号拼接到偏移量的高位端，以替换掉虚拟页号，形成物理地址。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/712.jpeg" alt="">
+<strong>因此，页表的目的是把虚拟页映射到页框中。从数学上说，页表是一个函数，它的参数是虚拟页号，结果是物理页框号。</strong></p>
+<h4 id="页表项的结构"><code>页表项的结构</code></h4>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/713.png" alt=""></p>
+<ul>
+<li><code>页框号(Page frame number)</code>： 用于页表映射到页框</li>
+<li><code>在/不在位</code>：如果此位上的值是 1，那么页表项是有效的并且能够被使用。如果此值是 0 的话，则表示该页表项对应的虚拟页面不在内存中，访问该页面会引起一个<code>缺页异常(page fault)</code>。</li>
+<li><code>保护位(Protection)</code>：告诉我们哪一种访问是允许的，啥意思呢？最简单的表示形式是这个域只有一位，0 表示可读可写，1 表示的是只读。</li>
+<li><code>修改位(Modified)</code>：当一个页面被写入时，硬件会自动的设置修改位。修改位在页面重新分配页框时很有用。如果一个页面已经被修改过（即它是 脏 的），则必须把它写回磁盘。如果一个页面没有被修改过（即它是 干净的），那么重新分配时这个页框会被直接丢弃，因为磁盘上的副本仍然是有效的。这个位有时也叫做 脏位(dirty bit)，因为它反映了页面的状态。</li>
+<li><code>访问位(Referenced)</code>：在页面被访问时被设置，不管是读还是写。这个值能够帮助操作系统在发生缺页中断时选择要淘汰的页。不再使用的页要比正在使用的页更适合被淘汰。</li>
+<li><code>高速缓存禁止位</code>：这个功能对于映射到设备寄存器还是内存中起到了关键作用。通过这一位可以禁用高速缓存。</li>
+</ul>
+<hr>
+<h4 id="加速分页过程">加速分页过程</h4>
+<p>到现在我们已经<code>虚拟内存(virtual memory)</code> 和 <code>分页(paging)</code> 的基础，现在我们可以把目光放在具体的实现上面了。在任何带有分页的系统中，都会需要面临下面这两个主要问题：</p>
+<ul>
+<li>虚拟地址到物理地址的映射速度必须要快</li>
+<li>如果虚拟地址空间足够大，那么页表也会足够大</li>
+</ul>
+<p>第一个问题是<code>由于每次访问内存都需要进行虚拟地址到物理地址的映射</code>，所有的指令最终都来自于内存，并且很多指令也会访问内存中的操作数。因此，每条指令可能会多次访问页表，如果执行一条指令需要 1 ns，那么页表查询需要在 0.2 ns 之内完成，以避免映射成为一个主要性能瓶颈。</p>
+<p>第二个问题是所有的现代操作系统都会使用至少 32 位的虚拟地址，并且 64 位正在变得越来越普遍。假设页大小为 4 KB，32 位的地址空间将近有 100 万页，而  64 位地址空间简直多到无法想象。</p>
+<p>对大而且快速的页映射的需要成为构建计算机的一个非常重要的约束。就像上面页表中的图一样，<strong>每一个表项对应一个虚拟页面，虚拟页号作为索引</strong>。在启动一个进程时，操作系统会把保存在内存中进程页表读副本放入寄存器中。</p>
+<blockquote>
+<p>最后一句话的理解：它是虚拟地址到内存地址的映射页表。页表是虚拟地址转换的关键组成部分，它是访问内存中数据所必需的。在进程启动时，执行很多次虚拟地址到物理地址的转换，会把物理地址的副本从内存中读入到寄存器中，再执行这一转换过程。</p>
+</blockquote>
+<p>所以，在进程的运行过程中，不必再为页表而访问内存。使用这种方法的优势是<code>简单而且映射过程中不需要访问内存</code>。缺点是 <code>页表太大时</code>，<code>代价高昂</code>，而且每次上下文切换的时候都必须装载整个页表，这样会造成性能的降低。</p>
+<p><strong>鉴于此，我们讨论一下加速分页机制和处理大的虚拟地址空间的实现方案</strong></p>
+<ul>
+<li><strong><code>转换检测缓冲区</code></strong></li>
+</ul>
+<p>大部分优化方案都是从内存中的页表开始的。这种设计对效率有着巨大的影响。考虑一下，例如，假设一条 1 字节的指令要把一个寄存器中的数据复制到另一个寄存器。在不分页的情况下，这条指令只访问一次内存，即从内存取出指令。有了分页机制后，会因为要访问页表而需要更多的内存访问。由于执行速度通常被 CPU 从内存中取指令和数据的速度所限制，这样的话，两次访问才能实现一次的访问效果，所以内存访问的性能会下降一半。在这种情况下，根本不会采用分页机制。</p>
+<p>大多数程序总是对少量页面进行多次访问，而不是对大量页面进行少量访问。因此，只有很少的页面能够被再次访问，而其他的页表项很少被访问。<strong>基于这种设想，提出了一种方案，即从硬件方面来解决这个问题，为计算机设置一个小型的硬件设备，能够将虚拟地址直接映射到物理地址，而不必再访问页表。这种设备被称为<code>转换检测缓冲区(Translation Lookaside Buffer, TLB)</code>，有时又被称为<code> 相联存储器(associate memory)</code> 。</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/714.png" alt="">
+TLB 通常位于 MMU 中，包含少量的表项，每个表项都记录了页面的相关信息，除了虚拟页号外，其他表项都和页表是一一对应的
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/715.jpeg" alt="">
+TLB 其实就是一种<code>内存缓存</code>，<strong>用于减少访问内存所需要的时间</strong>，它就是 MMU 的<code>一部分</code>，TLB 会将虚拟地址到物理地址的转换存储起来，通常可以称为<code>地址翻译缓存(address-translation cache)</code>。TLB 通常位于 CPU 和 CPU 缓存之间，它与 CPU 缓存是不同的缓存级别。下面我们来看一下 TLB 是如何工作的。</p>
+<p>当一个 MMU 中的虚拟地址需要进行转换时，硬件首先检查虚拟页号与 TLB 中所有表项进行并行匹配，判断虚拟页是否在 TLB 中。如果找到了有效匹配项，并且要进行的访问操作没有违反保护位的话，则将页框号直接从 TLB 中取出而不用再直接访问页表。如果虚拟页在 TLB 中但是违反了保护位的权限的话（比如只允许读但是是一个写指令），则会生成一个<code>保护错误(protection fault) </code>返回。</p>
+<p>上面探讨的是虚拟地址在 TLB 中的情况，那么如果虚拟地址不再 TLB 中该怎么办？如果 MMU 检测到没有有效的匹配项，就会进行正常的页表查找，然后从 TLB 中逐出一个表项然后把从页表中找到的项放在 TLB 中。当一个表项被从 TLB 中清除出，将修改位复制到内存中页表项，除了访问位之外，其他位保持不变。当页表项从页表装入 TLB 中时，所有的值都来自于内存。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/716.png" alt=""></p>
+<ul>
+<li><strong><code>软件 TLB 管理</code></strong></li>
+</ul>
+<p>直到现在，我们假设每台电脑都有可以被硬件识别的页表，外加一个 TLB。在这个设计中，TLB 管理和处理 TLB 错误完全由硬件来完成。仅仅当页面不在内存中时，才会发生操作系统的<code>陷入(trap)</code>。</p>
+<p>在以前，我们上面的假设通常是正确的。但是，许多现代的 <code>RISC</code> 机器，包括 SPARC、MIPS 和 HP PA，几乎所有的页面管理都是在软件中完成的。</p>
+<p>在这些计算机上，TLB 条目由操作系统显示加载。当发生 TLB 访问丢失时，不再是由 <strong>MMU 到页表中查找并取出需要的页表项，而是生成一个 TLB 失效并将问题交给操作系统解决</strong>。操作系统必须找到该页，把它从 TLB 中移除（移除页表中的一项），然后把新找到的页放在 TLB 中，最后再执行先前出错的指令。然而，所有这些操作都必须通过少量指令完成，因为 TLB 丢失的发生率要比出错率高很多。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/717.png" alt="">
+无论是用硬件还是用软件来处理 TLB 失效，常见的方式都是找到页表并执行索引操作以定位到将要访问的页面，在软件中进行搜索的问题是保存页表的页可能不在 TLB 中，这将在处理过程中导致其他 TLB 错误。改善方法是可以在内存中的固定位置维护一个大的 TLB 表项的高速缓存来减少 TLB 失效。通过首先检查软件的高速缓存，操作系统 能够有效的减少 TLB 失效问题。</p>
+<p>TLB 软件管理会有两种 TLB 失效问题，当一个页访问在内存中而不在 TLB 中时，将产生<code> 软失效(soft miss)</code>，那么此时要做的就是把页表更新到 TLB 中（我们上面探讨的过程），而不会产生磁盘 I/O，处理仅仅需要一些机器指令在几纳秒的时间内完成。然而，当页本身不在内存中时，将会产生<code>硬失效(hard miss)</code>，那么此时就需要从磁盘中进行页表提取，硬失效的处理时间通常是软失效的百万倍。在页表结构中查找映射的过程称为 <code>页表遍历(page table walk)</code>。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/718.jpeg" alt="">
+上面的这两种情况都是理想情况下出现的现象，但是在实际应用过程中情况会更加复杂，未命中的情况可能既不是硬失效又不是软失效。一些未命中可能更<code>软</code>或更<code>硬</code>。比如，如果页表遍历的过程中没有找到所需要的页，那么此时会出现三种情况：</p>
+<ul>
+<li>所需的页面就在内存中，但是却没有记录在进程的页表中，这种情况可能是由其他进程从磁盘掉入内存，这种情况只需要把页正确映射就可以了，而不需要在从硬盘调入，这是一种软失效，称为 <code>次要缺页错误(minor page fault)</code>。</li>
+<li>基于上述情况，如果需要从硬盘直接调入页面，这就是<code>严重缺页错误(major page fault)</code>。</li>
+<li>还有一种情况是，程序可能访问了一个非法地址，根本无需向 TLB 中增加映射。此时，操作系统会报告一个 <code>段错误(segmentation fault)</code> 来终止程序。只有第三种缺页属于程序错误，其他缺页情况都会被硬件或操作系统以降低程序性能为代价来修复</li>
+</ul>
+<hr>
+<h4 id="针对大内存的页表">针对大内存的页表</h4>
+<p>上面<code>加速分页</code>过程讨论的是<code>虚拟地址到物理地址的映射速度必须要快的问题</code>，还有一个问题是 <code>如果虚拟地址空间足够大，那么页表也会足够大的问题</code></p>
+<ul>
+<li><strong><code>多级页表</code></strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/719.png" alt="">
+32 位的虚拟地址被划分为 10 位的 PT1 域，10 位的 PT2 域，还有 12 位的 Offset 域。因为偏移量是 12 位，所以页面大小是 4KB，公有 2^20 次方个页面。</li>
+</ul>
+<p><strong>引入多级页表的原因是避免把全部页表一直保存在内存中。不需要的页表就不应该保留。</strong></p>
+<p>多级页表是一种分页方案，它由两个或多个层次的分页表组成，也称为分层分页。级别1（level 1）页面表的条目是指向级别 2（level 2） 页面表的指针，级别2页面表的条目是指向级别 3（level 3） 页面表的指针，依此类推。最后一级页表存储的是实际的信息。</p>
+<p><strong>下面是一个二级页表的工作过程</strong>
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/720.png" alt="">
+在最左边是顶级页表，它有 1024 个表项，对应于 10 位的 PT1 域。当一个虚拟地址被送到 MMU 时，MMU 首先提取 PT1 域并把该值作为访问顶级页表的索引。因为整个 4 GB （即 32 位）虚拟地址已经按 4 KB 大小分块，所以顶级页表中的 1024 个表项的每一个都表示 4M 的块地址范围。</p>
+<p>由索引顶级页表得到的表项中含有二级页表的地址或页框号。顶级页表的表项 0 指向程序正文的页表，表项 1 指向含有数据的页表，表项 1023 指向堆栈的页表，其他的项（用阴影表示）表示没有使用。现在把 PT2 域作为访问选定的二级页表的索引，以便找到虚拟页面的对应页框号。</p>
+<ul>
+<li><strong><code>倒排页表</code></strong></li>
+</ul>
+<p>针对分页层级结构中不断增加的替代方法是使用 <code>倒排页表(inverted page tables)</code>。采用这种解决方案的有 <strong>PowerPC、UltraSPARC 和 Itanium</strong>。在这种设计中，实际内存中的每个页框对应一个表项，而不是每个虚拟页面对应一个表项。</p>
+<p>虽然倒排页表<code>节省了大量的空间</code>，但是它也有自己的缺陷：<code>那就是从虚拟地址到物理地址的转换会变得很困难</code>。当进程 n 访问虚拟页面 p 时，硬件不能再通过把 p 当作指向页表的一个索引来查找物理页。而是必须搜索整个倒排表来查找某个表项。另外，搜索必须对每一个内存访问操作都执行一次，而不是在发生缺页中断时执行。</p>
+<p>解决这一问题的方式时使用 TLB。当发生 TLB 失效时，需要用软件搜索整个倒排页表。一个可行的方式是建立一个散列表，用虚拟地址来散列。当前所有内存中的具有相同散列值的虚拟页面被链接在一起。如下图所示
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/721.jpeg" alt="">
+如果散列表中的槽数与机器中物理页面数一样多，那么散列表的冲突链的长度将会是 1 个表项的长度，这将会大大提高映射速度。一旦页框被找到，新的（虚拟页号，物理页框号）就会被装在到 TLB 中。</p>
+<hr>
+<h3 id="页面置换算法">页面置换算法</h3>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/640.jpeg" alt=""></p>
+<ul>
+<li><code>最优算法</code>在当前页面中置换最后要访问的页面。不幸的是，没有办法来判定哪个页面是最后一个要访问的，因此实际上该算法不能使用。然而，它可以作为衡量其他算法的标准。</li>
+<li><code>NRU 算法</code>根据 R 位和 M 位的状态将页面氛围四类。从编号最小的类别中随机选择一个页面。NRU 算法易于实现，但是性能不是很好。存在更好的算法。</li>
+<li><code>FIFO</code> 会跟踪页面加载进入内存中的顺序，并把页面放入一个链表中。有可能删除存在时间最长但是还在使用的页面，因此这个算法也不是一个很好的选择。</li>
+<li><code>第二次机会算法</code>是对 FIFO 的一个修改，它会在删除页面之前检查这个页面是否仍在使用。如果页面正在使用，就会进行保留。这个改进大大提高了性能。</li>
+<li><code>时钟 算法</code>是第二次机会算法的另外一种实现形式，时钟算法和第二次算法的性能差不多，但是会花费更少的时间来执行算法。</li>
+<li><code>LRU 算法</code>是一个非常优秀的算法，但是没有特殊的硬件(TLB)很难实现。如果没有硬件，就不能使用 LRU 算法。</li>
+<li><code>NFU 算法</code>是一种近似于 LRU 的算法，它的性能不是非常好。</li>
+<li><code>老化 算法</code>是一种更接近 LRU 算法的实现，并且可以更好的实现，因此是一个很好的选择</li>
+</ul>
+<p>最后两种算法都使用了工作集算法。工作集算法提供了合理的性能开销，但是它的实现比较复杂。WSClock  是另外一种变体，它不仅能够提供良好的性能，而且可以高效地实现。</p>
+<p>总之，最好的算法是<code>老化算法</code>和<code>WSClock算法</code>。他们分别是基于 LRU 和工作集算法。他们都具有良好的性能并且能够被有效的实现。还存在其他一些好的算法，但实际上这两个可能是最重要的。</p>
+<hr>
+<h3 id="总结">总结</h3>
+<p><strong>1. 操作系统中的分层存储体系由：寄存器、高速缓存、主存、磁盘(访问速度依次变慢，容量依次变大)</strong></p>
+<p><strong>2. 内存管理器用来记录哪些内存正在使用，哪些内存使用完了要被回收</strong></p>
+<p><strong>3. 通过虚拟内存来解决：软件不断增大(内存无法容纳) 和支持多个程序同时运行</strong></p>
+<p><strong>4. 虚拟内存的基本思想：每个程序都有自己的地址空间，这个地址空间被划分成多个页面(page)块。每一页都是连续的地址范围。这些页映射到物理内存上但并不是所有的页都必须在内存中才能运行程序</strong></p>
+<ul>
+<li>当程序引用到的一部<code>分</code>在物理内存中的地址空间时，硬件会立即执行必要的映射</li>
+<li>当程序引用到的一部分<code>不在</code>物理内存中的地址空间时，由操作系统将缺失的部分装入物理内存(缺页错误)并重新执行失败的指令</li>
+</ul>
+<p><strong>5. 虚拟内存采用分页技术，程序会引用一组内存地址(可以由索引、基址寄存器、段寄存器或其他方式产生)，这个地址称为虚拟地址。这些程序的地址行程虚拟地址空间。在使用虚拟内存时。虚拟地址布会直接发送内存总线上，会使用MMU(内存管理单元)把虚拟地址映射为物理内存地址</strong></p>
+<p><strong>6. 页表维护程序虚拟地址和物理内存地址之间的映射关系；虚拟地址高位部分是虚拟页号可以作为页表的索引，低位部分是偏移量</strong></p>
+<p><strong>7. 通过转换检测缓冲区的方式和TLB(<code>内存缓存，用于减少访问内存所需要的时间，它就是 MMU 的一部分</code>)管理来加速页表的生成(<code>虚拟地址到物理地址的映射速度</code>)</strong></p>
+<p><strong>8. 通过<code>多级页表</code>和<code>倒排页表</code>来解决页表太大的问题</strong></p>
+<p><strong>9. 在页面置换算法中<code>老化</code>算法和<code>WSClock</code>算法是最好的算法，分别基于LRU和工作集算法</strong></p>
+<hr>
+<h4 id="参考">参考</h4>
+<p>《现代操作系统 第四版》</p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzU2NDg0OTgyMA==&amp;mid=2247485714&amp;idx=1&amp;sn=58ca990e0bdc336115ffab7f3169e8c9&amp;chksm=fc45f4e1cb327df7964f55425da2e9934af342de21fee16e14596967a5ab2143cd8d24ddbe08&amp;scene=21#wechat_redirect">内存：你跑慢点行不行？CPU：跑慢点你养我吗？内存：我不管！</a></p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/" data-toggle="tooltip" data-placement="top" title="计算机之进程与线程">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" data-toggle="tooltip" data-placement="top" title="计算机之文件系统">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"><i class="fa fa-link"></i>计算机之进程与线程</a></li>
+         
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu/"><i class="fa fa-link"></i>计算机之CPU</a></li>
+         
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%9F%BA%E7%A1%80/"><i class="fa fa-link"></i>计算机之基础</a></li>
+         
+        <li><a href="/blog/%E8%87%AA%E5%AD%A6%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%8C%87%E5%8D%97/"><i class="fa fa-link"></i>自学计算机科学指南</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

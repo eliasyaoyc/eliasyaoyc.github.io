@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Java8—新特性汇总.md · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Java, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Java8—新特性汇总.md" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="书籍《Java实战》一些操作的汇总">
+  <meta property="og:description" content="书籍《Java实战》一些操作的汇总">
+  <meta name="twitter:description" content="书籍《Java实战》一些操作的汇总">
+  <meta property="og:description" content="书籍《Java实战》一些操作的汇总" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—新特性汇总.md logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—新特性汇总.md logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Java8—新特性汇总.md - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—新特性汇总.md logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—新特性汇总.md logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Java8—新特性汇总.md - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—新特性汇总.md logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Java8—新特性汇总.md logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Java8—新特性汇总.md - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Java8—新特性汇总.md</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月9日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            4900字 | 阅读大约需要10分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/java">Java</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/java/"><i>#Java</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h2 id="1lambda">1.Lambda</h2>
+<h3 id="11-方法引用">1.1 方法引用</h3>
+<ul>
+<li>
+<p>指向<code>静态方法</code>的方法引用(例如Integer的parseInt方法，写作Integer::parseInt)。</p>
+</li>
+<li>
+<p>指向<code>任意类型实例方法</code>的方法引用(例如String的length方法，写作 String::length)。</p>
+</li>
+<li>
+<p>指向<code>现有对象的实例方法</code>的方法引用(假设你有一个局部变量expensiveTransaction 用于存放Transaction类型的对象，它支持实例方法getValue，那么你就可以写expensive- Transaction::getValue)。</p>
+</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">        List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> str <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;A&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;B&#34;</span><span style="color:#f92672">);</span>
+        str<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">((</span>s1<span style="color:#f92672">,</span>s2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> s1<span style="color:#f92672">.</span><span style="color:#a6e22e">compareToIgnoreCase</span><span style="color:#f92672">(</span>s2<span style="color:#f92672">));</span>
+        str<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>String<span style="color:#f92672">::</span>compareToIgnoreCase<span style="color:#f92672">);</span>
+
+        Function<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span>Integer<span style="color:#f92672">&gt;</span> stringToInteger <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>String s<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">parseInt</span><span style="color:#f92672">(</span>s<span style="color:#f92672">);</span>
+        Function<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span>Integer<span style="color:#f92672">&gt;</span> sti <span style="color:#f92672">=</span> Integer<span style="color:#f92672">::</span>parseInt<span style="color:#f92672">;</span>
+
+        BiPredicate<span style="color:#f92672">&lt;</span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;,</span> String<span style="color:#f92672">&gt;</span> contains <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>list<span style="color:#f92672">,</span> element<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span>    list<span style="color:#f92672">.</span><span style="color:#a6e22e">contains</span><span style="color:#f92672">(</span>element<span style="color:#f92672">);</span>
+        BiPredicate<span style="color:#f92672">&lt;</span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;,</span> String<span style="color:#f92672">&gt;</span> c <span style="color:#f92672">=</span> List<span style="color:#f92672">::</span>contains<span style="color:#f92672">;</span>
+</code></pre></div><p><strong>构造函数引用</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Apple</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> Integer weight<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> String color<span style="color:#f92672">;</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Apple</span><span style="color:#f92672">(</span>Integer weight<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">weight</span> <span style="color:#f92672">=</span> weight<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Apple</span><span style="color:#f92672">(</span>String color<span style="color:#f92672">,</span> Integer weight<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">weight</span> <span style="color:#f92672">=</span> weight<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">color</span> <span style="color:#f92672">=</span> color<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> list<span style="color:#f92672">,</span>
+                                  Function<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> Apple<span style="color:#f92672">&gt;</span> f<span style="color:#f92672">){</span>
+        List<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> result <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span>Integer e<span style="color:#f92672">:</span> list<span style="color:#f92672">){</span>
+            result<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>f<span style="color:#f92672">.</span><span style="color:#a6e22e">apply</span><span style="color:#f92672">(</span>e<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> result<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">mapTwo</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> list<span style="color:#f92672">,</span>
+                                  BiFunction<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span>Integer<span style="color:#f92672">,</span> Apple<span style="color:#f92672">&gt;</span> f<span style="color:#f92672">){</span>
+        List<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> result <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span>Integer e<span style="color:#f92672">:</span> list<span style="color:#f92672">){</span>
+            result<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>f<span style="color:#f92672">.</span><span style="color:#a6e22e">apply</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;green&#34;</span><span style="color:#f92672">,</span>e<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> result<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> weights <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>7<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 4<span style="color:#f92672">,</span> 10<span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> apples <span style="color:#f92672">=</span>  map<span style="color:#f92672">(</span>weights<span style="color:#f92672">,</span> Apple<span style="color:#f92672">::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">);</span>
+
+        BiFunction<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span>Integer<span style="color:#f92672">,</span>Apple<span style="color:#f92672">&gt;</span> c3 <span style="color:#f92672">=</span> Apple<span style="color:#f92672">::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">;</span>
+        Apple green <span style="color:#f92672">=</span> c3<span style="color:#f92672">.</span><span style="color:#a6e22e">apply</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;green&#34;</span><span style="color:#f92672">,</span> 10<span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> two <span style="color:#f92672">=</span> mapTwo<span style="color:#f92672">(</span>weights<span style="color:#f92672">,</span> Apple<span style="color:#f92672">::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>排序：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//1. 
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AppleComparator</span> <span style="color:#66d9ef">implements</span> Comparator<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">compare</span><span style="color:#f92672">(</span>Apple a1<span style="color:#f92672">,</span> Apple a2<span style="color:#f92672">){</span>
+            <span style="color:#66d9ef">return</span> a1<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">().</span><span style="color:#a6e22e">compareTo</span><span style="color:#f92672">(</span>a2<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> AppleComparator<span style="color:#f92672">());</span>
+<span style="color:#75715e">//2.
+</span><span style="color:#75715e"></span>inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Comparator<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">compare</span><span style="color:#f92672">(</span>Apple a1<span style="color:#f92672">,</span> Apple a2<span style="color:#f92672">){</span>
+            <span style="color:#66d9ef">return</span> a1<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">().</span><span style="color:#a6e22e">compareTo</span><span style="color:#f92672">(</span>a2<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+<span style="color:#f92672">});</span>
+<span style="color:#75715e">//3.
+</span><span style="color:#75715e"></span>inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">((</span>Apple a1<span style="color:#f92672">,</span> Apple a2<span style="color:#f92672">)</span>
+                <span style="color:#f92672">-&gt;</span> a1<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">().</span><span style="color:#a6e22e">compareTo</span><span style="color:#f92672">(</span>a2<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">())</span>
+<span style="color:#f92672">);</span>
+inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">((</span>a1<span style="color:#f92672">,</span> a2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> a1<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">().</span><span style="color:#a6e22e">compareTo</span><span style="color:#f92672">(</span>a2<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">()));</span>
+Comparator<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> c <span style="color:#f92672">=</span> Comparator<span style="color:#f92672">.</span><span style="color:#a6e22e">comparing</span><span style="color:#f92672">((</span>Apple a<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">());</span>
+inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">((</span>a<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">()));</span>
+<span style="color:#75715e">//4. 方法引用
+</span><span style="color:#75715e"></span>inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">(</span>Apple<span style="color:#f92672">::</span>getWeight<span style="color:#f92672">));</span>
+</code></pre></div><hr>
+<h3 id="12-复合lambda表达式">1.2 复合Lambda表达式</h3>
+<h4 id="121-比较器复合">1.2.1 比较器复合</h4>
+<ul>
+<li>
+<p>逆序</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//苹果按重量递减排序
+</span><span style="color:#75715e"></span>Comparator<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> c <span style="color:#f92672">=</span> Comparator<span style="color:#f92672">.</span><span style="color:#a6e22e">comparing</span><span style="color:#f92672">(</span>Apple<span style="color:#f92672">::</span>getWeight<span style="color:#f92672">);</span>
+inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">(</span>Apple<span style="color:#f92672">::</span>getWeight<span style="color:#f92672">).</span><span style="color:#a6e22e">reversed</span><span style="color:#f92672">());</span>
+</code></pre></div></li>
+<li>
+<p>比较器链</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//两个苹果一样重怎么办?哪个苹果应该排在前面呢?你可能 需要再提供一个Comparator来进一步定义这个比较
+</span><span style="color:#75715e"></span>inventory<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">(</span>Apple<span style="color:#f92672">::</span>getWeight<span style="color:#f92672">)</span>
+         <span style="color:#f92672">.</span><span style="color:#a6e22e">reversed</span><span style="color:#f92672">()</span>
+         <span style="color:#f92672">.</span><span style="color:#a6e22e">thenComparing</span><span style="color:#f92672">(</span>Apple<span style="color:#f92672">::</span>getCountry<span style="color:#f92672">))</span> <span style="color:#75715e">//一样重是按国家排序
+</span></code></pre></div></li>
+</ul>
+<h4 id="122-谓词复合--negateandor">1.2.2 谓词复合  negate、and、or</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//苹果不是红的
+</span><span style="color:#75715e"></span>Predicate<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> notRedApple <span style="color:#f92672">=</span> redApple<span style="color:#f92672">.</span><span style="color:#a6e22e">negate</span><span style="color:#f92672">();</span> 
+<span style="color:#75715e">//一个苹果是红的 重量大于150
+</span><span style="color:#75715e"></span>Predicate<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> redAndHeavyApple <span style="color:#f92672">=</span> redApple<span style="color:#f92672">.</span><span style="color:#a6e22e">and</span><span style="color:#f92672">(</span>a <span style="color:#f92672">-&gt;</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 150<span style="color:#f92672">);</span> 
+<span style="color:#75715e">//表达要么是重(150克以上)的红苹果，要么是绿苹果:
+</span><span style="color:#75715e"></span>Predicate<span style="color:#f92672">&lt;</span>Apple<span style="color:#f92672">&gt;</span> redAndHeavyAppleOrGreen <span style="color:#f92672">=</span>
+  redApple<span style="color:#f92672">.</span><span style="color:#a6e22e">and</span><span style="color:#f92672">(</span>a <span style="color:#f92672">-&gt;</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">getWeight</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 150<span style="color:#f92672">)</span>
+          <span style="color:#f92672">.</span><span style="color:#a6e22e">or</span><span style="color:#f92672">(</span>a <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#34;green&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>a<span style="color:#f92672">.</span><span style="color:#a6e22e">getColor</span><span style="color:#f92672">()));</span> 
+</code></pre></div><h4 id="123-函数复合-andthencompose">1.2.3 函数复合 andThen、compose</h4>
+<ul>
+<li>
+<p>andThen : 会返回一个函数，它先对输入应用一个给定函数，再对输出应用另一个函数。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Function<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span>Integer<span style="color:#f92672">&gt;</span> f <span style="color:#f92672">=</span> x <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">+</span> 1<span style="color:#f92672">;</span>
+Function<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span>Integer<span style="color:#f92672">&gt;</span> g <span style="color:#f92672">=</span> x <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">*</span> 2<span style="color:#f92672">;</span>
+Function<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span>Integer<span style="color:#f92672">&gt;</span> h <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span><span style="color:#a6e22e">andThen</span><span style="color:#f92672">(</span>g<span style="color:#f92672">);</span>
+<span style="color:#66d9ef">int</span> result <span style="color:#f92672">=</span> h<span style="color:#f92672">.</span><span style="color:#a6e22e">apply</span><span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>  <span style="color:#75715e">//4
+</span></code></pre></div></li>
+<li>
+<p>compose : 先把给定的函数用作compose的参数里面给的那个函数，然后再把函数本身用于结果。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Function<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> Integer<span style="color:#f92672">&gt;</span> f <span style="color:#f92672">=</span> x <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">+</span> 1<span style="color:#f92672">;</span>
+Function<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> Integer<span style="color:#f92672">&gt;</span> g <span style="color:#f92672">=</span> x <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">*</span> 2<span style="color:#f92672">;</span>
+Function<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> Integer<span style="color:#f92672">&gt;</span> h <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span><span style="color:#a6e22e">compose</span><span style="color:#f92672">(</span>g<span style="color:#f92672">);</span>
+<span style="color:#66d9ef">int</span> result <span style="color:#f92672">=</span> h<span style="color:#f92672">.</span><span style="color:#a6e22e">apply</span><span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>   <span style="color:#75715e">//3
+</span></code></pre></div></li>
+</ul>
+<p>案例： 用String 标识的一封信做文本转换：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Letter</span><span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> String <span style="color:#a6e22e">addHeader</span><span style="color:#f92672">(</span>String text<span style="color:#f92672">){</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;From Raoul, Mario and Alan: &#34;</span> <span style="color:#f92672">+</span> text<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> String <span style="color:#a6e22e">addFooter</span><span style="color:#f92672">(</span>String text<span style="color:#f92672">){</span>
+            <span style="color:#66d9ef">return</span> text <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; Kind regards&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> String <span style="color:#a6e22e">checkSpelling</span><span style="color:#f92672">(</span>String text<span style="color:#f92672">){</span>
+            <span style="color:#66d9ef">return</span> text<span style="color:#f92672">.</span><span style="color:#a6e22e">replaceAll</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;labda&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;lambda&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> 
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">){</span>
+  Function<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> addHeader <span style="color:#f92672">=</span> Letter<span style="color:#f92672">::</span>addHeader<span style="color:#f92672">;</span>
+  <span style="color:#75715e">//先加上 抬头，然后进行拼写检查，最后加上一个落款
+</span><span style="color:#75715e"></span>  Function<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> transformationPipeline
+        <span style="color:#f92672">=</span> addHeader<span style="color:#f92672">.</span><span style="color:#a6e22e">andThen</span><span style="color:#f92672">(</span>Letter<span style="color:#f92672">::</span>checkSpelling<span style="color:#f92672">)</span>
+                   <span style="color:#f92672">.</span><span style="color:#a6e22e">andThen</span><span style="color:#f92672">(</span>Letter<span style="color:#f92672">::</span>addFooter<span style="color:#f92672">);</span>
+  <span style="color:#75715e">//只加抬头、落款，而不做拼写检查:
+</span><span style="color:#75715e"></span>  Function<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> transformationPipeline
+        <span style="color:#f92672">=</span> addHeader<span style="color:#f92672">.</span><span style="color:#a6e22e">andThen</span><span style="color:#f92672">(</span>Letter<span style="color:#f92672">::</span>addFooter<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h3 id="13-lambda-小结">1.3 Lambda 小结</h3>
+<ul>
+<li>Lambda表达式可以理解为一种匿名函数:它没有名称，但有参数列表、函数主体、返回类型，可能还有一个可以抛出的异常的列表。</li>
+<li>Lambda表达式让你可以简洁地传递代码。</li>
+<li>函数式接口就是仅仅声明了一个抽象方法的接口。</li>
+<li>只有在接受函数式接口的地方才可以使用Lambda表达式。</li>
+<li>Lambda表达式允许你直接内联，为函数式接口的抽象方法提供实现，并且将整个表达式作为函数式接口的一个实例。</li>
+<li>Java 8自带一些常用的函数式接口，放在java.util.function包里，包括Predicate<!-- raw HTML omitted -->、Function&lt;T,R&gt;、Supplier<!-- raw HTML omitted -->、Consumer<!-- raw HTML omitted -->和BinaryOperator<!-- raw HTML omitted -->，如表3-2所述。</li>
+<li>为了避免装箱操作，对Predicate<!-- raw HTML omitted -->和Function&lt;T, R&gt;等通用函数式接口的原始类型特化:IntPredicate、IntToLongFunction等。</li>
+<li>环绕执行模式(即在方法所必需的代码中间，你需要执行点儿什么操作，比如资源分配 和清理)可以配合Lambda提高灵活性和可重用性。</li>
+<li>Lambda表达式所需要代表的类型称为目标类型。</li>
+<li>方法引用让你重复使用现有的方法实现并直接传递它们。</li>
+<li>Comparator、Predicate和Function等函数式接口都有几个可以用来结合Lambda表达式的默认方法</li>
+</ul>
+<hr>
+<h2 id="2-stream">2. Stream</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//单核处理
+</span><span style="color:#75715e"></span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lowCaloricDishesName <span style="color:#f92672">=</span>
+               menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                   <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>d <span style="color:#f92672">-&gt;</span> d<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;</span> 400<span style="color:#f92672">)</span> <span style="color:#75715e">//选出400卡路里 以下的菜肴
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">sorted</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">))</span> <span style="color:#75715e">//按照卡路；里排序
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getName<span style="color:#f92672">)</span> <span style="color:#75715e">//提取菜肴的名称
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span><span style="color:#75715e">//将所有名称保存在List中
+</span><span style="color:#75715e">//多核处理
+</span><span style="color:#75715e"></span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lowCaloricDishesName <span style="color:#f92672">=</span>
+               menu<span style="color:#f92672">.</span><span style="color:#a6e22e">parallelStream</span><span style="color:#f92672">()</span>
+                   <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>d <span style="color:#f92672">-&gt;</span> d<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;</span> 400<span style="color:#f92672">)</span> <span style="color:#75715e">//选出400卡路里 以下的菜肴
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">sorted</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">))</span> <span style="color:#75715e">//按照卡路；里排序
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getName<span style="color:#f92672">)</span> <span style="color:#75715e">//提取菜肴的名称
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span><span style="color:#75715e">//将所有名称保存在List中
+</span><span style="color:#75715e"></span> 
+</code></pre></div><hr>
+<h3 id="21-流与集合">2.1 流与集合</h3>
+<h4 id="211-流只能遍历一次">2.1.1 流只能遍历一次</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> title <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Java8&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;In&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Action&#34;</span><span style="color:#f92672">);</span>
+        Stream<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> s <span style="color:#f92672">=</span> title<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">();</span>
+        s<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>  <span style="color:#75715e">//只能被消费一次
+</span><span style="color:#75715e"></span>        s<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span> <span style="color:#75715e">//java.lang.IllegalStateException:流已被操作 或关闭
+</span></code></pre></div><h4 id="212-外部迭代与内部迭代">2.1.2 外部迭代与内部迭代</h4>
+<ul>
+<li>
+<p>集合：<code>外部迭代</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//用for-each循环
+</span><span style="color:#75715e"></span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> names <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+    <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span>Dish d<span style="color:#f92672">:</span> menu<span style="color:#f92672">){</span>
+     names<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>d<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//用背后的迭代器做外部迭代
+</span><span style="color:#75715e"></span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> names <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+    Iterator<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> iterator <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>iterator<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        Dish d <span style="color:#f92672">=</span> iterator<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">();</span>
+        names<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>d<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p>流：<code>内部迭代</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> names <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                         <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getName<span style="color:#f92672">)</span>
+                         <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div></li>
+</ul>
+<h4 id="213-流操作中间操作">2.1.3 流操作—中间操作</h4>
+<p>诸如filter或sorted等中间操作会返回另一个流</p>
+<h4 id="214-流操作中端操作">2.1.4 流操作—中端操作</h4>
+<p>终端操作会从流的流水线生成结果。</p>
+<h4 id="215-流操作使用流">2.1.5 流操作—使用流</h4>
+<ul>
+<li>一个数据源(如集合)来执行一个查询;</li>
+<li>一个中间操作链，形成一条流的流水线;</li>
+<li>一个终端操作，执行流水线，并能生成结果。</li>
+</ul>
+<hr>
+<h3 id="22-流操作">2.2 流操作</h3>
+<h4 id="221-筛选和切片">2.2.1 筛选和切片</h4>
+<p>用谓词筛选，筛选出各不相同的元素，忽略流中的头几个元素，或将流截短至指定长度。</p>
+<ul>
+<li>
+<p>用谓词筛选</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> vegetarianMenu <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                                 <span style="color:#75715e">//方法引用检查菜肴是否适合素食者
+</span><span style="color:#75715e"></span>                                <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>isVegetarian<span style="color:#f92672">)</span> 
+                                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div></li>
+<li>
+<p>去重</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> numbers <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 2<span style="color:#f92672">,</span> 1<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 2<span style="color:#f92672">,</span> 4<span style="color:#f92672">);</span>
+numbers<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+  <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>i <span style="color:#f92672">-&gt;</span> i <span style="color:#f92672">%</span> 2 <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+  <span style="color:#f92672">.</span><span style="color:#a6e22e">distinct</span><span style="color:#f92672">()</span> <span style="color:#75715e">//去重
+</span><span style="color:#75715e"></span>  <span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+</code></pre></div></li>
+<li>
+<p>截短流</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> dishes <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                            <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>d <span style="color:#f92672">-&gt;</span> d<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 300<span style="color:#f92672">)</span>
+                            <span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">(</span>3<span style="color:#f92672">)</span>
+                            <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div></li>
+<li>
+<p>跳过元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> dishes <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                            <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>d <span style="color:#f92672">-&gt;</span> d<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 300<span style="color:#f92672">)</span>
+                            <span style="color:#f92672">.</span><span style="color:#a6e22e">skip</span><span style="color:#f92672">(</span>2<span style="color:#f92672">)</span> <span style="color:#75715e">//跳过
+</span><span style="color:#75715e"></span>                            <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div></li>
+</ul>
+<h4 id="222-映射">2.2.2 映射</h4>
+<ul>
+<li>
+<p>对流中每一个元素应用函数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> dishNames <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                                 <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getName<span style="color:#f92672">)</span> <span style="color:#75715e">//提取菜肴的名字
+</span><span style="color:#75715e"></span>                                 <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div></li>
+<li>
+<p>流的扁平化</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> uniqueCharacters <span style="color:#f92672">=</span>
+    words<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+         <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>w <span style="color:#f92672">-&gt;</span> w<span style="color:#f92672">.</span><span style="color:#a6e22e">split</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">))</span> <span style="color:#75715e">//将每个单词转换为由 其字母构成的数组
+</span><span style="color:#75715e"></span>         <span style="color:#f92672">.</span><span style="color:#a6e22e">flatMap</span><span style="color:#f92672">(</span>Arrays<span style="color:#f92672">::</span>stream<span style="color:#f92672">)</span> <span style="color:#75715e">//将各个生成流扁平化为单个流
+</span><span style="color:#75715e"></span>         <span style="color:#f92672">.</span><span style="color:#a6e22e">distinct</span><span style="color:#f92672">()</span>
+         <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span><span style="color:#f92672">());</span>
+</code></pre></div><p><code>案例一</code>：给定一个数字列表，如何返回一个由每个数的平方构成的列表呢?例如，给定[1, 2, 3, 4,5]，应该返回[1, 4, 9, 16, 25]</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> list <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 2<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 4<span style="color:#f92672">,</span> 5<span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> collect1 <span style="color:#f92672">=</span> list<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>i <span style="color:#f92672">-&gt;</span> i <span style="color:#f92672">*</span> i<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>collect1<span style="color:#f92672">);</span>
+</code></pre></div><p><code>案例二</code>：给定两个数字列表，如何返回所有的数对呢?例如，给定列表[1, 2, 3]和列表[3, 4]，应 该返回[(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> numbers1 <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 2<span style="color:#f92672">,</span> 3<span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> numbers2 <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>3<span style="color:#f92672">,</span> 4<span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]&gt;</span> pairs <span style="color:#f92672">=</span>
+                numbers1<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">flatMap</span><span style="color:#f92672">(</span>i <span style="color:#f92672">-&gt;</span> numbers2<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>j <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[]{</span>i<span style="color:#f92672">,</span> j<span style="color:#f92672">})</span>
+                        <span style="color:#f92672">)</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div><p><code>案例三</code>：扩展前一个例子，只返回总和能被3整除的数对呢?例如(2, 4)和(3, 3)是可以的</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">[]&gt;</span> collect <span style="color:#f92672">=</span>
+                numbers1<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">flatMap</span><span style="color:#f92672">(</span>i <span style="color:#f92672">-&gt;</span> numbers2<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>j <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">(</span>i <span style="color:#f92672">+</span> j<span style="color:#f92672">)</span> <span style="color:#f92672">%</span> 3 <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>j <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[]{</span>i<span style="color:#f92672">,</span> j<span style="color:#f92672">}))</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div></li>
+</ul>
+<h4 id="223-查找和匹配">2.2.3 查找和匹配</h4>
+<ul>
+<li>
+<p>检查谓词是否至少匹配一个元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//anyMatch
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">anyMatch</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>isVegetarian<span style="color:#f92672">)){</span>
+     System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;The menu is (somewhat) vegetarian friendly!!&#34;</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p>检查谓词是否匹配所有元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//allMatch
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">boolean</span> isHealthy <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                            <span style="color:#f92672">.</span><span style="color:#a6e22e">allMatch</span><span style="color:#f92672">(</span>d <span style="color:#f92672">-&gt;</span> d<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;</span> 1000<span style="color:#f92672">);</span>
+<span style="color:#75715e">//noneMatch
+</span><span style="color:#75715e"></span> <span style="color:#66d9ef">boolean</span> isHealthy <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                            <span style="color:#f92672">.</span><span style="color:#a6e22e">noneMatch</span><span style="color:#f92672">(</span>d <span style="color:#f92672">-&gt;</span> d<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;=</span> 1000<span style="color:#f92672">);</span>
+</code></pre></div></li>
+<li>
+<p>查找元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Optional<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> dish <span style="color:#f92672">=</span>
+        menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+            <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>isVegetarian<span style="color:#f92672">)</span>
+            <span style="color:#f92672">.</span><span style="color:#a6e22e">findAny</span><span style="color:#f92672">();</span>  <span style="color:#75715e">//返回当前流中的任意元素
+</span></code></pre></div></li>
+<li>
+<p>查找第一个元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> someNumbers <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 2<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 4<span style="color:#f92672">,</span> 5<span style="color:#f92672">);</span>
+    Optional<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> firstSquareDivisibleByThree <span style="color:#f92672">=</span>
+        someNumbers<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                   <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">*</span> x<span style="color:#f92672">)</span>
+                   <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">%</span> 3 <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+                   <span style="color:#f92672">.</span><span style="color:#a6e22e">findFirst</span><span style="color:#f92672">();</span> <span style="color:#75715e">// 9
+</span></code></pre></div></li>
+</ul>
+<h4 id="224-归约">2.2.4 归约</h4>
+<ul>
+<li>
+<p>元素求和</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> sum <span style="color:#f92672">=</span> numbers<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> <span style="color:#f92672">(</span>a<span style="color:#f92672">,</span> b<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> a <span style="color:#f92672">+</span> b<span style="color:#f92672">);</span>
+<span style="color:#66d9ef">int</span> sum <span style="color:#f92672">=</span> numbers<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> Integer<span style="color:#f92672">::</span>sum<span style="color:#f92672">);</span>
+</code></pre></div></li>
+<li>
+<p>最大值和最小值</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//最大值
+</span><span style="color:#75715e"></span>Optional<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> max <span style="color:#f92672">=</span> numbers<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>Integer<span style="color:#f92672">::</span>max<span style="color:#f92672">);</span>
+<span style="color:#75715e">//最小值
+</span><span style="color:#75715e"></span>Optional<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> min <span style="color:#f92672">=</span> numbers<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>Integer<span style="color:#f92672">::</span>min<span style="color:#f92672">);</span>
+</code></pre></div><p>案例:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Trader</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String name<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String city<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Transaction</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Trader trader<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> year<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> value<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TradeTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>Transaction<span style="color:#f92672">&gt;</span> transactions<span style="color:#f92672">;</span>
+  
+    <span style="color:#66d9ef">static</span> <span style="color:#f92672">{</span>
+        Trader raoul <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Trader<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Raoul&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Cambridge&#34;</span><span style="color:#f92672">);</span>
+        Trader mario <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Trader<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Mario&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Milan&#34;</span><span style="color:#f92672">);</span>
+        Trader alan <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Trader<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Alan&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Cambridge&#34;</span><span style="color:#f92672">);</span>
+        Trader brian <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Trader<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Brian&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Cambridge&#34;</span><span style="color:#f92672">);</span>
+        transactions <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>
+                <span style="color:#66d9ef">new</span> Transaction<span style="color:#f92672">(</span>brian<span style="color:#f92672">,</span> 2011<span style="color:#f92672">,</span> 300<span style="color:#f92672">),</span>
+                <span style="color:#66d9ef">new</span> Transaction<span style="color:#f92672">(</span>raoul<span style="color:#f92672">,</span> 2012<span style="color:#f92672">,</span> 1000<span style="color:#f92672">),</span>
+                <span style="color:#66d9ef">new</span> Transaction<span style="color:#f92672">(</span>raoul<span style="color:#f92672">,</span> 2011<span style="color:#f92672">,</span> 400<span style="color:#f92672">),</span>
+                <span style="color:#66d9ef">new</span> Transaction<span style="color:#f92672">(</span>mario<span style="color:#f92672">,</span> 2012<span style="color:#f92672">,</span> 710<span style="color:#f92672">),</span>
+                <span style="color:#66d9ef">new</span> Transaction<span style="color:#f92672">(</span>mario<span style="color:#f92672">,</span> 2012<span style="color:#f92672">,</span> 700<span style="color:#f92672">),</span>
+                <span style="color:#66d9ef">new</span> Transaction<span style="color:#f92672">(</span>alan<span style="color:#f92672">,</span> 2012<span style="color:#f92672">,</span> 950<span style="color:#f92672">)</span>
+        <span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+  
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//1.找出2011年发生的所有交易，并按交易额排序(从低到高)。
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>Transaction<span style="color:#f92672">&gt;</span> case1 <span style="color:#f92672">=</span> transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>t <span style="color:#f92672">-&gt;</span> t<span style="color:#f92672">.</span><span style="color:#a6e22e">getYear</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> 2011<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">sorted</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">(</span>Transaction<span style="color:#f92672">::</span>getValue<span style="color:#f92672">))</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span><span style="color:#f92672">());</span>
+  
+        <span style="color:#75715e">//2.交易员都在哪些不同的城市工作过?
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> case2 <span style="color:#f92672">=</span> transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Transaction<span style="color:#f92672">::</span>getTrader<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Trader<span style="color:#f92672">::</span>getCity<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">distinct</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//3.查找所有来自于剑桥的交易员，并按姓名排序。
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>Trader<span style="color:#f92672">&gt;</span> case3 <span style="color:#f92672">=</span> transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Transaction<span style="color:#f92672">::</span>getTrader<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>trader <span style="color:#f92672">-&gt;</span> trader<span style="color:#f92672">.</span><span style="color:#a6e22e">getCity</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Cambridge&#34;</span><span style="color:#f92672">))</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">distinct</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">sorted</span><span style="color:#f92672">(</span>comparing<span style="color:#f92672">(</span>Trader<span style="color:#f92672">::</span>getName<span style="color:#f92672">))</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//4.返回所有交易员的姓名字符串，按字母顺序排序。
+</span><span style="color:#75715e"></span>        String case4 <span style="color:#f92672">=</span> transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>transaction <span style="color:#f92672">-&gt;</span> transaction<span style="color:#f92672">.</span><span style="color:#a6e22e">getTrader</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">())</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">distinct</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">sorted</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">,(</span>name1<span style="color:#f92672">,</span>name2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span>name1 <span style="color:#f92672">+</span> name2<span style="color:#f92672">);</span> <span style="color:#75715e">//reduce(joining())
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//5.有没有交易员是在米兰工作的?
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">boolean</span> case5 <span style="color:#f92672">=</span> transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">anyMatch</span><span style="color:#f92672">(</span>transaction <span style="color:#f92672">-&gt;</span>    transaction<span style="color:#f92672">.</span><span style="color:#a6e22e">getTrader</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getCity</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Milan&#34;</span><span style="color:#f92672">));</span>
+        <span style="color:#75715e">//6.打印生活在剑桥的交易员的所有交易额。
+</span><span style="color:#75715e"></span>        transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>transaction <span style="color:#f92672">-&gt;</span> transaction<span style="color:#f92672">.</span><span style="color:#a6e22e">getTrader</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getCity</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Cambridge&#34;</span><span style="color:#f92672">))</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Transaction<span style="color:#f92672">::</span>getValue<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//7.所有交易中，最高的交易额是多少?
+</span><span style="color:#75715e"></span>        Optional<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> case7 <span style="color:#f92672">=</span> transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Transaction<span style="color:#f92672">::</span>getValue<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>Integer<span style="color:#f92672">::</span>max<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//8.找到交易额最小的交易。
+</span><span style="color:#75715e"></span>        Optional<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> case8 <span style="color:#f92672">=</span> transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Transaction<span style="color:#f92672">::</span>getValue<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>Integer<span style="color:#f92672">::</span>min<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ul>
+<h4 id="225-数值流">2.2.5 数值流</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//这段代码的问题是，它有一个暗含的装箱成本。每个Integer都必须拆箱成一个原始类型再进行求和
+</span><span style="color:#75715e"></span>transactions<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Transaction<span style="color:#f92672">::</span>getValue<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>Integer<span style="color:#f92672">::</span>min<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p>原始类型流特化  <code>IntStream</code>、<code>DoubleStream</code>和 <code>LongStream</code></p>
+<ul>
+<li>
+<p>映射到数值流</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> calories <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span><span style="color:#75715e">//返回一个Stream&lt;Dish&gt;
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">mapToInt</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">)</span> <span style="color:#75715e">// 返回一个 IntStream
+</span><span style="color:#75715e"></span>                   <span style="color:#f92672">.</span><span style="color:#a6e22e">sum</span><span style="color:#f92672">();</span>
+</code></pre></div></li>
+<li>
+<p>转换回对象流</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//将 Stream 转 换为数值流
+</span><span style="color:#75715e"></span>IntStream intStream <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">mapToInt</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">);</span>
+<span style="color:#75715e">//将数值流转 换为Stream
+</span><span style="color:#75715e"></span>Stream<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> stream <span style="color:#f92672">=</span> intStream<span style="color:#f92672">.</span><span style="color:#a6e22e">boxed</span><span style="color:#f92672">();</span>
+</code></pre></div></li>
+<li>
+<p>默认值 <code>OptionalInt</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">OptionalInt maxCalories <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                                  <span style="color:#f92672">.</span><span style="color:#a6e22e">mapToInt</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">)</span>
+                                  <span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">();</span>
+<span style="color:#75715e">//现在，如果没有最大值的话，你就可以显式处理OptionalInt去定义一个默认值了:
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> max <span style="color:#f92672">=</span> maxCalories<span style="color:#f92672">.</span><span style="color:#a6e22e">orElse</span><span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p>数值范围</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">IntStream evenNumbers <span style="color:#f92672">=</span> IntStream<span style="color:#f92672">.</span><span style="color:#a6e22e">rangeClosed</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 100<span style="color:#f92672">)</span>  <span style="color:#75715e">//表示范围[1, 100] 
+</span><span style="color:#75715e"></span>                                 <span style="color:#f92672">.</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>n <span style="color:#f92672">-&gt;</span> n <span style="color:#f92672">%</span> 2 <span style="color:#f92672">==</span> 0<span style="color:#f92672">);</span> <span style="color:#75715e">//一个从1到 100的偶数流
+</span><span style="color:#75715e">//range是不包含结束值的。[1,100)
+</span></code></pre></div></li>
+<li>
+<p>数值流应用:勾股数</p>
+</li>
+</ul>
+<h4 id="226-构建流">2.2.6 构建流</h4>
+<ul>
+<li>
+<p>由值创建流</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Stream<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> stream <span style="color:#f92672">=</span> Stream<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Java 8 &#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Lambdas &#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;In &#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Action&#34;</span><span style="color:#f92672">);</span> stream<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>String<span style="color:#f92672">::</span>toUpperCase<span style="color:#f92672">).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+<span style="color:#75715e">//你可以使用empty得到一个空流，如下所示: 
+</span><span style="color:#75715e"></span>Stream<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> emptyStream <span style="color:#f92672">=</span> Stream<span style="color:#f92672">.</span><span style="color:#a6e22e">empty</span><span style="color:#f92672">();</span>
+</code></pre></div></li>
+<li>
+<p>由数组创建流</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> numbers <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>2<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> 5<span style="color:#f92672">,</span> 7<span style="color:#f92672">,</span> 11<span style="color:#f92672">,</span> 13<span style="color:#f92672">};</span> 
+<span style="color:#66d9ef">int</span> sum <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">(</span>numbers<span style="color:#f92672">).</span><span style="color:#a6e22e">sum</span><span style="color:#f92672">();</span>
+</code></pre></div></li>
+<li>
+<p>由文件生成流</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">long</span> uniqueWords <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+<span style="color:#66d9ef">try</span><span style="color:#f92672">(</span>Stream<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> lines <span style="color:#f92672">=</span>
+        <span style="color:#75715e">//流会自动 关闭
+</span><span style="color:#75715e"></span>        Files<span style="color:#f92672">.</span><span style="color:#a6e22e">lines</span><span style="color:#f92672">(</span>Paths<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;data.txt&#34;</span><span style="color:#f92672">),</span> Charset<span style="color:#f92672">.</span><span style="color:#a6e22e">defaultCharset</span><span style="color:#f92672">())){</span> 
+              <span style="color:#75715e">//生成单词流
+</span><span style="color:#75715e"></span>              uniqueWords <span style="color:#f92672">=</span> lines<span style="color:#f92672">.</span><span style="color:#a6e22e">flatMap</span><span style="color:#f92672">(</span>line <span style="color:#f92672">-&gt;</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">(</span>line<span style="color:#f92672">.</span><span style="color:#a6e22e">split</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">)))</span>
+                                 <span style="color:#f92672">.</span><span style="color:#a6e22e">distinct</span><span style="color:#f92672">()</span> <span style="color:#75715e">//删除重复项
+</span><span style="color:#75715e"></span>                                 <span style="color:#f92672">.</span><span style="color:#a6e22e">count</span><span style="color:#f92672">();</span><span style="color:#75715e">//数一数有多少各 不相同的单词
+</span><span style="color:#75715e"></span>   <span style="color:#f92672">}</span><span style="color:#66d9ef">catch</span><span style="color:#f92672">(</span>IOException e<span style="color:#f92672">){</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p>由函数生成流:创建无限流</p>
+<ul>
+<li>
+<p>迭代</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Stream<span style="color:#f92672">.</span><span style="color:#a6e22e">iterate</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> n <span style="color:#f92672">-&gt;</span> n <span style="color:#f92672">+</span> 2<span style="color:#f92672">)</span>
+      <span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">(</span>10<span style="color:#f92672">)</span>
+      <span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+</code></pre></div></li>
+<li>
+<p>生成</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Stream<span style="color:#f92672">.</span><span style="color:#a6e22e">generate</span><span style="color:#f92672">(</span>Math<span style="color:#f92672">::</span>random<span style="color:#f92672">)</span>
+          <span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">(</span>5<span style="color:#f92672">)</span>
+          <span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+</code></pre></div></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="23-用流收集数据">2.3 用流收集数据</h3>
+<h4 id="231-归纳与汇总">2.3.1 归纳与汇总</h4>
+<ul>
+<li>
+<p>查找流中的最大值和最小值</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Comparator<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> dishCaloriesComparator <span style="color:#f92672">=</span>
+                Comparator<span style="color:#f92672">.</span><span style="color:#a6e22e">comparingInt</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">);</span>
+  
+        Optional<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> mostCalorieDish <span style="color:#f92672">=</span>
+                menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>maxBy<span style="color:#f92672">(</span>dishCaloriesComparator<span style="color:#f92672">));</span><span style="color:#75715e">//maxBy 最大 minBy最小
+</span></code></pre></div></li>
+<li>
+<p>汇总</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//总和
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> totalCalories <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>summingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">));</span>
+<span style="color:#75715e">//平均
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">double</span> avgCalories <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>averagingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">));</span>
+<span style="color:#75715e">//IntSummaryStatistics{count=9, sum=4300, min=120,average=477.777778, max=800}
+</span><span style="color:#75715e">//个数，并得 总和、平均值、最大值和最小值:
+</span><span style="color:#75715e"></span>IntSummaryStatistics menuStatistics <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>summarizingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p>连接字符串</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">String shortMenu <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getName<span style="color:#f92672">).</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>joining<span style="color:#f92672">());</span>
+<span style="color:#75715e">//逗号分隔的名称列表:
+</span><span style="color:#75715e"></span>String shortMenu <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getName<span style="color:#f92672">).</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>joining<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;, &#34;</span><span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p>广义的归约总汇</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Optional<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> mostCalorieDish <span style="color:#f92672">=</span>
+    menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>reducing<span style="color:#f92672">(</span>
+            <span style="color:#f92672">(</span>d1<span style="color:#f92672">,</span> d2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> d1<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> d2<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">?</span> d1 <span style="color:#f92672">:</span> d2<span style="color:#f92672">));</span>
+</code></pre></div><ul>
+<li>
+<p>收集框架的灵活性:以不同的方法执行同样的操作</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> totalCalories <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>reducing<span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> <span style="color:#75715e">//初始值
+</span><span style="color:#75715e"></span> Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">,</span>  <span style="color:#75715e">//转换函数
+</span><span style="color:#75715e"></span> Integer<span style="color:#f92672">::</span>sum<span style="color:#f92672">));</span> <span style="color:#75715e">//累积函数
+</span></code></pre></div></li>
+</ul>
+</li>
+</ul>
+<h4 id="232-分组">2.3.2 分组</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;&gt;</span> dishesByType <span style="color:#f92672">=</span>
+                          menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">));</span>
+<span style="color:#75715e">//{FISH=[prawns, salmon], OTHER=[french fries, rice, season fruit, pizza], MEAT=[pork, beef, chicken]}
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">//你可能想把热量不到400卡路里的菜划分为“低热量”(diet)，热量400到700 卡路里的菜划为“普通”(normal)，高于700卡路里的划为“高热量”(fat)。
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">enum</span> CaloricLevel <span style="color:#f92672">{</span> DIET<span style="color:#f92672">,</span> NORMAL<span style="color:#f92672">,</span> FAT <span style="color:#f92672">}</span>
+Map<span style="color:#f92672">&lt;</span>CaloricLevel<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;&gt;</span> dishesByCaloricLevel <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span> 
+  groupingBy<span style="color:#f92672">(</span>dish <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+               <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>dish<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;=</span> 400<span style="color:#f92672">)</span> 
+                 <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">DIET</span><span style="color:#f92672">;</span>
+               <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>dish<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;=</span> 700<span style="color:#f92672">)</span> 
+                 <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">NORMAL</span><span style="color:#f92672">;</span>
+               <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">FAT</span><span style="color:#f92672">;</span>
+         <span style="color:#f92672">}</span> <span style="color:#f92672">));</span>
+</code></pre></div><ul>
+<li>
+<p>多级分组</p>
+<p>要实现多级分组，我们可以使用一个由双参数版本的Collectors.groupingBy工厂方法创 建的收集器，它除了普通的分类函数之外，还可以接受collector类型的第二个参数。那么要进 行二级分组的话，我们可以把一个内层groupingBy传递给外层groupingBy，并定义一个为流 中项目分类的二级标准</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span> Map<span style="color:#f92672">&lt;</span>CaloricLevel<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;&gt;&gt;</span> dishesByTypeCaloricLevel <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>
+    groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">,</span> <span style="color:#75715e">// 一级分类函数
+</span><span style="color:#75715e"></span>        groupingBy<span style="color:#f92672">(</span>dish <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span><span style="color:#75715e">//二级分类函数
+</span><span style="color:#75715e"></span>          <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>dish<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;=</span> 400<span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">DIET</span><span style="color:#f92672">;</span>
+          <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>dish<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;=</span> 700<span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">NORMAL</span><span style="color:#f92672">;</span>
+          <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">FAT</span><span style="color:#f92672">;</span>
+         <span style="color:#f92672">}</span> <span style="color:#f92672">));</span>
+<span style="color:#75715e">//  这个二级分组的结果就是像下面这样的两级Map:
+</span><span style="color:#75715e">//{MEAT={DIET=[chicken], NORMAL=[beef], FAT=[pork]}, FISH={DIET=[prawns], NORMAL=[salmon]},
+</span><span style="color:#75715e">//OTHER={DIET=[rice, seasonal fruit], NORMAL=[french fries, pizza]}}
+</span></code></pre></div></li>
+<li>
+<p>按子组收集数据</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//1.要数一数菜单中每类菜有多少个
+</span><span style="color:#75715e"></span>Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span> Long<span style="color:#f92672">&gt;</span> typesCount <span style="color:#f92672">=</span> menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>
+                   groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">,</span> counting<span style="color:#f92672">()));</span>
+<span style="color:#75715e">//{MEAT=3, FISH=2, OTHER=4}
+</span><span style="color:#75715e"></span>  
+<span style="color:#75715e">//2. 查找菜单中热量最高的菜肴的收集器改一改
+</span><span style="color:#75715e"></span>Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span> Optional<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;&gt;</span> mostCaloricByType <span style="color:#f92672">=</span>
+    menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">,</span>
+                            maxBy<span style="color:#f92672">(</span>comparingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">))));</span>
+<span style="color:#75715e">//{FISH=Optional[salmon], OTHER=Optional[pizza], MEAT=Optional[pork]}
+</span><span style="color:#75715e"></span>  
+<span style="color:#75715e">//3. 去掉返回值的Optional
+</span><span style="color:#75715e"></span> Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span> Dish<span style="color:#f92672">&gt;</span> mostCaloricByType <span style="color:#f92672">=</span>
+    menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">,</span>
+                            maxBy<span style="color:#f92672">(</span>comparingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">)),</span>
+                            Optional<span style="color:#f92672">::</span>get
+                           <span style="color:#f92672">));</span>
+<span style="color:#75715e">//4. 对每一组的菜肴热量求总和
+</span><span style="color:#75715e"></span> Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span> Integer<span style="color:#f92672">&gt;</span> totalCaloriesByType <span style="color:#f92672">=</span>
+                   menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">,</span>
+                            summingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">)));</span>
+  
+<span style="color:#75715e">//5. 对于每种类型的Dish， 菜单中都有哪些CaloricLevel
+</span><span style="color:#75715e"></span> Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span> Set<span style="color:#f92672">&lt;</span>CaloricLevel<span style="color:#f92672">&gt;&gt;</span> caloricLevelsByType <span style="color:#f92672">=</span>
+    menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>
+       groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">,</span> mapping<span style="color:#f92672">(</span>
+       dish <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>dish<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;=</span> 400<span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">DIET</span><span style="color:#f92672">;</span>
+               <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>dish<span style="color:#f92672">.</span><span style="color:#a6e22e">getCalories</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;=</span> 700<span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">NORMAL</span><span style="color:#f92672">;</span>
+               <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">return</span> CaloricLevel<span style="color:#f92672">.</span><span style="color:#a6e22e">FAT</span><span style="color:#f92672">;</span> <span style="color:#f92672">},</span>
+                toSet<span style="color:#f92672">()</span> <span style="color:#f92672">)));</span>
+</code></pre></div></li>
+</ul>
+<h4 id="233-分区">2.3.3 分区</h4>
+<p>由一个谓词(返回一个布尔值的函数)作为分类函数，它称分区函 数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//1. 菜单按照素食和非素食分开
+</span><span style="color:#75715e"></span>Map<span style="color:#f92672">&lt;</span>Boolean<span style="color:#f92672">,</span>List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;&gt;</span> partitionedMenu <span style="color:#f92672">=</span> 
+             menu<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>partitioningBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>isVegetarian<span style="color:#f92672">))</span><span style="color:#75715e">//分区函数 
+</span><span style="color:#75715e">//2. 将数字按质数和非质数分区 它接受参数int n，并将前n个自然数分为质数和非质数
+</span><span style="color:#75715e"></span>   <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isPrime</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> candidate<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">int</span> candidateRoot <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">sqrt</span><span style="color:#f92672">((</span><span style="color:#66d9ef">double</span><span style="color:#f92672">)</span> candidate<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> IntStream<span style="color:#f92672">.</span><span style="color:#a6e22e">rangeClosed</span><span style="color:#f92672">(</span>2<span style="color:#f92672">,</span> candidateRoot<span style="color:#f92672">)</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">noneMatch</span><span style="color:#f92672">(</span>i <span style="color:#f92672">-&gt;</span> candidate <span style="color:#f92672">%</span> i <span style="color:#f92672">==</span> 0<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+
+  <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>Boolean<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;&gt;</span> <span style="color:#a6e22e">partitionPrimes</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> n<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> IntStream<span style="color:#f92672">.</span><span style="color:#a6e22e">rangeClosed</span><span style="color:#f92672">(</span>2<span style="color:#f92672">,</span> n<span style="color:#f92672">).</span><span style="color:#a6e22e">boxed</span><span style="color:#f92672">()</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>
+                            partitioningBy<span style="color:#f92672">(</span>candidate <span style="color:#f92672">-&gt;</span> isPrime<span style="color:#f92672">(</span>candidate<span style="color:#f92672">)));</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Collectors类的静态工厂方法</p>
+<ul>
+<li>
+<p><code>toList</code> ：用于把流中所有项目收集到一个</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">ListList<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> dishes <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toList<span style="color:#f92672">());</span>
+</code></pre></div></li>
+<li>
+<p><code>toSet</code> : 把流中所有项目收集到一个 Set，删除重复项</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Set<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> dishes <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toSet<span style="color:#f92672">());</span>
+</code></pre></div></li>
+<li>
+<p><code>toCollection</code> ：把流中所有项目收集到给定的供应源创建的集合</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Collection<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> dishes <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>toCollection<span style="color:#f92672">(),</span> ArrayList<span style="color:#f92672">::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">);</span>
+</code></pre></div></li>
+<li>
+<p><code>counting</code> 计算流中元素的个数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">long</span> howManyDishes <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>counting<span style="color:#f92672">());</span> 
+</code></pre></div></li>
+<li>
+<p><code>summingInt</code> 对流中项目的一个整数属性求和</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> totalCalories <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>summingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p><code>averagingInt</code> 计算流中项目 Integer 属性的平均值</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">double</span> avgCalories <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>averagingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p><code>summarizingInt</code> 收集关于流中项目 Integer 属性的统计值，例如最大、最小、总和与平均值</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">IntSummaryStatistics menuStatistics <span style="color:#f92672">=</span>
+           menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>summarizingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p><code>joining</code> 连接对流中每个项目调用 toString 方法所生成的字符串</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">String shortMenu <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getName<span style="color:#f92672">).</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>joining<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;, &#34;</span><span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p><code>maxBy</code> 一个包裹了流中按照给定比较器选出的最大元素的 Optional， 或如果流为空则为 Optional.empty()</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Optional<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> fattest <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>maxBy<span style="color:#f92672">(</span>comparingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">)));</span>
+</code></pre></div></li>
+<li>
+<p><code>minBy</code> 一个包裹了流中按照给定比较器选出的最小元素的 Optional， 或如果流为空则为 Optional.empty()</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Optional<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;</span> lightest <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>minBy<span style="color:#f92672">(</span>comparingInt<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">)));</span>
+</code></pre></div></li>
+<li>
+<p><code>reducing</code> 从一个作为累加器的初始值开始，利用 BinaryOperator 与流 中的元素逐个结合，从而将流归约为单个值</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> totalCalories <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>reducing<span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> Dish<span style="color:#f92672">::</span>getCalories<span style="color:#f92672">,</span> Integer<span style="color:#f92672">::</span>sum<span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p><code>collectingAndThen</code> 包裹另一个收集器，对其结果应用转换函数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> howManyDishes <span style="color:#f92672">=</span>menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>collectingAndThen<span style="color:#f92672">(</span>toList<span style="color:#f92672">(),</span> List<span style="color:#f92672">::</span>size<span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p><code>groupingBy</code> 根据项目的一个属性的值对流中的项目作问组，并将属性值作 为结果 Map 的键</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Map<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">.</span><span style="color:#a6e22e">Type</span><span style="color:#f92672">,</span>List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;&gt;</span> dishesByType <span style="color:#f92672">=</span> menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>groupingBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>getType<span style="color:#f92672">));</span>
+</code></pre></div></li>
+<li>
+<p><code>partitioningBy</code> 根据对流中每个项目应用谓词的结果来对项目进行分区</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Map<span style="color:#f92672">&lt;</span>Boolean<span style="color:#f92672">,</span>List<span style="color:#f92672">&lt;</span>Dish<span style="color:#f92672">&gt;&gt;</span> vegetarianDishes <span style="color:#f92672">=</span>Map<span style="color:#f92672">&lt;</span>Boolean<span style="color:#f92672">,</span>List<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;&gt;</span> <span style="color:#f92672">=</span> 
+                 menuStream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>partitioningBy<span style="color:#f92672">(</span>Dish<span style="color:#f92672">::</span>isVegetarian<span style="color:#f92672">));</span>
+</code></pre></div></li>
+</ul>
+<h4 id="234-收集器接口">2.3.4 收集器接口</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Collector</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">,</span> A<span style="color:#f92672">,</span> R<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+        Supplier<span style="color:#f92672">&lt;</span>A<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">supplier</span><span style="color:#f92672">();</span>
+        BiConsumer<span style="color:#f92672">&lt;</span>A<span style="color:#f92672">,</span> T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">accumulator</span><span style="color:#f92672">();</span>
+        Function<span style="color:#f92672">&lt;</span>A<span style="color:#f92672">,</span> R<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">finisher</span><span style="color:#f92672">();</span>
+        BinaryOperator<span style="color:#f92672">&lt;</span>A<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">combiner</span><span style="color:#f92672">();</span>
+        Set<span style="color:#f92672">&lt;</span>Characteristics<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">characteristics</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li><code>T</code>是流中要收集的项目的泛型。</li>
+<li><code>A</code>是累加器的类型，累加器是在收集过程中用于累积部分结果的对象。</li>
+<li><code>R</code>是收集操作得到的对象(通常但并不一定是集合)的类型。</li>
+</ul>
+<h4 id="235-开发你自己的收集器">2.3.5 开发你自己的收集器</h4>
+<hr>
+<h3 id="24-并行数据处理与性能">2.4 并行数据处理与性能</h3>
+<h4 id="241-并行流">2.4.1 并行流</h4>
+<h4 id="242-分支合并框架">2.4.2 分支/合并框架</h4>
+<h4 id="243-spliterator">2.4.3 Spliterator</h4>
+<hr>
+<h4 id="25-stream-小结">2.5 Stream 小结</h4>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/" data-toggle="tooltip" data-placement="top" title="Java8—日期时间API">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0/" data-toggle="tooltip" data-placement="top" title="Spring Boot additional—location 参数">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/"><i class="fa fa-link"></i>Java8—日期时间API</a></li>
+         
+        <li><a href="/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/"><i class="fa fa-link"></i>深入理解 String</a></li>
+         
+        <li><a href="/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/"><i class="fa fa-link"></i>引用以及Reference类</a></li>
+         
+        <li><a href="/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/"><i class="fa fa-link"></i>println、sleep、Integer与线程安全的一些故事</a></li>
+         
+        <li><a href="/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/"><i class="fa fa-link"></i>JVM 内存区域与内存溢出异常</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

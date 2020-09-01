@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resilience4j CircuitBreaker 源码分析 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Java, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Resilience4j CircuitBreaker 源码分析" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/resilience4j-circuitbreaker-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="简述 在Resilience4j 中所有模块的事件机制采用了观察者模式，所以先写一个观察者模式熟悉一下以便在之后的源码分析。 //抽象的主体角色 interface">
+  <meta property="og:description" content="简述 在Resilience4j 中所有模块的事件机制采用了观察者模式，所以先写一个观察者模式熟悉一下以便在之后的源码分析。 //抽象的主体角色 interface">
+  <meta name="twitter:description" content="简述 在Resilience4j 中所有模块的事件机制采用了观察者模式，所以先写一个观察者模式熟悉一下以便在之后的源码分析。 //抽象的主体角色 interface">
+  <meta property="og:description" content="简述 在Resilience4j 中所有模块的事件机制采用了观察者模式，所以先写一个观察者模式熟悉一下以便在之后的源码分析。 //抽象的主体角色 interface" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Resilience4j CircuitBreaker 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Resilience4j CircuitBreaker 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Resilience4j CircuitBreaker 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Resilience4j CircuitBreaker 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Resilience4j CircuitBreaker 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Resilience4j CircuitBreaker 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Resilience4j CircuitBreaker 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Resilience4j CircuitBreaker 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Resilience4j CircuitBreaker 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Resilience4j CircuitBreaker 源码分析</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月15日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            4300字 | 阅读大约需要9分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/resilience4j">Resilience4j</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/resilience4j/"><i>#Resilience4j</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="简述">简述</h3>
+<p>在Resilience4j 中所有模块的事件机制采用了<code>观察者模式</code>，所以先写一个观察者模式熟悉一下以便在之后的源码分析。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//抽象的主体角色
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">AbstractSubject</span><span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">registerObserver</span><span style="color:#f92672">();</span>
+  <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">notifyObserver</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//具体的主体角色
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteSubject</span> <span style="color:#66d9ef">implements</span> AbstractSubject<span style="color:#f92672">{</span>
+  List<span style="color:#f92672">&lt;</span>AbstractObserver<span style="color:#f92672">&gt;</span> observers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+  
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">registerObserver</span><span style="color:#f92672">(</span>Observer o<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">observers</span><span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>o<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">notifyObservers</span><span style="color:#f92672">(</span>String tweet<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        observers<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>o <span style="color:#f92672">-&gt;</span> o<span style="color:#f92672">.</span><span style="color:#a6e22e">notify</span><span style="color:#f92672">(</span>tweet<span style="color:#f92672">));</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//抽象的观察者角色
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">AbstractObserver</span><span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">notify</span><span style="color:#f92672">(</span>String tweet<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//具体的观察的角色
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteNYTimes</span> <span style="color:#66d9ef">implements</span> Observer <span style="color:#f92672">{</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">notify</span><span style="color:#f92672">(</span>String tweet<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tweet <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> tweet<span style="color:#f92672">.</span><span style="color:#a6e22e">contains</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;money&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Breaking news in NY! &#34;</span> <span style="color:#f92672">+</span> tweet<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//具体的观察的角色
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteGuardian</span> <span style="color:#66d9ef">implements</span> Observer <span style="color:#f92672">{</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">notify</span><span style="color:#f92672">(</span>String tweet<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tweet <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> tweet<span style="color:#f92672">.</span><span style="color:#a6e22e">contains</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;queen&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Yet another news in London... &#34;</span> <span style="color:#f92672">+</span> tweet<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//测试
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">){</span>
+  ConcreteSubject cs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcreteSubject<span style="color:#f92672">();</span>
+  cs<span style="color:#f92672">.</span><span style="color:#a6e22e">registerObserver</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ConcreteNYTimes<span style="color:#f92672">());</span>
+  cs<span style="color:#f92672">.</span><span style="color:#a6e22e">registerObserver</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ConcreteGuardian<span style="color:#f92672">());</span>
+  cs<span style="color:#f92672">.</span><span style="color:#a6e22e">notifyObservers</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hi&#34;</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Resilience4j的CircuitBreaker主要由6个部分组成：</p>
+<ul>
+<li><code>CircuitBreakerRegistry</code>：管理熔断器实例的注册容器</li>
+<li><code>CircuitBreakerConfig</code>：熔断器的相关配置</li>
+<li><code>CircuitBreakerState</code>：熔断器的各种状态</li>
+<li><code>CircuitBreakerMetrics</code>：触发熔断器状态变化的指标</li>
+<li><code>CircuitBreakerEvent</code>：熔断器行为变化产生的事件</li>
+<li><code>CircuitBreaker</code>：熔断器本身</li>
+</ul>
+<p>整体的调用流程是：</p>
+<ol>
+<li>通过<code>CircuitBreakerRegistry</code> 注册一个熔断器。</li>
+<li>然后得到<code>CircuitBreaker</code> 熔断器装饰你的调用方法。</li>
+<li>跟你方法的执行判断是否是慢请求或者请求失败，然后发布事件。</li>
+<li>统计这些事件然后根据熔断器的指标来判断熔断器是否要关闭、半打开、打开。</li>
+</ol>
+<hr>
+<h3 id="源码分析">源码分析</h3>
+<h4 id="1circuitbreakerregistry">1.CircuitBreakerRegistry</h4>
+<p>管理熔断器实例的注册容器</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">CircuitBreakerRegistry</span> <span style="color:#66d9ef">extends</span> Registry<span style="color:#f92672">&lt;</span>CircuitBreaker<span style="color:#f92672">,</span> CircuitBreakerConfig<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+    
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * &lt;1&gt; 根据自定义的配置，创建CircuitBreakerRegistry实例  线程安全的单例
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">static</span> CircuitBreakerRegistry <span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>CircuitBreakerConfig circuitBreakerConfig<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> InMemoryCircuitBreakerRegistry<span style="color:#f92672">(</span>circuitBreakerConfig<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">//...省略 都差不多 就是创建创建CircuitBreakerRegistry实例 
+</span><span style="color:#75715e"></span>   
+    <span style="color:#75715e">//默认配置
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">static</span> CircuitBreakerRegistry <span style="color:#a6e22e">ofDefaults</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> InMemoryCircuitBreakerRegistry<span style="color:#f92672">();</span>
+
+    <span style="color:#75715e">//获取所有的熔断器  
+</span><span style="color:#75715e"></span>    Seq<span style="color:#f92672">&lt;</span>CircuitBreaker<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getAllCircuitBreakers</span><span style="color:#f92672">();</span>
+
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="11-inmemorycircuitbreakerregistry">1.1 InMemoryCircuitBreakerRegistry</h4>
+<p>此类是真正管理熔断器的。根据上面<code>&lt;1&gt;</code> 处创建了InMemoryCircuitBreakerRegistry 对象。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//io.github.resilience4j.circuitbreaker.internal.InMemoryCircuitBreakerRegistry
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">InMemoryCircuitBreakerRegistry</span><span style="color:#f92672">(</span>CircuitBreakerConfig defaultConfig<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>defaultConfig<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//io.github.resilience4j.core.registry.AbstractRegistry
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">AbstractRegistry</span><span style="color:#f92672">(</span>C defaultConfig<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">(</span>defaultConfig<span style="color:#f92672">,</span> HashMap<span style="color:#f92672">.</span><span style="color:#a6e22e">empty</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">AbstractRegistry</span><span style="color:#f92672">(</span>C defaultConfig<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>RegistryEventConsumer<span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;&gt;</span> registryEventConsumers<span style="color:#f92672">,</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> tags<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">configurations</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">//可以看到是用ConcurrentHashMap 来作为管理熔断器的容器，保证线程安全
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">entryMap</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">eventProcessor</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> RegistryEventProcessor<span style="color:#f92672">(</span>
+            Objects<span style="color:#f92672">.</span><span style="color:#a6e22e">requireNonNull</span><span style="color:#f92672">(</span>registryEventConsumers<span style="color:#f92672">,</span> CONSUMER_MUST_NOT_BE_NULL<span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">registryTags</span> <span style="color:#f92672">=</span> Objects<span style="color:#f92672">.</span><span style="color:#a6e22e">requireNonNull</span><span style="color:#f92672">(</span>tags<span style="color:#f92672">,</span> TAGS_MUST_NOT_BE_NULL<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">configurations</span>
+            <span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>DEFAULT_CONFIG<span style="color:#f92672">,</span> Objects<span style="color:#f92672">.</span><span style="color:#a6e22e">requireNonNull</span><span style="color:#f92672">(</span>defaultConfig<span style="color:#f92672">,</span> CONFIG_MUST_NOT_BE_NULL<span style="color:#f92672">));</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>在上面可以得知，CircuitBreakerRegistry 只是一个入口，真正管理熔断器的是InMemoryCircuitBreakerRegistry</li>
+<li>而InMemoryCircuitBreakerRegistry 又是通过 ConcurrentHashMap 来作为熔断器的容器</li>
+</ul>
+<hr>
+<h4 id="2circuitbreakerconfig">2.CircuitBreakerConfig</h4>
+<p>熔断器的相关配置</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CircuitBreakerConfig</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#75715e">// 请求调用失败的阈值，百分比。默认是50%
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_FAILURE_RATE_THRESHOLD <span style="color:#f92672">=</span> 50<span style="color:#f92672">;</span> <span style="color:#75715e">// Percentage
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 请求调用慢请求的阀值， 百分比。 默认50%
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_SLOW_CALL_RATE_THRESHOLD <span style="color:#f92672">=</span> 100<span style="color:#f92672">;</span> <span style="color:#75715e">// Percentage
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 在open 状态等待的时间， 时间到了 就进去 half-open状态  默认60s
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_WAIT_DURATION_IN_OPEN_STATE <span style="color:#f92672">=</span> 60<span style="color:#f92672">;</span> <span style="color:#75715e">// Seconds
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 在half-open 状态下 允许通过请求数量  默认10个
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_PERMITTED_CALLS_IN_HALF_OPEN_STATE <span style="color:#f92672">=</span> 10<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 最少需要多少个请求调用 进行计算错误率  默认100
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_MINIMUM_NUMBER_OF_CALLS <span style="color:#f92672">=</span> 100<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 在滑动窗口的模式下， 需要多少个请求调用进行计算，  默认100
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_SLIDING_WINDOW_SIZE <span style="color:#f92672">=</span> 100<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> DEFAULT_SLOW_CALL_DURATION_THRESHOLD <span style="color:#f92672">=</span> 60<span style="color:#f92672">;</span> <span style="color:#75715e">// Seconds
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 统计的模式。  默认 计数， 还有一个是 滑动窗口
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> SlidingWindowType DEFAULT_SLIDING_WINDOW_TYPE <span style="color:#f92672">=</span> SlidingWindowType<span style="color:#f92672">.</span><span style="color:#a6e22e">COUNT_BASED</span><span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> DEFAULT_WRITABLE_STACK_TRACE_ENABLED <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 是否记录请求调用失败的断言，默认所有异常都记录。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Predicate<span style="color:#f92672">&lt;</span>Throwable<span style="color:#f92672">&gt;</span> DEFAULT_RECORD_EXCEPTION_PREDICATE <span style="color:#f92672">=</span> throwable <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 是否忽视请求调用失败的断言，  默认false
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Predicate<span style="color:#f92672">&lt;</span>Throwable<span style="color:#f92672">&gt;</span> DEFAULT_IGNORE_EXCEPTION_PREDICATE <span style="color:#f92672">=</span> throwable <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">// The default exception predicate counts all exceptions as failures.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Predicate<span style="color:#f92672">&lt;</span>Throwable<span style="color:#f92672">&gt;</span> recordExceptionPredicate <span style="color:#f92672">=</span> DEFAULT_RECORD_EXCEPTION_PREDICATE<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// The default exception predicate ignores no exceptions.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Predicate<span style="color:#f92672">&lt;</span>Throwable<span style="color:#f92672">&gt;</span> ignoreExceptionPredicate <span style="color:#f92672">=</span> DEFAULT_IGNORE_EXCEPTION_PREDICATE<span style="color:#f92672">;</span>
+
+    <span style="color:#a6e22e">@SuppressWarnings</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;unchecked&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#75715e">// 请求调用失败，存储异常记录的集合
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Class<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> Throwable<span style="color:#f92672">&gt;[]</span> recordExceptions <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[</span>0<span style="color:#f92672">];</span>
+
+    <span style="color:#a6e22e">@SuppressWarnings</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;unchecked&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#75715e">// 请求调用失败，忽略异常记录的集合
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Class<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> Throwable<span style="color:#f92672">&gt;[]</span> ignoreExceptions <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[</span>0<span style="color:#f92672">];</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li><code>failureRateThreshold</code>：请求调用失败的阈值百分比。默认是50%</li>
+<li><code>slowCallRateThreshold：</code>：请求调用慢请求的阀值百分比。 默认100%</li>
+<li><code>slowCallDurationThreshold</code> ： 调用请求超过此只就被视为是慢请求，默认60秒</li>
+<li><code>permittedNumberOfCallsInHalfOpenState</code>：在半开状态下允许通过的请求数，默认10个</li>
+<li><code>slidingWindowType</code>：统计的类型，默认count-based，可选 time-based</li>
+<li><code>slidingWindowSize</code>：滑动窗口的大小，默认100</li>
+<li><code>minimumNumberOfCalls</code>：统计最小次数，默认10次 如果只有9次，那么不会触发统计</li>
+<li><code>waitDurationInOpenState</code>：在打开状态下，等待多久进去半打开状态，默认 60秒</li>
+<li><code>automaticTransitionFromOpenToHalfOpenEnabled</code>：默认为false，如果设置为true，则自动从打开状态转换为半打开状态，不需要调用即可触发该转换。</li>
+<li><code>recordExceptions</code>：是否记录请求调用失败的断言，默认所有异常都记录。</li>
+<li><code>ignoreExceptions</code>：是否忽视请求调用失败的断言</li>
+</ul>
+<hr>
+<h4 id="3circuitbreakerstate">3.CircuitBreakerState</h4>
+<p>熔断器的各种状态</p>
+<p><img src="https://files.readme.io/39cdd54-state_machine.jpg" alt=""></p>
+<ul>
+<li><code>CLOSED  —&gt; OPEN</code>：单向转换。当请求失败率超过阈值时，熔断器的状态由关闭状态转换到打开状态。失败率的阈值默认50%，可以通过设置CircuitBreakerConfig实例的failureRateThreshold属性值进行改变。</li>
+<li><code>OPEN &lt;—&gt; HALF_OPEN</code>：双向转换。打开状态的持续时间结束，熔断器的状态由打开状态转换到半开状态。这时允许一定数量的请求通过，当这些请求的失败率超过阈值，熔断器的状态由半开状态转换回打开状态。半开时请求的数量是由CircuitBreakerConfig实例的ringBufferSizeInHalfOpenState属性值设置的。</li>
+<li><code>HALF_OPEN —&gt; CLOSED</code>：如果请求失败率小于或等于阈值，则熔断器的状态由半开状态转换到关闭状态。</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#75715e">//CircuitBreaker 的状态
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">CircuitBreakerState</span> <span style="color:#f92672">{</span>
+
+        <span style="color:#75715e">//判断是否允许调用后端接口， 当CircuitBreaker 状态为open的时候这里返回false 反之true
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryAcquirePermission</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//获取请求后端接口的许可
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">acquirePermission</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//释放
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">releasePermission</span><span style="color:#f92672">();</span>
+
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * 请求调用失败，记录指标
+</span><span style="color:#75715e">         * 当达到设定的度量指标值后，调用状态机实例触发状态转换
+</span><span style="color:#75715e">         * @param duration  持续时间
+</span><span style="color:#75715e">         * @param durationUnit
+</span><span style="color:#75715e">         * @param throwable
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onError</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> duration<span style="color:#f92672">,</span> TimeUnit durationUnit<span style="color:#f92672">,</span> Throwable throwable<span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * 调用成功，记录指标
+</span><span style="color:#75715e">         * 当达到设定的度量指标后，调用状态机实例触发状态转换
+</span><span style="color:#75715e">         * @param duration  持续时间
+</span><span style="color:#75715e">         * @param durationUnit
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onSuccess</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> duration<span style="color:#f92672">,</span> TimeUnit durationUnit<span style="color:#f92672">);</span>
+
+        <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">attempts</span><span style="color:#f92672">();</span>
+
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * 返回当前状态在CircuitBreaker 接口中对应的枚举值
+</span><span style="color:#75715e">         * @return
+</span><span style="color:#75715e">         */</span>
+        CircuitBreaker<span style="color:#f92672">.</span><span style="color:#a6e22e">State</span> <span style="color:#a6e22e">getState</span><span style="color:#f92672">();</span>
+
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * 返回当前状态封装的度量指标的类实例
+</span><span style="color:#75715e">         * @return
+</span><span style="color:#75715e">         */</span>
+        CircuitBreakerMetrics <span style="color:#a6e22e">getMetrics</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>CircuitBreakerState 的各种实现类，就那HalfOpenState 来看一下他是如何做转换的，其他都类似不一一分析了。</p>
+<p><!-- raw HTML omitted --></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//CircuitBreakerStateMachine 的内部类
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HalfOpenState</span> <span style="color:#66d9ef">implements</span> CircuitBreakerState <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//允许通过的数量
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> AtomicInteger permittedNumberOfCalls<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//是否是半开状态
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> AtomicBoolean isHalfOpen<span style="color:#f92672">;</span>
+ 
+        <span style="color:#75715e">//是否允许通过，就是查看permittedNumberOfCalls 
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//减去这次请求是否&gt;0是的话就是true，反之false
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryAcquirePermission</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>permittedNumberOfCalls<span style="color:#f92672">.</span><span style="color:#a6e22e">getAndUpdate</span><span style="color:#f92672">(</span>current <span style="color:#f92672">-&gt;</span> current <span style="color:#f92672">==</span> 0 <span style="color:#f92672">?</span> current <span style="color:#f92672">:</span> <span style="color:#f92672">--</span>current<span style="color:#f92672">)</span>
+                <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            circuitBreakerMetrics<span style="color:#f92672">.</span><span style="color:#a6e22e">onCallNotPermitted</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//就是给permittedNumberOfCalls + 1
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">releasePermission</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            permittedNumberOfCalls<span style="color:#f92672">.</span><span style="color:#a6e22e">incrementAndGet</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">//onError 和 onSuccess 就是来进行状态转换的，调用了checkIfThresholdsExceeded 方法
+</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onError</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> duration<span style="color:#f92672">,</span> TimeUnit durationUnit<span style="color:#f92672">,</span> Throwable throwable<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// CircuitBreakerMetrics is thread-safe
+</span><span style="color:#75715e"></span>            checkIfThresholdsExceeded<span style="color:#f92672">(</span>circuitBreakerMetrics<span style="color:#f92672">.</span><span style="color:#a6e22e">onError</span><span style="color:#f92672">(</span>duration<span style="color:#f92672">,</span> durationUnit<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onSuccess</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> duration<span style="color:#f92672">,</span> TimeUnit durationUnit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// CircuitBreakerMetrics is thread-safe
+</span><span style="color:#75715e"></span>            checkIfThresholdsExceeded<span style="color:#f92672">(</span>circuitBreakerMetrics<span style="color:#f92672">.</span><span style="color:#a6e22e">onSuccess</span><span style="color:#f92672">(</span>duration<span style="color:#f92672">,</span> durationUnit<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li><code>onError</code> 和 <code>onSuccess</code> 当一个请求调用后通过返回的result来判断是触发onError 事件还是onSuccess事件，就是来进行状态转换的，调用了<code>checkIfThresholdsExceeded</code> 方法</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">       <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">checkIfThresholdsExceeded</span><span style="color:#f92672">(</span>Result result<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//&lt;1&gt; 如果已经达到了阀值， 那么先把Half-Open 状态关闭，然后调用transitionToOpenState 升级到open 状态
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>Result<span style="color:#f92672">.</span><span style="color:#a6e22e">hasExceededThresholds</span><span style="color:#f92672">(</span>result<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isHalfOpen<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSet</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                    transitionToOpenState<span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//&lt;2&gt; 如果在阀值的下面， 那么就先把Half-Open 状态关闭，然后调用transitionToClosedState 降到close 状态
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>result <span style="color:#f92672">==</span> BELOW_THRESHOLDS<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isHalfOpen<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSet</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                    transitionToClosedState<span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>&lt;1&gt;</code> 如果已经达到了阀值， 那么先把Half-Open 状态关闭，然后调用transitionToOpenState 升级到open 状态</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">transitionToOpenState</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        stateTransition<span style="color:#f92672">(</span>OPEN<span style="color:#f92672">,</span>
+            currentState <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">new</span> OpenState<span style="color:#f92672">(</span>currentState<span style="color:#f92672">.</span><span style="color:#a6e22e">attempts</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">,</span> currentState<span style="color:#f92672">.</span><span style="color:#a6e22e">getMetrics</span><span style="color:#f92672">()));</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p><code>&lt;2&gt;</code> 如果在阀值的下面， 那么就先把Half-Open 状态关闭，然后调用transitionToClosedState 降到close 状态</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">transitionToClosedState</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        stateTransition<span style="color:#f92672">(</span>CLOSED<span style="color:#f92672">,</span> currentState <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">new</span> ClosedState<span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ul>
+<p>到这里，已经把CircuitBreaker 状态如何转换，如何注册，已经讲清楚了。还差一步是，如何根据我们的方法调用来判断触发什么事件，然后进行状态的转换。</p>
+<hr>
+<h4 id="4circuitbreaker">4.CircuitBreaker</h4>
+<p>在通过 CircuitBreakerRegistry 注册好熔断器之后，我们可以通过这个熔断器，来增强我们的调用方法。然后根据我们调用的方法，触发是什么事件然后判断是否需要转换状态。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">CircuitBreaker</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">static</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> Supplier<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">decorateSupplier</span><span style="color:#f92672">(</span>CircuitBreaker circuitBreaker<span style="color:#f92672">,</span> Supplier<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> supplier<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">()</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//&lt;1&gt; 如果熔断器是打开状态，则抛出异常，不执行下面的代码
+</span><span style="color:#75715e"></span>            circuitBreaker<span style="color:#f92672">.</span><span style="color:#a6e22e">acquirePermission</span><span style="color:#f92672">();</span>
+            <span style="color:#75715e">//计时 start
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">long</span> start <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//&lt;2&gt; 执行被装饰的方法
+</span><span style="color:#75715e"></span>                T returnValue <span style="color:#f92672">=</span> supplier<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+                <span style="color:#75715e">//计时 end
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">long</span> durationInNanos <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> start<span style="color:#f92672">;</span>
+                <span style="color:#75715e">//&lt;3&gt; 调用成功 在ring buffer 中记录成功状态，计算失败率 失败达到阀值，则触发状态转换
+</span><span style="color:#75715e"></span>                circuitBreaker<span style="color:#f92672">.</span><span style="color:#a6e22e">onSuccess</span><span style="color:#f92672">(</span>durationInNanos<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">NANOSECONDS</span><span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">return</span> returnValue<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception exception<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// Do not handle java.lang.Error
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">long</span> durationInNanos <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> start<span style="color:#f92672">;</span>
+                <span style="color:#75715e">//&lt;4&gt; 调用失败  在ring buffer 中记录失败状态，计算失败率 失败达到阀值，则触发状态转换
+</span><span style="color:#75715e"></span>                circuitBreaker<span style="color:#f92672">.</span><span style="color:#a6e22e">onError</span><span style="color:#f92672">(</span>durationInNanos<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">NANOSECONDS</span><span style="color:#f92672">,</span> exception<span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">throw</span> exception<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">};</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>&lt;1&gt;</code> 如果熔断器是打开状态，则抛出异常，不执行下面的代码</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">acquirePermission</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>tryAcquirePermission<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">throw</span> CallNotPermittedException
+                    <span style="color:#f92672">.</span><span style="color:#a6e22e">createCallNotPermittedException</span><span style="color:#f92672">(</span>CircuitBreakerStateMachine<span style="color:#f92672">.</span><span style="color:#a6e22e">this</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p><code>&lt;2&gt;</code> 执行被装饰的方法</p>
+</li>
+<li>
+<p><code>&lt;3&gt;</code> 调用<code>onSuccess</code> 在ring buffer 中记录成功状态，计算失败率 失败达到阀值，则触发状态转换，这里会通过观察者模式发布事件然后进行处理</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//io.github.resilience4j.circuitbreaker.internal.CircuitBreakerStateMachine
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onSuccess</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> duration<span style="color:#f92672">,</span> TimeUnit durationUnit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//发布调用成功的事件，这里就使用了一开头讲的观察者模式
+</span><span style="color:#75715e"></span>        publishSuccessEvent<span style="color:#f92672">(</span>duration<span style="color:#f92672">,</span> durationUnit<span style="color:#f92672">);</span>
+        stateReference<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">().</span><span style="color:#a6e22e">onSuccess</span><span style="color:#f92672">(</span>duration<span style="color:#f92672">,</span> durationUnit<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+  
+<span style="color:#75715e">//io.github.resilience4j.circuitbreaker.internal.CircuitBreakerStateMachine
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">publishSuccessEvent</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> duration<span style="color:#f92672">,</span> TimeUnit durationUnit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//封装调用成功的事件
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">final</span> CircuitBreakerOnSuccessEvent event <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CircuitBreakerOnSuccessEvent<span style="color:#f92672">(</span>name<span style="color:#f92672">,</span>
+            Duration<span style="color:#f92672">.</span><span style="color:#a6e22e">ofNanos</span><span style="color:#f92672">(</span>durationUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">toNanos</span><span style="color:#f92672">(</span>duration<span style="color:#f92672">)));</span>
+        <span style="color:#75715e">//发布
+</span><span style="color:#75715e"></span>        publishEventIfPossible<span style="color:#f92672">(</span>event<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p>消费事件，调用consumer 的 consumerEvent函数处理事件，返回true 已处理，false 未处理</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#f92672">&lt;</span>E <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">processEvent</span><span style="color:#f92672">(</span>E event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">boolean</span> consumed <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//查看是否有消费着， 有的话调用消费者
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>onEventConsumers<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            onEventConsumers<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>onEventConsumer <span style="color:#f92672">-&gt;</span> onEventConsumer<span style="color:#f92672">.</span><span style="color:#a6e22e">consumeEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">));</span>
+            consumed <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>eventConsumerMap<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            List<span style="color:#f92672">&lt;</span>EventConsumer<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;&gt;</span> eventConsumers <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">eventConsumerMap</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>event<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getSimpleName</span><span style="color:#f92672">());</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>eventConsumers <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>eventConsumers<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                eventConsumers<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>consumer <span style="color:#f92672">-&gt;</span> consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">consumeEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">));</span>
+                consumed <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> consumed<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p><code>&lt;4&gt;</code> 调用<code>onError</code>  在ring buffer 中记录失败状态，计算失败率 失败达到阀值，则触发状态转换</p>
+</li>
+</ul>
+<hr>
+<h4 id="总结">总结：</h4>
+<ul>
+<li>通过 CircuitBreakerRegistry 注册熔断器获得熔断器并且CircuitBreaker.decorateXXX( ); 来装饰我们调用方法</li>
+<li>每次调用方法：
+<ul>
+<li>请求调用的结果成功或失败，熔断器最终会调用度量指标CircuitBreakerMetrics的onSuccess或onError方法返回请求调用失败率到ClosedState。</li>
+<li>ClosedState会在它的onSuccess或onError方法中判断请求失败率是否达到了设置的阈值，</li>
+<li>如果达到了阈值则调用状态机CircuitBreakerStateMachine的transitionToOpenState方法生成OpenState对象，同时把关闭状态的度量指标对象传给打开状态。</li>
+<li>然后熔断器把当前持有的状态更改为打开状态，完成了状态转换。</li>
+</ul>
+</li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0/" data-toggle="tooltip" data-placement="top" title="Spring Boot additional—location 参数">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/spring-boot-%E6%B3%A8%E8%A7%A3-configurationproperties/" data-toggle="tooltip" data-placement="top" title="Spring Boot 注解 @ConfigurationProperties">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/"><i class="fa fa-link"></i>Java8—新特性汇总.md</a></li>
+         
+        <li><a href="/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/"><i class="fa fa-link"></i>Java8—日期时间API</a></li>
+         
+        <li><a href="/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/"><i class="fa fa-link"></i>引用以及Reference类</a></li>
+         
+        <li><a href="/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/"><i class="fa fa-link"></i>println、sleep、Integer与线程安全的一些故事</a></li>
+         
+        <li><a href="/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/"><i class="fa fa-link"></i>JVM 内存区域与内存溢出异常</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

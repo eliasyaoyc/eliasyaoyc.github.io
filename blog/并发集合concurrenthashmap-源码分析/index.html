@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>并发集合——ConcurrentHashMap 源码分析 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Java, 并发编程">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="并发集合——ConcurrentHashMap 源码分析" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrenthashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="ConcurrentHashMap是HashMap的线程安全版本，内部也是使用（数组 &#43; 链表 &#43; 红黑树）的结构来存储元素。">
+  <meta property="og:description" content="ConcurrentHashMap是HashMap的线程安全版本，内部也是使用（数组 &#43; 链表 &#43; 红黑树）的结构来存储元素。">
+  <meta name="twitter:description" content="ConcurrentHashMap是HashMap的线程安全版本，内部也是使用（数组 &#43; 链表 &#43; 红黑树）的结构来存储元素。">
+  <meta property="og:description" content="ConcurrentHashMap是HashMap的线程安全版本，内部也是使用（数组 &#43; 链表 &#43; 红黑树）的结构来存储元素。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="并发集合——ConcurrentHashMap 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="并发集合——ConcurrentHashMap 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">并发集合——ConcurrentHashMap 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="并发集合——ConcurrentHashMap 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="并发集合——ConcurrentHashMap 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">并发集合——ConcurrentHashMap 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="并发集合——ConcurrentHashMap 源码分析 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="并发集合——ConcurrentHashMap 源码分析 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">并发集合——ConcurrentHashMap 源码分析 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>并发集合——ConcurrentHashMap 源码分析</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月19日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            8000字 | 阅读大约需要16分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b">并发编程</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/map/"><i>#Map</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="问题">问题</h3>
+<ul>
+<li>
+<p>ConcurrentHashMap的存储结构？</p>
+</li>
+<li>
+<p>ConcurrentHashMap是怎么保证并发安全的？</p>
+</li>
+<li>
+<p>ConcurrentHashMap是怎么扩容的？</p>
+</li>
+<li>
+<p>ConcurrentHashMap的size()方法的实现知多少？</p>
+</li>
+<li>
+<p>ConcurrentHashMap是强一致性的吗？</p>
+</li>
+<li>
+<p>ConcurrentHashMap不能解决什么问题？</p>
+</li>
+<li>
+<p>ConcurrentHashMap中哪些地方运用到分段锁的思想？</p>
+</li>
+</ul>
+<hr>
+<h3 id="简述">简述</h3>
+<p>ConcurrentHashMap是HashMap的线程安全版本，内部也是使用（数组 + 链表 + 红黑树）的结构来存储元素。</p>
+<p>相比于同样线程安全的HashTable来说，效率等各方面都有极大地提高。</p>
+<hr>
+<h3 id="源码分析">源码分析</h3>
+<h4 id="map-类图">Map 类图</h4>
+<p><img src="/img/blog/Java%E5%9F%BA%E7%A1%80/%E7%AE%80%E5%8D%95%E9%9B%86%E5%90%88/HashMap/WeChat6f2450b6c1bfded47ca2d79a4b44ddc3.png" alt=""></p>
+<hr>
+<h4 id="属性">属性</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//初始值
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">transient</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">long</span> baseCount<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">//来替代HashMap中的threshold和loadFactor
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">transient</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">int</span> sizeCtl<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">//标记是否有线程在扩容或者创建Cell，会通过cas来更新该值
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">transient</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">int</span> cellsBusy<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">//存储cell的数组
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">transient</span> <span style="color:#66d9ef">volatile</span> CounterCell<span style="color:#f92672">[]</span> counterCells<span style="color:#f92672">;</span>
+</code></pre></div><p><code>sizeCtl</code>：</p>
+<ul>
+<li>-1，表示有线程正在进行初始化操作</li>
+<li>(1 + nThreads)，表示有n个线程正在一起扩容</li>
+<li>0，默认值，后续在真正初始化的时候使用默认容量</li>
+<li>大于0，初始化或扩容完成后下一次的扩容门槛</li>
+</ul>
+<hr>
+<h4 id="内部类">内部类</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Node</span><span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">implements</span> Map<span style="color:#f92672">.</span><span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> hash<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">final</span> K key<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">volatile</span> V val<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">volatile</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next<span style="color:#f92672">;</span>
+
+        Node<span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> hash<span style="color:#f92672">,</span> K key<span style="color:#f92672">,</span> V val<span style="color:#f92672">,</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">=</span> hash<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">key</span> <span style="color:#f92672">=</span> key<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">val</span> <span style="color:#f92672">=</span> val<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="构造方法">构造方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ConcurrentHashMap</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ConcurrentHashMap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> initialCapacity<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>initialCapacity <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">int</span> cap <span style="color:#f92672">=</span> <span style="color:#f92672">((</span>initialCapacity <span style="color:#f92672">&gt;=</span> <span style="color:#f92672">(</span>MAXIMUM_CAPACITY <span style="color:#f92672">&gt;&gt;&gt;</span> 1<span style="color:#f92672">))</span> <span style="color:#f92672">?</span>
+                   MAXIMUM_CAPACITY <span style="color:#f92672">:</span>
+                   tableSizeFor<span style="color:#f92672">(</span>initialCapacity <span style="color:#f92672">+</span> <span style="color:#f92672">(</span>initialCapacity <span style="color:#f92672">&gt;&gt;&gt;</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sizeCtl</span> <span style="color:#f92672">=</span> cap<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ConcurrentHashMap</span><span style="color:#f92672">(</span>Map<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> K<span style="color:#f92672">,</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">extends</span> V<span style="color:#f92672">&gt;</span> m<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sizeCtl</span> <span style="color:#f92672">=</span> DEFAULT_CAPACITY<span style="color:#f92672">;</span>
+        putAll<span style="color:#f92672">(</span>m<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ConcurrentHashMap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> initialCapacity<span style="color:#f92672">,</span> <span style="color:#66d9ef">float</span> loadFactor<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">(</span>initialCapacity<span style="color:#f92672">,</span> loadFactor<span style="color:#f92672">,</span> 1<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ConcurrentHashMap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> initialCapacity<span style="color:#f92672">,</span>
+                             <span style="color:#66d9ef">float</span> loadFactor<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> concurrencyLevel<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!(</span>loadFactor <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0f</span><span style="color:#f92672">)</span> <span style="color:#f92672">||</span> initialCapacity <span style="color:#f92672">&lt;</span> 0 <span style="color:#f92672">||</span> concurrencyLevel <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>initialCapacity <span style="color:#f92672">&lt;</span> concurrencyLevel<span style="color:#f92672">)</span>   <span style="color:#75715e">// Use at least as many bins
+</span><span style="color:#75715e"></span>            initialCapacity <span style="color:#f92672">=</span> concurrencyLevel<span style="color:#f92672">;</span>   <span style="color:#75715e">// as estimated threads
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">long</span> size <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)(</span>1<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#f92672">+</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)</span>initialCapacity <span style="color:#f92672">/</span> loadFactor<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">int</span> cap <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>size <span style="color:#f92672">&gt;=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)</span>MAXIMUM_CAPACITY<span style="color:#f92672">)</span> <span style="color:#f92672">?</span>
+            MAXIMUM_CAPACITY <span style="color:#f92672">:</span> tableSizeFor<span style="color:#f92672">((</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span>size<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sizeCtl</span> <span style="color:#f92672">=</span> cap<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="put方法">put方法</h4>
+<p>添加元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> V <span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>K key<span style="color:#f92672">,</span> V value<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> putVal<span style="color:#f92672">(</span>key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">final</span> V <span style="color:#a6e22e">putVal</span><span style="color:#f92672">(</span>K key<span style="color:#f92672">,</span> V value<span style="color:#f92672">,</span> <span style="color:#66d9ef">boolean</span> onlyIfAbsent<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//key和value都不能为null
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> value <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> NullPointerException<span style="color:#f92672">();</span>
+        <span style="color:#75715e">//计算hash值
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> hash <span style="color:#f92672">=</span> spread<span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">hashCode</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//要插入的元素所在桶的元素个数
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> binCount <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+        <span style="color:#75715e">// 死循环，结合CAS使用（如果CAS失败，则会重新取整个桶进行下面的流程）
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab <span style="color:#f92672">=</span> table<span style="color:#f92672">;;)</span> <span style="color:#f92672">{</span>
+            Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> f<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">int</span> n<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> fh<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tab <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">=</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+                <span style="color:#75715e">//&lt;1&gt; 如果桶未初始化或者桶个数为0，则初始化桶
+</span><span style="color:#75715e"></span>                tab <span style="color:#f92672">=</span> initTable<span style="color:#f92672">();</span>
+            <span style="color:#75715e">//如果要插入的元素所在的桶还没有元素，则把这个元素插入到这个桶中
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>f <span style="color:#f92672">=</span> tabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;</span> hash<span style="color:#f92672">))</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>casTabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span>
+                             <span style="color:#66d9ef">new</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;(</span>hash<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)))</span>
+                    <span style="color:#75715e">// 如果使用CAS插入元素时，发现已经有元素了，则进入下一次循环，重新操作(cas操作失败)
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// 如果使用CAS插入元素成功，则break跳出循环，流程结束
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>                   <span style="color:#75715e">// no lock when adding to empty bin
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>fh <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> MOVED<span style="color:#f92672">)</span>
+                <span style="color:#75715e">// 如果要插入的元素所在的桶的第一个元素的hash是MOVED，则当前线程帮忙一起迁移元素
+</span><span style="color:#75715e"></span>                tab <span style="color:#f92672">=</span> helpTransfer<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> f<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 如果这个桶不为空且不在迁移元素，则锁住这个桶（分段锁）
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// 并查找要插入的元素是否在这个桶中
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// 存在，则替换值（onlyIfAbsent=false）
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// 不存在，则插入到链表结尾或插入树中
+</span><span style="color:#75715e"></span>                V oldVal <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>f<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//再次检测第一个元素是否有变化，如果有变化则进入下一次循环，从头来过
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> f<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//如果第一个元素的hash值大于等于0（说明不是在迁移，也不是树）
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//那就是桶中的元素使用的是链表方式存储
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>fh <span style="color:#f92672">&gt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">//桶中元素个数赋值为1
+</span><span style="color:#75715e"></span>                            binCount <span style="color:#f92672">=</span> 1<span style="color:#f92672">;</span>
+                            <span style="color:#75715e">//遍历整个桶，每次结束binCount加1
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> f<span style="color:#f92672">;;</span> <span style="color:#f92672">++</span>binCount<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                K ek<span style="color:#f92672">;</span>
+                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">==</span> hash <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">((</span>ek <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">key</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> key <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>ek <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>ek<span style="color:#f92672">))))</span> <span style="color:#f92672">{</span>
+                                    <span style="color:#75715e">//如果找到了这个元素，则赋值了新值（onlyIfAbsent=false）
+</span><span style="color:#75715e"></span>                                    <span style="color:#75715e">//并退出循环
+</span><span style="color:#75715e"></span>                                    oldVal <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">;</span>
+                                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>onlyIfAbsent<span style="color:#f92672">)</span>
+                                        e<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span> <span style="color:#f92672">=</span> value<span style="color:#f92672">;</span>
+                                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                                <span style="color:#f92672">}</span>
+                                Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> pred <span style="color:#f92672">=</span> e<span style="color:#f92672">;</span>
+                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>e <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                    <span style="color:#75715e">//如果到链表尾部还没有找到元素
+</span><span style="color:#75715e"></span>                                    <span style="color:#75715e">//就把它插入到链表结尾并退出循环
+</span><span style="color:#75715e"></span>                                    pred<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;(</span>hash<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+                                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                                <span style="color:#f92672">}</span>
+                            <span style="color:#f92672">}</span>
+                        <span style="color:#f92672">}</span>
+                        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>f <span style="color:#66d9ef">instanceof</span> TreeBin<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">//如果第一个元素是树节点
+</span><span style="color:#75715e"></span>                            Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> p<span style="color:#f92672">;</span>
+                            <span style="color:#75715e">//桶中元素个数赋值为2
+</span><span style="color:#75715e"></span>                            binCount <span style="color:#f92672">=</span> 2<span style="color:#f92672">;</span>
+                            <span style="color:#75715e">//调用红黑树的插入方法插入元素
+</span><span style="color:#75715e"></span>                            <span style="color:#75715e">//如果成功插入则返回null
+</span><span style="color:#75715e"></span>                            <span style="color:#75715e">//否则返回寻找到的节点
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>p <span style="color:#f92672">=</span> <span style="color:#f92672">((</span>TreeBin<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;)</span>f<span style="color:#f92672">).</span><span style="color:#a6e22e">putTreeVal</span><span style="color:#f92672">(</span>hash<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">))</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                <span style="color:#75715e">//如果找到了这个元素，则赋值了新值（onlyIfAbsent=false）
+</span><span style="color:#75715e"></span>                                <span style="color:#75715e">//并退出循环
+</span><span style="color:#75715e"></span>                                oldVal <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">;</span>
+                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>onlyIfAbsent<span style="color:#f92672">)</span>
+                                    p<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span> <span style="color:#f92672">=</span> value<span style="color:#f92672">;</span>
+                            <span style="color:#f92672">}</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">//如果binCount不为0，说明成功插入了元素或者寻找到了元素
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>binCount <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//如果链表元素个数达到了8，则尝试树化
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">//因为上面把元素插入到树中时，binCount只赋值了2，并没有计算整个树中元素的个数 所以不会重复树化
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>binCount <span style="color:#f92672">&gt;=</span> TREEIFY_THRESHOLD<span style="color:#f92672">)</span>
+                        treeifyBin<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">);</span>
+                    <span style="color:#75715e">//如果要插入的元素已经存在，则返回旧值
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>oldVal <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                        <span style="color:#66d9ef">return</span> oldVal<span style="color:#f92672">;</span>
+                    <span style="color:#75715e">//退出外层大循环，流程结束
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//成功插入元素，元素个数加1（是否要扩容在这个里面）
+</span><span style="color:#75715e"></span>        addCount<span style="color:#f92672">(</span>1L<span style="color:#f92672">,</span> binCount<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//成功插入元素返回null
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+</code></pre></div><p><code>整体流程跟HashMap比较类似，大致是以下几步</code>：</p>
+<p>（1）如果桶数组未初始化，则初始化；</p>
+<p>（2）如果待插入的元素所在的桶为空，则尝试把此元素直接插入到桶的第一个位置；</p>
+<p>（3）如果正在扩容，则当前线程一起加入到扩容的过程中；</p>
+<p>（4）如果待插入的元素所在的桶不为空且不在迁移元素，则锁住这个桶（分段锁）；</p>
+<p>（5）如果当前桶中元素以链表方式存储，则在链表中寻找该元素或者插入元素；</p>
+<p>（6）如果当前桶中元素以红黑树方式存储，则在红黑树中寻找该元素或者插入元素；</p>
+<p>（7）如果元素存在，则返回旧值；</p>
+<p>（8）如果元素不存在，整个Map的元素个数加1，并检查是否需要扩容；</p>
+<p><strong>添加元素操作中使用的锁主要有（自旋锁 + CAS + synchronized + 分段锁）。</strong></p>
+<hr>
+<h4 id="初始化桶数组-inittable方法">初始化桶数组 initTable方法</h4>
+<p>第一次放元素时，初始化桶数组。在上面的putVal中<code>&lt;1&gt;</code> 有所体现</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> <span style="color:#a6e22e">initTable</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab<span style="color:#f92672">;</span> <span style="color:#66d9ef">int</span> sc<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">((</span>tab <span style="color:#f92672">=</span> table<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>sc <span style="color:#f92672">=</span> sizeCtl<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span>
+                <span style="color:#75715e">//如果sizeCtl&lt;0说明正在初始化或者扩容，让出CPU
+</span><span style="color:#75715e"></span>                Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">yield</span><span style="color:#f92672">();</span> <span style="color:#75715e">// lost initialization race; just spin
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapInt</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> SIZECTL<span style="color:#f92672">,</span> sc<span style="color:#f92672">,</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//如果把sizeCtl原子更新为-1成功，则当前线程进入初始化
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//如果原子更新失败则说明有其它线程先一步进入初始化了，则进入下一次循环
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//如果下一次循环时还没初始化完毕，则sizeCtl&lt;0进入上面if的逻辑让出CPU
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//如果下一次循环更新完毕了，则table.length!=0，退出循环
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//再次检查table是否为空，防止ABA问题
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>tab <span style="color:#f92672">=</span> table<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//如果sc为0则使用默认值16
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>sc <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> sc <span style="color:#f92672">:</span> DEFAULT_CAPACITY<span style="color:#f92672">;</span>
+                        <span style="color:#75715e">//新建数组
+</span><span style="color:#75715e"></span>                        <span style="color:#a6e22e">@SuppressWarnings</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;unchecked&#34;</span><span style="color:#f92672">)</span>
+                        Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> nt <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[])</span><span style="color:#66d9ef">new</span> Node<span style="color:#f92672">&lt;?,?&gt;[</span>n<span style="color:#f92672">];</span>
+                        <span style="color:#75715e">//赋值给table桶数组
+</span><span style="color:#75715e"></span>                        table <span style="color:#f92672">=</span> tab <span style="color:#f92672">=</span> nt<span style="color:#f92672">;</span>
+                        <span style="color:#75715e">//设置sc为数组长度的0.75倍
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//n - (n &gt;&gt;&gt; 2) = n - n/4 = 0.75n
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//可见这里装载因子和扩容门槛都是写死了的 这也正是没有threshold和loadFactor属性的原因
+</span><span style="color:#75715e"></span>                        sc <span style="color:#f92672">=</span> n <span style="color:#f92672">-</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">&gt;&gt;&gt;</span> 2<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//把sc赋值给sizeCtl，这时存储的是扩容门槛
+</span><span style="color:#75715e"></span>                    sizeCtl <span style="color:#f92672">=</span> sc<span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> tab<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>（1）使用CAS锁控制只有一个线程初始化桶数组；</p>
+<p>（2）sizeCtl在初始化后存储的是扩容门槛；</p>
+<p>（3）扩容门槛写死的是桶数组大小的0.75倍，桶数组大小即map的容量，也就是最多存储多少个元素。</p>
+<hr>
+<h4 id="addcount-方法">addCount 方法</h4>
+<p>每次添加元素后，元素数量加1，并判断是否达到扩容门槛，达到了则进行扩容或协助扩容。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addCount</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> x<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> check<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//把数组的大小存储根据不同的线程存储到不同的段上（也是分段锁的思想）
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//并且有一个baseCount，优先更新baseCount，如果失败了再更新不同线程对应的段
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//这样可以保证尽量小的减少冲突
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//先尝试把数量加到baseCount上，如果失败再加到分段的CounterCell上
+</span><span style="color:#75715e"></span>        CounterCell<span style="color:#f92672">[]</span> as<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">long</span> b<span style="color:#f92672">,</span> s<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>as <span style="color:#f92672">=</span> counterCells<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> <span style="color:#f92672">!</span>U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapLong</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> BASECOUNT<span style="color:#f92672">,</span> b <span style="color:#f92672">=</span> baseCount<span style="color:#f92672">,</span> s <span style="color:#f92672">=</span> b <span style="color:#f92672">+</span> x<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            CounterCell a<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">long</span> v<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">int</span> m<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">boolean</span> uncontended <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#75715e">//如果as为空 或者长度为0 或者当前线程所在的段为null 或者在当前线程的段上加数量失败
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>as <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>m <span style="color:#f92672">=</span> as<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> 0 <span style="color:#f92672">||</span>
+                <span style="color:#f92672">(</span>a <span style="color:#f92672">=</span> as<span style="color:#f92672">[</span>ThreadLocalRandom<span style="color:#f92672">.</span><span style="color:#a6e22e">getProbe</span><span style="color:#f92672">()</span> <span style="color:#f92672">&amp;</span> m<span style="color:#f92672">])</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span>
+                <span style="color:#f92672">!(</span>uncontended <span style="color:#f92672">=</span>
+                  U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapLong</span><span style="color:#f92672">(</span>a<span style="color:#f92672">,</span> CELLVALUE<span style="color:#f92672">,</span> v <span style="color:#f92672">=</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span><span style="color:#f92672">,</span> v <span style="color:#f92672">+</span> x<span style="color:#f92672">)))</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//强制增加数量（无论如何数量是一定要加上的，并不是简单地自旋）
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//不同线程对应不同的段都更新失败了 说明已经发生冲突了，那么就对counterCells进行扩容 以减少多个线程hash到同一个段的概率
+</span><span style="color:#75715e"></span>                fullAddCount<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> uncontended<span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>check <span style="color:#f92672">&lt;=</span> 1<span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+            <span style="color:#75715e">//计算元素个数
+</span><span style="color:#75715e"></span>            s <span style="color:#f92672">=</span> sumCount<span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>check <span style="color:#f92672">&gt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab<span style="color:#f92672">,</span> nt<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">int</span> n<span style="color:#f92672">,</span> sc<span style="color:#f92672">;</span>
+            <span style="color:#75715e">//如果元素个数达到了扩容门槛，则进行扩容 注意，正常情况下sizeCtl存储的是扩容门槛，即容量的0.75倍
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>s <span style="color:#f92672">&gt;=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">long</span><span style="color:#f92672">)(</span>sc <span style="color:#f92672">=</span> sizeCtl<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>tab <span style="color:#f92672">=</span> table<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">=</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> MAXIMUM_CAPACITY<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//rs是扩容时的一个邮戳标识
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">int</span> rs <span style="color:#f92672">=</span> resizeStamp<span style="color:#f92672">(</span>n<span style="color:#f92672">);</span>
+                <span style="color:#75715e">//sc&lt;0说明正在扩容中
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>sc <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>sc <span style="color:#f92672">&gt;&gt;&gt;</span> RESIZE_STAMP_SHIFT<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> rs <span style="color:#f92672">||</span> sc <span style="color:#f92672">==</span> rs <span style="color:#f92672">+</span> 1 <span style="color:#f92672">||</span>
+                        sc <span style="color:#f92672">==</span> rs <span style="color:#f92672">+</span> MAX_RESIZERS <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>nt <span style="color:#f92672">=</span> nextTable<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span>
+                        transferIndex <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">)</span>
+                        <span style="color:#75715e">//扩容已经完成了，退出循环
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//正常应该只会触发nextTable==null这个条件，其它条件没看出来何时触发
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                    <span style="color:#75715e">//扩容未完成，则当前线程加入迁移元素中 并把扩容线程数加1
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapInt</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> SIZECTL<span style="color:#f92672">,</span> sc<span style="color:#f92672">,</span> sc <span style="color:#f92672">+</span> 1<span style="color:#f92672">))</span>
+                        transfer<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> nt<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapInt</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> SIZECTL<span style="color:#f92672">,</span> sc<span style="color:#f92672">,</span>
+                                             <span style="color:#f92672">(</span>rs <span style="color:#f92672">&lt;&lt;</span> RESIZE_STAMP_SHIFT<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> 2<span style="color:#f92672">))</span>
+                    <span style="color:#75715e">//这里是触发扩容的那个线程进入的地方 sizeCtl的高16位存储着rs这个扩容邮戳
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">//sizeCtl的低16位存储着扩容线程数加1，即(1+nThreads) 所以官方说的扩容时sizeCtl的值为 -(1+nThreads)是错误的
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">//进入迁移元素
+</span><span style="color:#75715e"></span>                    transfer<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+                <span style="color:#75715e">//重新计算元素个数
+</span><span style="color:#75715e"></span>                s <span style="color:#f92672">=</span> sumCount<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>（1）元素个数的存储方式类似于LongAdder类，存储在不同的段上，减少不同线程同时更新size时的冲突；</p>
+<p>（2）计算元素个数时把这些段的值及baseCount相加算出总的元素个数；</p>
+<p>（3）正常情况下sizeCtl存储着扩容门槛，扩容门槛为容量的0.75倍；</p>
+<p>（4）扩容时sizeCtl高位存储扩容邮戳(resizeStamp)，低位存储扩容线程数加1（1+nThreads）；</p>
+<p>（5）其它线程添加元素后如果发现存在扩容，也会加入的扩容行列中来；</p>
+<hr>
+<h4 id="helptransfer">helpTransfer</h4>
+<p>线程添加元素时发现正在扩容且当前元素所在的桶元素已经迁移完成了，则协助迁移其它桶的元素。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> <span style="color:#a6e22e">helpTransfer</span><span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab<span style="color:#f92672">,</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> f<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> nextTab<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">int</span> sc<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//如果桶数组不为空，并且当前桶第一个元素为ForwardingNode类型，并且nextTab不为空
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//说明当前桶已经迁移完毕了，才去帮忙迁移其它桶的元素
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//扩容时会把旧桶的第一个元素置为ForwardingNode，并让其nextTab指向新桶数组
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tab <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>f <span style="color:#66d9ef">instanceof</span> ForwardingNode<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span>
+            <span style="color:#f92672">(</span>nextTab <span style="color:#f92672">=</span> <span style="color:#f92672">((</span>ForwardingNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;)</span>f<span style="color:#f92672">).</span><span style="color:#a6e22e">nextTable</span><span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">int</span> rs <span style="color:#f92672">=</span> resizeStamp<span style="color:#f92672">(</span>tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+            <span style="color:#75715e">//sizeCtl&lt;0，说明正在扩容
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>nextTab <span style="color:#f92672">==</span> nextTable <span style="color:#f92672">&amp;&amp;</span> table <span style="color:#f92672">==</span> tab <span style="color:#f92672">&amp;&amp;</span>
+                   <span style="color:#f92672">(</span>sc <span style="color:#f92672">=</span> sizeCtl<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>sc <span style="color:#f92672">&gt;&gt;&gt;</span> RESIZE_STAMP_SHIFT<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> rs <span style="color:#f92672">||</span> sc <span style="color:#f92672">==</span> rs <span style="color:#f92672">+</span> 1 <span style="color:#f92672">||</span>
+                    sc <span style="color:#f92672">==</span> rs <span style="color:#f92672">+</span> MAX_RESIZERS <span style="color:#f92672">||</span> transferIndex <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#75715e">//扩容线程数加1
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapInt</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> SIZECTL<span style="color:#f92672">,</span> sc<span style="color:#f92672">,</span> sc <span style="color:#f92672">+</span> 1<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//当前线程帮忙迁移元素
+</span><span style="color:#75715e"></span>                    transfer<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> nextTab<span style="color:#f92672">);</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">return</span> nextTab<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> table<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//扩容时容量变为两倍，并把部分元素迁移到其它桶中。
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">transfer</span><span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab<span style="color:#f92672">,</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> nextTab<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">,</span> stride<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>stride <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>NCPU <span style="color:#f92672">&gt;</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">&gt;&gt;&gt;</span> 3<span style="color:#f92672">)</span> <span style="color:#f92672">/</span> NCPU <span style="color:#f92672">:</span> n<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> MIN_TRANSFER_STRIDE<span style="color:#f92672">)</span>
+            stride <span style="color:#f92672">=</span> MIN_TRANSFER_STRIDE<span style="color:#f92672">;</span> <span style="color:#75715e">// subdivide range
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//如果nextTab为空，说明还没开始迁移
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//就新建一个新桶数组
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>nextTab <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>            <span style="color:#75715e">// initiating
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//新桶数组是原桶的两倍
+</span><span style="color:#75715e"></span>                <span style="color:#a6e22e">@SuppressWarnings</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;unchecked&#34;</span><span style="color:#f92672">)</span>
+                Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> nt <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[])</span><span style="color:#66d9ef">new</span> Node<span style="color:#f92672">&lt;?,?&gt;[</span>n <span style="color:#f92672">&lt;&lt;</span> 1<span style="color:#f92672">];</span>
+                nextTab <span style="color:#f92672">=</span> nt<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Throwable ex<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>      <span style="color:#75715e">// try to cope with OOME
+</span><span style="color:#75715e"></span>                sizeCtl <span style="color:#f92672">=</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            nextTable <span style="color:#f92672">=</span> nextTab<span style="color:#f92672">;</span>
+            transferIndex <span style="color:#f92672">=</span> n<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//新桶数组大小
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> nextn <span style="color:#f92672">=</span> nextTab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">// 新建一个ForwardingNode类型的节点，并把新桶数组存储在里面
+</span><span style="color:#75715e"></span>        ForwardingNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> fwd <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ForwardingNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;(</span>nextTab<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">boolean</span> advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">boolean</span> finishing <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span> <span style="color:#75715e">// to ensure sweep before committing nextTab
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">,</span> bound <span style="color:#f92672">=</span> 0<span style="color:#f92672">;;)</span> <span style="color:#f92672">{</span>
+            Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> f<span style="color:#f92672">;</span> <span style="color:#66d9ef">int</span> fh<span style="color:#f92672">;</span>
+            <span style="color:#75715e">// 整个while循环就是在算i的值，过程太复杂，不用太关心
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// i的值会从n-1依次递减 其中n是旧桶数组的大小，也就是说i从15开始一直减到1这样去迁移元素
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>advance<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">int</span> nextIndex<span style="color:#f92672">,</span> nextBound<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(--</span>i <span style="color:#f92672">&gt;=</span> bound <span style="color:#f92672">||</span> finishing<span style="color:#f92672">)</span>
+                    advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>nextIndex <span style="color:#f92672">=</span> transferIndex<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    i <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">;</span>
+                    advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapInt</span>
+                         <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> TRANSFERINDEX<span style="color:#f92672">,</span> nextIndex<span style="color:#f92672">,</span>
+                          nextBound <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>nextIndex <span style="color:#f92672">&gt;</span> stride <span style="color:#f92672">?</span>
+                                       nextIndex <span style="color:#f92672">-</span> stride <span style="color:#f92672">:</span> 0<span style="color:#f92672">)))</span> <span style="color:#f92672">{</span>
+                    bound <span style="color:#f92672">=</span> nextBound<span style="color:#f92672">;</span>
+                    i <span style="color:#f92672">=</span> nextIndex <span style="color:#f92672">-</span> 1<span style="color:#f92672">;</span>
+                    advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>i <span style="color:#f92672">&lt;</span> 0 <span style="color:#f92672">||</span> i <span style="color:#f92672">&gt;=</span> n <span style="color:#f92672">||</span> i <span style="color:#f92672">+</span> n <span style="color:#f92672">&gt;=</span> nextn<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//如果一次遍历完成了 也就是整个map所有桶中的元素都迁移完成了
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">int</span> sc<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>finishing<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//如果全部迁移完成了，则替换旧桶数组 并设置下一次扩容门槛为新桶数组容量的0.75倍
+</span><span style="color:#75715e"></span>                    nextTable <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                    table <span style="color:#f92672">=</span> nextTab<span style="color:#f92672">;</span>
+                    sizeCtl <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">&lt;&lt;</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">-</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">&gt;&gt;&gt;</span> 1<span style="color:#f92672">);</span>
+                    <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>U<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapInt</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> SIZECTL<span style="color:#f92672">,</span> sc <span style="color:#f92672">=</span> sizeCtl<span style="color:#f92672">,</span> sc <span style="color:#f92672">-</span> 1<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//当前线程扩容完成，把扩容线程数-1
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>sc <span style="color:#f92672">-</span> 2<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> resizeStamp<span style="color:#f92672">(</span>n<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;&lt;</span> RESIZE_STAMP_SHIFT<span style="color:#f92672">)</span>
+                        <span style="color:#75715e">//扩容完成两边肯定相等
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+                    <span style="color:#75715e">//把finishing设置为true finishing为true才会走到上面的if条件
+</span><span style="color:#75715e"></span>                    finishing <span style="color:#f92672">=</span> advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                    <span style="color:#75715e">//i重新赋值为n
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// 这样会再重新遍历一次桶数组，看看是不是都迁移完成了
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// 也就是第二次遍历都会走到下面的(fh = f.hash) == MOVED这个条件
+</span><span style="color:#75715e"></span>                    i <span style="color:#f92672">=</span> n<span style="color:#f92672">;</span> <span style="color:#75715e">// recheck before commit
+</span><span style="color:#75715e"></span>                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//如果桶中无数据，直接放入ForwardingNode标记该桶已迁移
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>f <span style="color:#f92672">=</span> tabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">))</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                advance <span style="color:#f92672">=</span> casTabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> fwd<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>fh <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> MOVED<span style="color:#f92672">)</span>
+                <span style="color:#75715e">//如果桶中第一个元素的hash值为MOVED 说明它是ForwardingNode节点 也就是该桶已迁移
+</span><span style="color:#75715e"></span>                advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span> <span style="color:#75715e">// already processed
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 锁定该桶并迁移元素
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>f<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//再次判断当前桶第一个元素是否有修改 也就是可能其它线程先一步迁移了元素
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> f<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//把一个链表分化成两个链表 规则是桶中各元素的hash与桶大小n进行与操作
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//等于0的放到低位链表(low)中，不等于0的放到高位链表(high)中
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//其中低位链表迁移到新桶中的位置相对旧桶不变 高位链表迁移到新桶中位置正好是其在旧桶的位置加n
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//这也正是为什么扩容时容量在变成两倍的原因
+</span><span style="color:#75715e"></span>                        Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> ln<span style="color:#f92672">,</span> hn<span style="color:#f92672">;</span>
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>fh <span style="color:#f92672">&gt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">//第一个元素的hash值大于等于0 说明该桶中元素是以链表形式存储的 这里与HashMap迁移算法基本类似
+</span><span style="color:#75715e"></span>                            <span style="color:#75715e">//唯一不同的是多了一步寻找lastRun 这里的lastRun是提取出链表后面不用处理再特殊处理的子链表
+</span><span style="color:#75715e"></span>                            <span style="color:#75715e">//比如所有元素的hash值与桶大小n与操作后的值分别为 0 0 4 4 0 0 0 则最后面三个0对应的元素肯定还是在同一个桶中
+</span><span style="color:#75715e"></span>                            <span style="color:#75715e">//这时lastRun对应的就是倒数第三个节点
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">int</span> runBit <span style="color:#f92672">=</span> fh <span style="color:#f92672">&amp;</span> n<span style="color:#f92672">;</span>
+                            Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> lastRun <span style="color:#f92672">=</span> f<span style="color:#f92672">;</span>
+                            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> p <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span> p <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> p <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                <span style="color:#66d9ef">int</span> b <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">&amp;</span> n<span style="color:#f92672">;</span>
+                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>b <span style="color:#f92672">!=</span> runBit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                    runBit <span style="color:#f92672">=</span> b<span style="color:#f92672">;</span>
+                                    lastRun <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                                <span style="color:#f92672">}</span>
+                            <span style="color:#f92672">}</span>
+                            <span style="color:#75715e">//看看最后这几个元素归属于低位链表还是高位链表
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>runBit <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                ln <span style="color:#f92672">=</span> lastRun<span style="color:#f92672">;</span>
+                                hn <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                            <span style="color:#f92672">}</span>
+                            <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                                hn <span style="color:#f92672">=</span> lastRun<span style="color:#f92672">;</span>
+                                ln <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                            <span style="color:#f92672">}</span>
+                            <span style="color:#75715e">//遍历链表，把hash&amp;n为0的放在低位链表中  不为0的放在高位链表中
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> p <span style="color:#f92672">=</span> f<span style="color:#f92672">;</span> p <span style="color:#f92672">!=</span> lastRun<span style="color:#f92672">;</span> p <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                <span style="color:#66d9ef">int</span> ph <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">;</span> K pk <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">key</span><span style="color:#f92672">;</span> V pv <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">;</span>
+                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>ph <span style="color:#f92672">&amp;</span> n<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span>
+                                    ln <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;(</span>ph<span style="color:#f92672">,</span> pk<span style="color:#f92672">,</span> pv<span style="color:#f92672">,</span> ln<span style="color:#f92672">);</span>
+                                <span style="color:#66d9ef">else</span>
+                                    hn <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;(</span>ph<span style="color:#f92672">,</span> pk<span style="color:#f92672">,</span> pv<span style="color:#f92672">,</span> hn<span style="color:#f92672">);</span>
+                            <span style="color:#f92672">}</span>
+                            <span style="color:#75715e">//低位链表的位置不变
+</span><span style="color:#75715e"></span>                            setTabAt<span style="color:#f92672">(</span>nextTab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> ln<span style="color:#f92672">);</span>
+                            <span style="color:#75715e">//高位链表的位置是原位置加n
+</span><span style="color:#75715e"></span>                            setTabAt<span style="color:#f92672">(</span>nextTab<span style="color:#f92672">,</span> i <span style="color:#f92672">+</span> n<span style="color:#f92672">,</span> hn<span style="color:#f92672">);</span>
+                            <span style="color:#75715e">//标记当前桶已迁移
+</span><span style="color:#75715e"></span>                            setTabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> fwd<span style="color:#f92672">);</span>
+                            <span style="color:#75715e">//advance为true，返回上面进行--i操作
+</span><span style="color:#75715e"></span>                            advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span>
+                        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>f <span style="color:#66d9ef">instanceof</span> TreeBin<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">//如果第一个元素是树节点 也是一样，分化成两颗树 也是根据hash&amp;n为0放在低位树中 不为0放在高位树中
+</span><span style="color:#75715e"></span>                            TreeBin<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> t <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TreeBin<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;)</span>f<span style="color:#f92672">;</span>
+                            TreeNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> lo <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> loTail <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                            TreeNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> hi <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> hiTail <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                            <span style="color:#66d9ef">int</span> lc <span style="color:#f92672">=</span> 0<span style="color:#f92672">,</span> hc <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                            <span style="color:#75715e">//遍历整颗树，根据hash&amp;n是否为0分化成两颗树
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> t<span style="color:#f92672">.</span><span style="color:#a6e22e">first</span><span style="color:#f92672">;</span> e <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> e <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                <span style="color:#66d9ef">int</span> h <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">;</span>
+                                TreeNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> p <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TreeNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span>
+                                    <span style="color:#f92672">(</span>h<span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">key</span><span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>h <span style="color:#f92672">&amp;</span> n<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>p<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span> <span style="color:#f92672">=</span> loTail<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                                        lo <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                                    <span style="color:#66d9ef">else</span>
+                                        loTail<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                                    loTail <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                                    <span style="color:#f92672">++</span>lc<span style="color:#f92672">;</span>
+                                <span style="color:#f92672">}</span>
+                                <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>p<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span> <span style="color:#f92672">=</span> hiTail<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                                        hi <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                                    <span style="color:#66d9ef">else</span>
+                                        hiTail<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                                    hiTail <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                                    <span style="color:#f92672">++</span>hc<span style="color:#f92672">;</span>
+                                <span style="color:#f92672">}</span>
+                            <span style="color:#f92672">}</span>
+                            <span style="color:#75715e">//如果分化的树中元素个数小于等于6，则退化成链表
+</span><span style="color:#75715e"></span>                            ln <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>lc <span style="color:#f92672">&lt;=</span> UNTREEIFY_THRESHOLD<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> untreeify<span style="color:#f92672">(</span>lo<span style="color:#f92672">)</span> <span style="color:#f92672">:</span>
+                                <span style="color:#f92672">(</span>hc <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">new</span> TreeBin<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;(</span>lo<span style="color:#f92672">)</span> <span style="color:#f92672">:</span> t<span style="color:#f92672">;</span>
+                            hn <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>hc <span style="color:#f92672">&lt;=</span> UNTREEIFY_THRESHOLD<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> untreeify<span style="color:#f92672">(</span>hi<span style="color:#f92672">)</span> <span style="color:#f92672">:</span>
+                                <span style="color:#f92672">(</span>lc <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">new</span> TreeBin<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;(</span>hi<span style="color:#f92672">)</span> <span style="color:#f92672">:</span> t<span style="color:#f92672">;</span>
+                            <span style="color:#75715e">//低位树的位置不变
+</span><span style="color:#75715e"></span>                            setTabAt<span style="color:#f92672">(</span>nextTab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> ln<span style="color:#f92672">);</span>
+                            <span style="color:#75715e">//高位树的位置是原位置加n
+</span><span style="color:#75715e"></span>                            setTabAt<span style="color:#f92672">(</span>nextTab<span style="color:#f92672">,</span> i <span style="color:#f92672">+</span> n<span style="color:#f92672">,</span> hn<span style="color:#f92672">);</span>
+                            <span style="color:#75715e">//标记该桶已迁移
+</span><span style="color:#75715e"></span>                            setTabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> fwd<span style="color:#f92672">);</span>
+                            <span style="color:#75715e">//advance为true，返回上面进行--i操作
+</span><span style="color:#75715e"></span>                            advance <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>（1）新桶数组大小是旧桶数组的两倍；</p>
+<p>（2）迁移元素先从靠后的桶开始；</p>
+<p>（3）迁移完成的桶在里面放置一ForwardingNode类型的元素，标记该桶迁移完成；</p>
+<p>（4）迁移时根据hash&amp;n是否等于0把桶中元素分化成两个链表或树；</p>
+<p>（5）低位链表（树）存储在原来的位置；</p>
+<p>（6）高们链表（树）存储在原来的位置加n的位置；</p>
+<p>（7）迁移元素时会锁住当前桶，也是分段锁的思想；</p>
+<p>到这里添加操作涉及到的一些方法全部分析完毕</p>
+<hr>
+<h4 id="remove-">remove（ ）</h4>
+<p>删除元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> V <span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> replaceNode<span style="color:#f92672">(</span>key<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">final</span> V <span style="color:#a6e22e">replaceNode</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">,</span> V value<span style="color:#f92672">,</span> Object cv<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//计算hash
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> hash <span style="color:#f92672">=</span> spread<span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">hashCode</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//自旋
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab <span style="color:#f92672">=</span> table<span style="color:#f92672">;;)</span> <span style="color:#f92672">{</span>
+            Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> f<span style="color:#f92672">;</span> <span style="color:#66d9ef">int</span> n<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> fh<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tab <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">=</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> 0 <span style="color:#f92672">||</span>
+                <span style="color:#f92672">(</span>f <span style="color:#f92672">=</span> tabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;</span> hash<span style="color:#f92672">))</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                <span style="color:#75715e">//如果目标key所在的桶不存在，跳出循环返回null
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>fh <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> MOVED<span style="color:#f92672">)</span>
+                <span style="color:#75715e">//如果正在扩容中，协助扩容
+</span><span style="color:#75715e"></span>                tab <span style="color:#f92672">=</span> helpTransfer<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> f<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                V oldVal <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                <span style="color:#75715e">//标记是否处理过
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">boolean</span> validated <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>f<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//再次验证当前桶第一个元素是否被修改过
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">)</span> <span style="color:#f92672">==</span> f<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//fh&gt;=0表示是链表节点
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>fh <span style="color:#f92672">&gt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            validated <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                            <span style="color:#75715e">//遍历链表寻找目标节点
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> f<span style="color:#f92672">,</span> pred <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;;)</span> <span style="color:#f92672">{</span>
+                                K ek<span style="color:#f92672">;</span>
+                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">==</span> hash <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">((</span>ek <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">key</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> key <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>ek <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>ek<span style="color:#f92672">))))</span> <span style="color:#f92672">{</span>
+                                    <span style="color:#75715e">//找到了目标节点
+</span><span style="color:#75715e"></span>                                    V ev <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">;</span>
+                                    <span style="color:#75715e">//检查目标节点旧value是否等于cv
+</span><span style="color:#75715e"></span>                                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cv <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> cv <span style="color:#f92672">==</span> ev <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>ev <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> cv<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>ev<span style="color:#f92672">)))</span> <span style="color:#f92672">{</span>
+                                        oldVal <span style="color:#f92672">=</span> ev<span style="color:#f92672">;</span>
+                                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>value <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                                            <span style="color:#75715e">//如果value不为空则替换旧值
+</span><span style="color:#75715e"></span>                                            e<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span> <span style="color:#f92672">=</span> value<span style="color:#f92672">;</span>
+                                        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>pred <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                                            <span style="color:#75715e">//如果前置节点不为空 删除当前节点
+</span><span style="color:#75715e"></span>                                            pred<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+                                        <span style="color:#66d9ef">else</span>
+                                            <span style="color:#75715e">//如果前置节点为空 说明是桶中第一个元素，删除之
+</span><span style="color:#75715e"></span>                                            setTabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">);</span>
+                                    <span style="color:#f92672">}</span>
+                                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                                <span style="color:#f92672">}</span>
+                                pred <span style="color:#f92672">=</span> e<span style="color:#f92672">;</span>
+                                <span style="color:#75715e">//遍历到链表尾部还没找到元素，跳出循环
+</span><span style="color:#75715e"></span>                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>e <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                            <span style="color:#f92672">}</span>
+                        <span style="color:#f92672">}</span>
+                        <span style="color:#75715e">//如果是树节点
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>f <span style="color:#66d9ef">instanceof</span> TreeBin<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            validated <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                            TreeBin<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> t <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TreeBin<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;)</span>f<span style="color:#f92672">;</span>
+                            TreeNode<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> r<span style="color:#f92672">,</span> p<span style="color:#f92672">;</span>
+                            <span style="color:#75715e">//遍历树找到了目标节点
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>r <span style="color:#f92672">=</span> t<span style="color:#f92672">.</span><span style="color:#a6e22e">root</span><span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>p <span style="color:#f92672">=</span> r<span style="color:#f92672">.</span><span style="color:#a6e22e">findTreeNode</span><span style="color:#f92672">(</span>hash<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">))</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                V pv <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">;</span>
+                                <span style="color:#75715e">//检查目标节点旧value是否等于cv
+</span><span style="color:#75715e"></span>                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cv <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> cv <span style="color:#f92672">==</span> pv <span style="color:#f92672">||</span>
+                                    <span style="color:#f92672">(</span>pv <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> cv<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>pv<span style="color:#f92672">)))</span> <span style="color:#f92672">{</span>
+                                    oldVal <span style="color:#f92672">=</span> pv<span style="color:#f92672">;</span>
+                                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>value <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                                        <span style="color:#75715e">//如果value不为空则替换旧值
+</span><span style="color:#75715e"></span>                                        p<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span> <span style="color:#f92672">=</span> value<span style="color:#f92672">;</span>
+                                    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>t<span style="color:#f92672">.</span><span style="color:#a6e22e">removeTreeNode</span><span style="color:#f92672">(</span>p<span style="color:#f92672">))</span>
+                                        <span style="color:#75715e">//如果value为空则删除元素 如果删除后树的元素个数较少则退化成链表
+</span><span style="color:#75715e"></span>                                        <span style="color:#75715e">//t.removeTreeNode(p)这个方法返回true表示删除节点后树的元素个数较少
+</span><span style="color:#75715e"></span>                                        setTabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> i<span style="color:#f92672">,</span> untreeify<span style="color:#f92672">(</span>t<span style="color:#f92672">.</span><span style="color:#a6e22e">first</span><span style="color:#f92672">));</span>
+                                <span style="color:#f92672">}</span>
+                            <span style="color:#f92672">}</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">//如果处理过，不管有没有找到元素都返回
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>validated<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//如果找到了元素，返回其旧值
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>oldVal <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//如果要替换的值为空，元素个数减1
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>value <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                            addCount<span style="color:#f92672">(-</span>1L<span style="color:#f92672">,</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">);</span>
+                        <span style="color:#66d9ef">return</span> oldVal<span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//没找到元素返回空
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>（1）计算hash；</p>
+<p>（2）如果所在的桶不存在，表示没有找到目标元素，返回；</p>
+<p>（3）如果正在扩容，则协助扩容完成后再进行删除操作；</p>
+<p>（4）如果是以链表形式存储的，则遍历整个链表查找元素，找到之后再删除；</p>
+<p>（5）如果是以树形式存储的，则遍历树查找元素，找到之后再删除；</p>
+<p>（6）如果是以树形式存储的，删除元素之后树较小，则退化成链表；</p>
+<p>（7）如果确实删除了元素，则整个map元素个数减1，并返回旧值；</p>
+<p>（8）如果没有删除元素，则返回null；</p>
+<hr>
+<h4 id="get-">get( )</h4>
+<p>获取元素</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> V <span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;[]</span> tab<span style="color:#f92672">;</span>
+        Node<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e<span style="color:#f92672">,</span> p<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">int</span> n<span style="color:#f92672">,</span> eh<span style="color:#f92672">;</span>
+        K ek<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//计算hash
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> h <span style="color:#f92672">=</span> spread<span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">hashCode</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//如果元素所在的桶存在且里面有元素
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>tab <span style="color:#f92672">=</span> table<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">=</span> tab<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> <span style="color:#f92672">&gt;</span> 0 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>e <span style="color:#f92672">=</span> tabAt<span style="color:#f92672">(</span>tab<span style="color:#f92672">,</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;</span> h<span style="color:#f92672">))</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//如果第一个元素就是要找的元素，直接返回
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>eh <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> h<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>ek <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">key</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> key <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>ek <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>ek<span style="color:#f92672">)))</span>
+                    <span style="color:#66d9ef">return</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//hash小于0，说明是树或者正在扩容 使用find寻找元素，find的寻找方式依据Node的不同子类有不同的实现方式
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>eh <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#f92672">(</span>p <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">find</span><span style="color:#f92672">(</span>h<span style="color:#f92672">,</span> key<span style="color:#f92672">))</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+            <span style="color:#75715e">//遍历整个链表寻找元素
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">while</span> <span style="color:#f92672">((</span>e <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span> <span style="color:#f92672">==</span> h <span style="color:#f92672">&amp;&amp;</span>
+                    <span style="color:#f92672">((</span>ek <span style="color:#f92672">=</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">key</span><span style="color:#f92672">)</span> <span style="color:#f92672">==</span> key <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>ek <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>ek<span style="color:#f92672">))))</span>
+                    <span style="color:#66d9ef">return</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">val</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>（1）hash到元素所在的桶；</p>
+<p>（2）如果桶中第一个元素就是该找的元素，直接返回；</p>
+<p>（3）如果是树或者正在迁移元素，则调用各自Node子类的find()方法寻找元素；</p>
+<p>（4）如果是链表，遍历整个链表寻找元素；</p>
+<p>（5）获取元素没有加锁；</p>
+<hr>
+<h3 id="总结">总结</h3>
+<ul>
+<li>
+<p><strong>ConcurrentHashMap是HashMap的线程安全版本,采用（数组 + 链表 + 红黑树）的结构存储元素</strong></p>
+</li>
+<li>
+<p><strong>ConcurrentHashMap相比于同样线程安全的HashTable，效率要高很多（采用的锁有 synchronized，CAS，自旋锁，分段锁，volatile等）</strong></p>
+</li>
+<li>
+<p><strong>ConcurrentHashMap中没有threshold和loadFactor这两个字段，而是采用sizeCtl来控制</strong></p>
+<ul>
+<li>sizeCtl = -1，表示正在进行初始化；</li>
+<li>sizeCtl = 0，默认值，表示后续在真正初始化的时候使用默认容量；</li>
+<li>sizeCtl &gt; 0，在初始化之前存储的是传入的容量，在初始化或扩容后存储的是下一次的扩容门槛；</li>
+<li>sizeCtl = (resizeStamp &laquo; 16) + (1 + nThreads)，表示正在进行扩容，高位存储扩容邮戳，低位存储扩容线程数加1；</li>
+</ul>
+</li>
+<li>
+<p><strong>更新操作时如果正在进行扩容，当前线程协助扩容</strong></p>
+</li>
+<li>
+<p><strong>更新操作会采用synchronized锁住当前桶的第一个元素，这是分段锁的思想</strong></p>
+</li>
+<li>
+<p><strong>整个扩容过程都是通过CAS控制sizeCtl这个字段来进行的，这很关键</strong></p>
+</li>
+<li>
+<p><strong>迁移完元素的桶会放置一个ForwardingNode节点，以标识该桶迁移完毕</strong></p>
+</li>
+<li>
+<p><strong>元素个数的存储也是采用的分段思想，类似于LongAdder的实现</strong></p>
+<ul>
+<li>元素个数的更新会把不同的线程hash到不同的段上，减少资源争用</li>
+<li>元素个数的更新如果还是出现多个线程同时更新一个段，则会扩容段（CounterCell）</li>
+</ul>
+</li>
+<li>
+<p><strong>获取元素个数是把所有的段（包括baseCount和CounterCell）相加起来得到的</strong></p>
+</li>
+<li>
+<p><strong>查询操作是不会加锁的，所以ConcurrentHashMap不是强一致性的</strong></p>
+</li>
+<li>
+<p><strong>ConcurrentHashMap中不能存储key或value为null的元素，HashMap可以</strong></p>
+</li>
+</ul>
+<hr>
+<h4 id="参考">参考</h4>
+<ul>
+<li>
+<p><a href="https://kaiwu.lagou.com/course/courseInfo.htm?courseId=59#/detail/pc?id=1762">HashMap 底层实现原理是什么？JDK8 做了哪些优化？</a></p>
+</li>
+<li>
+<p><a href="https://mp.weixin.qq.com/s?__biz=Mzg2ODA0ODM0Nw==&amp;mid=2247483711&amp;idx=3&amp;sn=f0743c914e26695eb9c0d4cb0cab5e99&amp;scene=21#wechat_redirect">死磕 java集合之HashMap源码分析</a></p>
+</li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrentskiplistmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" data-toggle="tooltip" data-placement="top" title="并发集合——ConcurrentSkipListMap 源码分析">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/http-%E5%8D%8F%E8%AE%AE%E6%80%BB%E7%BB%93/" data-toggle="tooltip" data-placement="top" title="HTTP 协议总结.md">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrentskiplistmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>并发集合——ConcurrentSkipListMap 源码分析</a></li>
+         
+        <li><a href="/blog/hashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>HashMap 源码分析</a></li>
+         
+        <li><a href="/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>LinkedHashMap 源码分析</a></li>
+         
+        <li><a href="/blog/weakhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>WeakHashMap 源码分析</a></li>
+         
+        <li><a href="/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/"><i class="fa fa-link"></i>深入理解 String</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

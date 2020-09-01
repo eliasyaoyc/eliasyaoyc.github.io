@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>引用以及Reference类 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Java, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="引用以及Reference类" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="Java与C&#43;&#43;之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。">
+  <meta property="og:description" content="Java与C&#43;&#43;之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。">
+  <meta name="twitter:description" content="Java与C&#43;&#43;之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。">
+  <meta property="og:description" content="Java与C&#43;&#43;之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="引用以及Reference类 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="引用以及Reference类 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">引用以及Reference类 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="引用以及Reference类 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="引用以及Reference类 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">引用以及Reference类 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="引用以及Reference类 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="引用以及Reference类 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">引用以及Reference类 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>引用以及Reference类</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月31日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            9600字 | 阅读大约需要19分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/jvm">JVM</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/jvm/"><i>#JVM</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <p>简述</p>
+<p>无论是通过<code>引用计数算法</code>判断对象的引用数量，还是通过<code>可达性分析算法</code>判断对象是否引用链可达，判定对象是否存活都和“引用”离不开关系。</p>
+<ul>
+<li>
+<p>在JDK 1.2版之前，Java里面的引用是很传统的定义：如果reference类型的数据中存储的数值代表的是另外一块内存的起始地址，<strong>就称该reference数据是代表某块内存、某个对象的引用。</strong></p>
+<blockquote>
+<p>这种定义并没有什么不对，只是现在看来有些过于狭隘了，一个对象在这种定义下只有“<code>被引用</code>”或者“<code>未被引用</code>”两种状态，对于描述一些“食之无味，弃之可惜”的对象就显得无能为力。譬如我们希望能描述一类对象：当内存空间还足够时，能保留在内存之中，如果内存空间在进行垃圾收集后仍然非常紧张，那就可以抛弃这些对象——很多系统的缓存功能都符合这样的应用场景。</p>
+</blockquote>
+</li>
+<li>
+<p>在JDK 1.2版之后，Java对引用的概念进行了扩充，将引用分为<code>强引用（Strongly Re-ference）</code>、<code>软引用（Soft Reference）</code>、<code>弱引用（Weak Reference）</code>和<code>虚引用（PhantomReference）</code>4种，这4种引用强度依次逐渐减弱。</p>
+<ul>
+<li>
+<p><code>强引用</code>：普通的的引用类型，new一个对象默认得到的引用就是强引用，只要对象存在强引用，就不会被GC。</p>
+</li>
+<li>
+<p><code>软引用</code>：相对较弱的引用，垃圾回收器会在内存不足时回收弱引用指向的对象。JVM会在抛出OOME前清理所有弱引用指向的对象，如果清理完还是内存不足， 才会抛出OOME。所以软引用一般用于实现内存敏感缓存。</p>
+</li>
+<li>
+<p><code>弱引用</code>：更弱的引用类型，垃圾回收器在GC时会回收此对象，也可以用于实现缓存，比如JDK提供的WeakHashMap。</p>
+</li>
+<li>
+<p><code>虚引用</code>：一种特殊的引用类型，不能通过虚引用获取到关联对象，只是用于获取对象被回收的通知。</p>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="假死亡的情况">假死亡的情况</h4>
+<p>即使在可达性分析算法中判定为不可达的对象，也不是<code>“非死不可”</code>的，这时候它们暂时还处于“缓刑”阶段，<strong>要真正宣告一个对象死亡，至少要经历两次标记过程</strong>：</p>
+<ul>
+<li>如果对象在进行可达性分析后发现没有与GC Roots相连接的引用链，那它将会被<code>第一次标记</code>。</li>
+<li>随后进行一次筛选，筛选的条件是此对象是否有必要执行<code>finalize()</code>方法。</li>
+<li>假如对象没有覆盖<code>finalize()</code>方法，或者<code>finalize()</code>方法已经被虚拟机调用过，那么虚拟机将这两种情况都视为“没有必要执行”。<code>只会执行一次</code></li>
+</ul>
+<p>如果这个对象被判定为确有必要执行<code>finalize()</code>方法，那么该对象将会被放置在一个名为<code>F-Queue</code>的队列之中，并在稍后<strong>由一条由虚拟机自动建立的、低调度优先级的Finalizer线程去执行它们的finalize()方法。</strong></p>
+<blockquote>
+<p>这里所说的“执行”是指虚拟机会触发这个方法<code>开始运行</code>，但并不承诺一定会等待它运行结束。这样做的原因是，如果某个对象的<code>finalize()</code>方法执行缓慢，或者更极端地发生了<code>死循环</code>，将很可能导致F-Queue队列中的其他对象永久处于等待，甚至导致整个内存回收子系统的崩溃。</p>
+<p>所以针对这种情况JVM不会等待。</p>
+</blockquote>
+<p><code>finalize()</code>方法是对象逃脱死亡命运的<code>最后一次机会</code>，稍后收集器将对<code>F-Queue</code>中的对象进行第二次小规模的标记，如果对象要在<code>finalize()</code>中成功拯救自己——<strong>只要重新与引用链上的任何一个对象建立关联即可，譬如把自己（this关键字）赋值给某个类变量或者对象的成员变量</strong>，那在第二次标记时它将被移出“即将回收”的集合；如果对象这时候还没有逃脱，那基本上它就真的要被回收了。</p>
+<p>从下面代码中我们可以看到一个对象的<code>finalize()</code>被执行，但是它仍然可以存活。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FinalizeEscapeGC</span><span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> FinalizeEscapeGC SAVE_HOOK <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+  
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">isAlive</span><span style="color:#f92672">(){</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;yes, i am still alive&#34;</span><span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+  
+  <span style="color:#a6e22e">@Override</span>
+  <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">finalize</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Throwable<span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">finalize</span><span style="color:#f92672">();</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;finalize method executed! &#34;</span><span style="color:#f92672">);</span>
+    FinalizeEscapeGC<span style="color:#f92672">.</span><span style="color:#a6e22e">SAVE_HOOK</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">;</span>
+  <span style="color:#f92672">}</span>
+  
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Throwable<span style="color:#f92672">{</span>
+        SAVE_HOOK <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FinalizeEscapeGC<span style="color:#f92672">();</span>
+        <span style="color:#75715e">//&lt;1&gt; 对象第一次拯救自己  成功
+</span><span style="color:#75715e"></span>        SAVE_HOOK <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">gc</span><span style="color:#f92672">();</span>
+        Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>500<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>SAVE_HOOK <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+            SAVE_HOOK<span style="color:#f92672">.</span><span style="color:#a6e22e">isAlive</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;no, i am dea :(&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">//&lt;2&gt; 对象第二次拯救自己 失败
+</span><span style="color:#75715e"></span>        SAVE_HOOK <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">gc</span><span style="color:#f92672">();</span>
+        Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>500<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>SAVE_HOOK <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+            SAVE_HOOK<span style="color:#f92672">.</span><span style="color:#a6e22e">isAlive</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;no, i am dea :(&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>输出</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">finalize method executed<span style="color:#f92672">!</span> 
+yes<span style="color:#f92672">,</span> i am still alive
+no<span style="color:#f92672">,</span> i am dea <span style="color:#f92672">:(</span>
+</code></pre></div><p>可以看到，SAVE_HOOK对象的<code>finalize()</code>方法确实被垃圾收集器触发过，并且在被收集前成功逃脱了。</p>
+<p>另外一个值得注意的地方就是，代码中有两段完全一样的代码片段，</p>
+<ul>
+<li>执行结果却是一次逃脱成功，一次失败了。这是因为任何一个对象的<code>finalize()</code>方法都只会被系统自动调用一次</li>
+<li>如果对象面临下一次回收，它的<code>finalize()</code>方法不会被再次执行，因此第二段代码的自救行动失败了。</li>
+</ul>
+<p>这也验证了在上面分析的<code>假死亡</code>的情况，<code>finalize()</code> 只会被调用一次。</p>
+<blockquote>
+<p>不建议使用<code>finalize()</code>方法：运行代价高昂，不确定性大，无法保证各个对象的调用顺序，如今已被官方明确声明为不推荐使用的语法。</p>
+</blockquote>
+<p>有了上面的关于 <code>引用</code> 和 <code>finalize</code> 方法的一些理论，下面让我们来看一下 Java 中关于引用和 finalize方法的具体实现以及逻辑。</p>
+<hr>
+<h4 id="java有5种类型的可达性">Java有5种类型的可达性：</h4>
+<ul>
+<li><code>强可到达</code>，如果从GC Root搜索后，发现对象与GC Root之间存在强引用链则为强可到达。强引用链即有强引用对象，引用了该对象。</li>
+<li><code>软可到达</code>，如果从GC Root搜索后，发现对象与GC Root之间不存在强引用链，但存在软引用链，则为软可到达。软引用链即有软引用对象，引用了该对象。</li>
+<li><code>弱可到达</code>，如果从GC Root搜索后，发现对象与GC Root之间不存在强引用链与软引用链，但有弱引用链，则为弱可到达。弱引用链即有弱引用对象，引用了该对象。</li>
+<li><code>虚可到达</code>，如果从GC Root搜索后，发现对象与GC Root之间只存在虚引用链则为虚可到达。虚引用链即有虚引用对象，引用了该对象。</li>
+<li><code>不可达</code>，如果从GC Root搜索后，找不到对象与GC Root之间的引用链，则为不可到达。</li>
+</ul>
+<p><img src="/img/blog/Java%E5%9F%BA%E7%A1%80/1585278783250.jpg" alt=""></p>
+<p>根据上图的例子中，可以得到以下的结论：</p>
+<ul>
+<li>Object A为<code>强可到达</code>，Object B也为<code>强可到达</code>，虽然Object B对象被<code>SoftReference Objcet E</code> 引用但由于其还被Object A引用所以为<code>强可到达</code>;</li>
+<li>而Object C和Object D为<code>弱引用达到</code>，虽然Object D对象被PhantomReference Objcet G引用但由于其还被Object C引用，而Object C又为弱引用达到，所以Object D为弱引用达到;</li>
+<li>而Object H与Object I是<code>不可到达</code>。</li>
+<li>引用链的强弱有关系依次是 <strong>强引用 &gt; 软引用 &gt; 弱引用 &gt; 虚引用</strong>，如果有更强的引用关系存在，那么引用链到达性，将由更强的引用有关系决定。</li>
+</ul>
+<hr>
+<h3 id="源码分析">源码分析</h3>
+<h4 id="类图">类图</h4>
+<p><img src="/img/blog/Java%E5%9F%BA%E7%A1%80/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_7a6d97d1-b667-4d87-928d-75a48ff3441d.png" alt=""></p>
+<p>可以看到的是除了<code>软引用（Soft Reference）</code>、<code>弱引用（Weak Reference）</code>和<code>虚引用（PhantomReference）</code>多了一个</p>
+<p>FinalReference 这个引用而Finalizer 继承于它，所以可以知道 这个引用就是用来处理上面所说的<code>finalizer()</code>方法的。</p>
+<p>所有的子类引用都继承于 <code>Reference</code> 类，先来分析一下此类。</p>
+<hr>
+<h4 id="reference">Reference</h4>
+<p>JVM在GC时如果当前对象只被<code>Reference</code>对象引用，<strong>JVM会根据Reference具体类型与堆内存的使用情况决定是否把对应的Reference对象加入到一个由Reference构成的pending链表上</strong>，如果能加入pending链表JVM同时会通知<code>ReferenceHandler</code>线程进行处理。ReferenceHandler线程是在Reference类被初始化时调用的，其是一个守护进程并且拥有最高的优先级。Reference类静态初始化块代码如下:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">static</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//省略部分代码...
+</span><span style="color:#75715e"></span>    Thread handler <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReferenceHandler<span style="color:#f92672">(</span>tg<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Reference Handler&#34;</span><span style="color:#f92672">);</span>
+    handler<span style="color:#f92672">.</span><span style="color:#a6e22e">setPriority</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_PRIORITY</span><span style="color:#f92672">);</span>
+    handler<span style="color:#f92672">.</span><span style="color:#a6e22e">setDaemon</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    handler<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#75715e">//省略部分代码...
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="referencehandle线程">ReferenceHandle线程</h4>
+<p>而<code>ReferenceHandler</code>线程内部的<code>run</code>方法会不断地从Reference构成的<code>pending</code>链表上获取<code>Reference</code>对象，如果能获取则根据Reference的具体类型进行不同的处理，不能则调用wait方法等待GC回收对象处理pending链表的通知。ReferenceHandler线程run方法源码:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//死循环，线程启动后会一直运行
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        tryHandlePending<span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryHandlePending</span><span style="color:#f92672">(</span><span style="color:#66d9ef">boolean</span> waitForNotify<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    Reference<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> r<span style="color:#f92672">;</span>
+    Cleaner c<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//上锁
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//&lt;1&gt; 如果JVM 发现有满足回收的对象，则会加入Reference 中的 pending链表。
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//    这里会进行判断，如果有则取出来 并在pending链表上断开
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>pending <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                r <span style="color:#f92672">=</span> pending<span style="color:#f92672">;</span>
+                <span style="color:#75715e">//instanceof 可能会抛出OOME，所以在将r从pending链上断开前，做这个处理
+</span><span style="color:#75715e"></span>                c <span style="color:#f92672">=</span> r <span style="color:#66d9ef">instanceof</span> Cleaner <span style="color:#f92672">?</span> <span style="color:#f92672">(</span>Cleaner<span style="color:#f92672">)</span> r <span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                <span style="color:#75715e">//将将r从pending链上断开
+</span><span style="color:#75715e"></span>                pending <span style="color:#f92672">=</span> r<span style="color:#f92672">.</span><span style="color:#a6e22e">discovered</span><span style="color:#f92672">;</span>
+                r<span style="color:#f92672">.</span><span style="color:#a6e22e">discovered</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+            <span style="color:#75715e">//&lt;2&gt; 目前还没有，则wait等待
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//等待CG后的通知
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>waitForNotify<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    lock<span style="color:#f92672">.</span><span style="color:#a6e22e">wait</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">//重试
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">return</span> waitForNotify<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>OutOfMemoryError x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//当抛出OOME时，放弃CPU的运行时间，这样有希望收回一些存活的引用并且GC能回收部分空间。同时能避免频繁地自旋重试，导致连续的OOME异常
+</span><span style="color:#75715e"></span>        Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">yield</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//重试
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+         <span style="color:#75715e">//重试
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">//&lt;3&gt; 在上面的pending链表中取出来的结果，如果是Cleaner类型的Reference调用其clean方法并退出
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>c <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        c<span style="color:#f92672">.</span><span style="color:#a6e22e">clean</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    ReferenceQueue<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> Object<span style="color:#f92672">&gt;</span> q <span style="color:#f92672">=</span> r<span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">//&lt;4&gt; 如果Reference有注册ReferenceQueue，则处理pending指向的Reference结点将其加入ReferenceQueue中
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>q <span style="color:#f92672">!=</span> ReferenceQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">NULL</span><span style="color:#f92672">)</span> q<span style="color:#f92672">.</span><span style="color:#a6e22e">enqueue</span><span style="color:#f92672">(</span>r<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li><code>&lt;1&gt;</code> 如果JVM 发现有满足回收的对象，则会加入Reference 中的 pending链表。  这里会进行判断，如果有则取出来 并在pending链表上断开</li>
+<li><code>&lt;2&gt;</code> 目前pending链表上为空，则wait等待</li>
+<li><code>&lt;3&gt;</code> 在上面的pending链表中取出来的结果，如果是Cleaner类型的Reference调用其clean方法并退出</li>
+<li><code>&lt;4&gt;</code> 如果Reference有注册ReferenceQueue，则处理pending指向的Reference结点将其加入ReferenceQueue中</li>
+</ul>
+<p>上面<code>tryHandlePending</code>方法中比较重要的点是<code>c.clean()</code>与<code>q.enqueue</code></p>
+<ul>
+<li><code>Cleaner#clean</code> 方法用于完成清理工作</li>
+<li><code>q.enqueue</code> 则是ReferenceQueue将被回收对象加入到对应的Reference列队中，等待其他线程的后继处理。</li>
+</ul>
+<p><img src="/img/blog/JVM/1585626539469.jpg" alt=""></p>
+<p><strong>上面就是Reference的整理流程图，接下来回头看一下Reference类的属性、构造方法以及一些重要的方法</strong></p>
+<hr>
+<h4 id="构造方法">构造方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//构造函数，指定引用的对象referent
+</span><span style="color:#75715e"></span>Reference<span style="color:#f92672">(</span>T referent<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">this</span><span style="color:#f92672">(</span>referent<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//构造函数，指定引用的对象referent与注册的queue
+</span><span style="color:#75715e"></span>Reference<span style="color:#f92672">(</span>T referent<span style="color:#f92672">,</span> ReferenceQueue<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> T<span style="color:#f92672">&gt;</span> queue<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">referent</span> <span style="color:#f92672">=</span> referent<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span> <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>queue <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">?</span> ReferenceQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">NULL</span> <span style="color:#f92672">:</span> queue<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="enqueue-方法">enqueue 方法</h4>
+<p>在上面流程图中，如果<code>Reference#tryHandlePending</code> 从<code>pending</code>链表中取出的Reference对象不是<code>Clean</code>类型的，则调用此方法加入ReferenceQueue中，等待其他线程的后续处理。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//Reference
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">//将当前对象加入创建时注册的queue中
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">enqueue</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">enqueue</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//ReferenceQueue
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">//入列队enqueue方法，只被Reference类调用，也就是上面分析中ReferenceHandler线程为调用
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">enqueue</span><span style="color:#f92672">(</span>Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> r<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+	<span style="color:#75715e">//获取同步对象lock对应的监视器对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//获取r关联的ReferenceQueue，如果创建r时未注册ReferenceQueue则为NULL，同样如果r已从ReferenceQueue中移除其也为null
+</span><span style="color:#75715e"></span>        ReferenceQueue<span style="color:#f92672">&lt;?&gt;</span> queue <span style="color:#f92672">=</span> r<span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//判断queue是否为NULL 或者 r已加入ReferenceQueue中，是的话则入队列失败
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>queue <span style="color:#f92672">==</span> NULL<span style="color:#f92672">)</span> <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>queue <span style="color:#f92672">==</span> ENQUEUED<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">assert</span> queue <span style="color:#f92672">==</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//设置r的queue为已入队列
+</span><span style="color:#75715e"></span>        r<span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span> <span style="color:#f92672">=</span> ENQUEUED<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//如果ReferenceQueue头节点为null则r的next节点指向当前节点，否则指向头节点
+</span><span style="color:#75715e"></span>        r<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>head <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">?</span> r <span style="color:#f92672">:</span> head<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//更新ReferenceQueue头节点
+</span><span style="color:#75715e"></span>        head <span style="color:#f92672">=</span> r<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//列队长度加1
+</span><span style="color:#75715e"></span>        queueLength<span style="color:#f92672">++;</span>
+        <span style="color:#75715e">//为FinalReference类型引用增加FinalRefCount数量
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>r <span style="color:#66d9ef">instanceof</span> FinalReference<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            sun<span style="color:#f92672">.</span><span style="color:#a6e22e">misc</span><span style="color:#f92672">.</span><span style="color:#a6e22e">VM</span><span style="color:#f92672">.</span><span style="color:#a6e22e">addFinalRefCount</span><span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//通知remove操作队列有节点
+</span><span style="color:#75715e"></span>        lock<span style="color:#f92672">.</span><span style="color:#a6e22e">notifyAll</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="poll方法以及remove方法">poll方法以及remove方法</h4>
+<p>ReferenceQueue有入队方法enqueue方法，必然也是有获取和删除方法。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">poll</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//头结点为null直接返回，代表Reference还没有加入ReferenceQueue中
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>head <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">//获取同步对象lock对应的监视器对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> reallyPoll<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//从队列中真正poll元素的方法
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">reallyPoll</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> r <span style="color:#f92672">=</span> head<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//double check 头节点不为null
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>r <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    	<span style="color:#75715e">//保存头节点的下个节点引用
+</span><span style="color:#75715e"></span>        Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> rn <span style="color:#f92672">=</span> r<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//更新queue头节点引用
+</span><span style="color:#75715e"></span>        head <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>rn <span style="color:#f92672">==</span> r<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">:</span> rn<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//更新Reference的queue值，代表r已从队列中移除
+</span><span style="color:#75715e"></span>		r<span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span> <span style="color:#f92672">=</span> NULL<span style="color:#f92672">;</span>
+		<span style="color:#75715e">//更新Reference的next为其本身
+</span><span style="color:#75715e"></span>        r<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> r<span style="color:#f92672">;</span>
+        queueLength<span style="color:#f92672">--;</span>
+        <span style="color:#75715e">//为FinalReference节点FinalRefCount数量减1
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>r <span style="color:#66d9ef">instanceof</span> FinalReference<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            sun<span style="color:#f92672">.</span><span style="color:#a6e22e">misc</span><span style="color:#f92672">.</span><span style="color:#a6e22e">VM</span><span style="color:#f92672">.</span><span style="color:#a6e22e">addFinalRefCount</span><span style="color:#f92672">(-</span>1<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//返回获取的节点
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> r<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+
+
+<span style="color:#66d9ef">public</span> Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> timeout<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IllegalArgumentException<span style="color:#f92672">,</span> InterruptedException <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>timeout <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Negative timeout value&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">//获取同步对象lock对应的监视器对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    	<span style="color:#75715e">//获取队列头节点指向的Reference
+</span><span style="color:#75715e"></span>        Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> T<span style="color:#f92672">&gt;</span> r <span style="color:#f92672">=</span> reallyPoll<span style="color:#f92672">();</span>
+        <span style="color:#75715e">//获取到返回
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>r <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span> r<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">long</span> start <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>timeout <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">?</span> 0 <span style="color:#f92672">:</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//在timeout时间内尝试重试获取
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(;;)</span> <span style="color:#f92672">{</span>
+        	<span style="color:#75715e">//等待队列上有结点通知
+</span><span style="color:#75715e"></span>            lock<span style="color:#f92672">.</span><span style="color:#a6e22e">wait</span><span style="color:#f92672">(</span>timeout<span style="color:#f92672">);</span>
+            <span style="color:#75715e">//获取队列中的头节点指向的Reference
+</span><span style="color:#75715e"></span>            r <span style="color:#f92672">=</span> reallyPoll<span style="color:#f92672">();</span>
+            <span style="color:#75715e">//获取到返回
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>r <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span> r<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>timeout <span style="color:#f92672">!=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">long</span> end <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoTime</span><span style="color:#f92672">();</span>
+                timeout <span style="color:#f92672">-=</span> <span style="color:#f92672">(</span>end <span style="color:#f92672">-</span> start<span style="color:#f92672">)</span> <span style="color:#f92672">/</span> 1000_000<span style="color:#f92672">;</span>
+                <span style="color:#75715e">//已超时但还没有获取到队列中的头节点指向的Reference返回null
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>timeout <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                start <span style="color:#f92672">=</span> end<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Reference 以及ReferenceQueue到这里是分析完了。</p>
+<p>总结一下：</p>
+<ul>
+<li>JVM在GC时如果当前对象只被<code>Reference</code>对象引用，JVM会根据Reference具体类型与堆内存的使用情况决定是否把对应的Reference对象加入到一个由Reference构成的<code>pending链表</code>上</li>
+<li>如果能加入<code>pending</code>链表JVM同时会通知<code>ReferenceHandler</code>线程进行处理。ReferenceHandler线程收到通知后会调用<code>Cleaner#clean</code>或<code>ReferenceQueue#enqueue</code>方法进行处理</li>
+</ul>
+<p>现在就差一个Cleaner 还没有分析。来看一下Cleaner的实现</p>
+<hr>
+<h4 id="cleaner-属性">Cleaner 属性</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//继承了PhantomReference类也就是虚引用，PhantomReference源码很简单只是重写了get方法返回null
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Cleaner</span> <span style="color:#66d9ef">extends</span> PhantomReference<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+	<span style="color:#75715e">/* 虚队列，命名很到位。之前说CG把ReferenceQueue加入pending-Reference链中后，ReferenceHandler线程在处理时
+</span><span style="color:#75715e">     * 是不会将对应的Reference加入列队的，而是调用Cleaner.clean方法。但如果Reference不注册ReferenceQueue，GC处理时
+</span><span style="color:#75715e">     * 又无法把他加入到pending-Reference链中，所以Cleaner里面有了一个dummyQueue成员变量。
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> ReferenceQueue<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> dummyQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReferenceQueue<span style="color:#f92672">();</span>
+    <span style="color:#75715e">//Cleaner链表的头结点
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Cleaner first <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">//当前Cleaner节点的后续节点
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Cleaner next <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">//当前Cleaner节点的前续节点
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Cleaner prev <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">//真正执行清理工作的Runnable对象，实际clean内部调用thunk.run()方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Runnable thunk<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//省略部分代码...
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+
+</code></pre></div><hr>
+<h4 id="cleaner-构造函数以及方法">Cleaner 构造函数以及方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//私有方法，不能直接new
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#a6e22e">Cleaner</span><span style="color:#f92672">(</span>Object var1<span style="color:#f92672">,</span> Runnable var2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>var1<span style="color:#f92672">,</span> dummyQueue<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">thunk</span> <span style="color:#f92672">=</span> var2<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//创建Cleaner对象，同时加入Cleaner链中。
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> Cleaner <span style="color:#a6e22e">create</span><span style="color:#f92672">(</span>Object var0<span style="color:#f92672">,</span> Runnable var1<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> var1 <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">:</span> add<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Cleaner<span style="color:#f92672">(</span>var0<span style="color:#f92672">,</span> var1<span style="color:#f92672">));</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">//头插法将新创意的Cleaner对象加入双向链表，synchronized保证同步
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">synchronized</span> Cleaner <span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>Cleaner var0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>first <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        var0<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> first<span style="color:#f92672">;</span>
+        first<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span> <span style="color:#f92672">=</span> var0<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">//更新头节点引用
+</span><span style="color:#75715e"></span>    first <span style="color:#f92672">=</span> var0<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">return</span> var0<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">clean</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+	<span style="color:#75715e">//从Cleaner链表中先移除当前节点
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>remove<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+        	<span style="color:#75715e">//调用thunk.run()方法执行对应清理逻辑
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">thunk</span><span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> Throwable var2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+           <span style="color:#75715e">//省略部分代码..
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">}</span>
+
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><code>Cleaner.clean</code>中的run方法有具体的子类实现。</p>
+<hr>
+<h4 id="directbytebuffer-堆外内存回收">DirectByteBuffer 堆外内存回收</h4>
+<p>在创建DirectByteBuffer时我们实际是调用<code>ByteBuffer#allocateDirect</code>方法，而其实现如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> ByteBuffer <span style="color:#a6e22e">allocateDirect</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> capacity<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> DirectByteBuffer<span style="color:#f92672">(</span>capacity<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+
+DirectByteBuffer<span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> cap<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//省略部分代码...
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+    	<span style="color:#75715e">//调用unsafe分配内存
+</span><span style="color:#75715e"></span>        base <span style="color:#f92672">=</span> unsafe<span style="color:#f92672">.</span><span style="color:#a6e22e">allocateMemory</span><span style="color:#f92672">(</span>size<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>OutOfMemoryError x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+       <span style="color:#75715e">//省略部分代码...
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">//省略部分代码...
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//&lt;1&gt; 前面分析中的Cleaner对象创建，持有当前DirectByteBuffer的引用
+</span><span style="color:#75715e"></span>    cleaner <span style="color:#f92672">=</span> Cleaner<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> Deallocator<span style="color:#f92672">(</span>base<span style="color:#f92672">,</span> size<span style="color:#f92672">,</span> cap<span style="color:#f92672">));</span>
+    att <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><ul>
+<li><code>&lt;1&gt;</code> 里面和<code>DirectByteBuffer</code>堆外内存回收相关的代码便是<code>Cleaner.create(this, new Deallocator(base, size, cap))</code>这部分。还记得之前说实际的清理逻辑是里面和DirectByteBuffer堆外内存回收相关的代码便是Cleaner里面的Runnable#run方法吗？直接看Deallocator.run方法源码：</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>address <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// Paranoia
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">//通过unsafe.freeMemory释放创建的堆外内存
+</span><span style="color:#75715e"></span>    unsafe<span style="color:#f92672">.</span><span style="color:#a6e22e">freeMemory</span><span style="color:#f92672">(</span>address<span style="color:#f92672">);</span>
+    address <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+    Bits<span style="color:#f92672">.</span><span style="color:#a6e22e">unreserveMemory</span><span style="color:#f92672">(</span>size<span style="color:#f92672">,</span> capacity<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>创建DirectByteBuffer对象时会创建一个Cleaner对象，Cleaner对象持有了DirectByteBuffer对象的引用</li>
+<li>当JVM在GC时，如果发现DirectByteBuffer被地方法没被引用了，JVM会将其对应的Cleaner加入到<code>pending-reference</code>链表中，同时通知<code>ReferenceHandler</code>线程处理，<code>ReferenceHandler</code>收到通知后，会调用<code>Cleaner#clean</code>方法，而对于DirectByteBuffer创建的Cleaner对象其clean方法内部会调用<code>unsafe.freeMemory</code>释放堆外内存。</li>
+</ul>
+<hr>
+<h4 id="weakhashmap敏感内存回收">WeakHashMap敏感内存回收</h4>
+<p>WeakHashMap实现上其Entry继承了WeakReference。只要发生GC 就会清除</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//Entry继承了WeakReference, WeakReference引用的是Map的key
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">extends</span> WeakReference<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">implements</span> Map<span style="color:#f92672">.</span><span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+    V value<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> hash<span style="color:#f92672">;</span>
+    Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next<span style="color:#f92672">;</span>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 创建Entry对象，上面分析过的ReferenceQueue，这个queue实际是WeakHashMap的成员变量，
+</span><span style="color:#75715e">     * 创建WeakHashMap时其便被初始化 final ReferenceQueue&lt;Object&gt; queue = new ReferenceQueue&lt;&gt;()
+</span><span style="color:#75715e">     */</span>
+    Entry<span style="color:#f92672">(</span>Object key<span style="color:#f92672">,</span> V value<span style="color:#f92672">,</span>
+          ReferenceQueue<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> queue<span style="color:#f92672">,</span>
+          <span style="color:#66d9ef">int</span> hash<span style="color:#f92672">,</span> Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>key<span style="color:#f92672">,</span> queue<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> value<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span>  <span style="color:#f92672">=</span> hash<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">next</span>  <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">//省略部分原码...
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+
+</code></pre></div><ul>
+<li>往<code>WeakHashMap</code>添加元素时，实际都会调用<code>Entry</code>的构造方法，也就是会创建一个<code>WeakReference</code>对象，这个对象的引用的是<code>WeakHashMap</code>刚加入的Key</li>
+<li>而所有的WeakReference对象关联在同一个<code>ReferenceQueue</code>上。我们上面说过JVM在GC时，如果发现当前对象只有被WeakReference对象引用，那么会把其对应的WeakReference对象加入到<code>pending-reference链表</code>上，并通知<code>ReferenceHandler</code>线程处理</li>
+<li>而<code>ReferenceHandler</code>线程收到通知后，对于<code>WeakReference</code>对象会调用<code>ReferenceQueue#enqueue</code>方法把他加入队列里面。</li>
+<li>WeakHashMap 则通过<code>expungeStaleEntries</code>方法不断的从ReferenceQueue中取出Reference，然后进行清除</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">expungeStaleEntries</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//不断地从ReferenceQueue中取出，那些只有被WeakReference对象引用的对象的Reference
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Object x<span style="color:#f92672">;</span> <span style="color:#f92672">(</span>x <span style="color:#f92672">=</span> queue<span style="color:#f92672">.</span><span style="color:#a6e22e">poll</span><span style="color:#f92672">())</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> <span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>queue<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//转为 entry
+</span><span style="color:#75715e"></span>            Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> e <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;)</span> x<span style="color:#f92672">;</span>
+            <span style="color:#75715e">//计算其对应的桶的下标
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> indexFor<span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">hash</span><span style="color:#f92672">,</span> table<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+            <span style="color:#75715e">//取出桶中元素
+</span><span style="color:#75715e"></span>            Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> prev <span style="color:#f92672">=</span> table<span style="color:#f92672">[</span>i<span style="color:#f92672">];</span>
+            Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> p <span style="color:#f92672">=</span> prev<span style="color:#f92672">;</span>
+            <span style="color:#75715e">//桶中对应位置有元素，遍历桶链表所有元素
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>p <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                Entry<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span>V<span style="color:#f92672">&gt;</span> next <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+                <span style="color:#75715e">//如果当前元素(也就是entry)与queue取出的一致，将entry从链表中去除
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>p <span style="color:#f92672">==</span> e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>prev <span style="color:#f92672">==</span> e<span style="color:#f92672">)</span>
+                        table<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">else</span>
+                        prev<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+                    <span style="color:#75715e">// Must not null out e.next;
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">//清空entry对应的value
+</span><span style="color:#75715e"></span>                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                    size<span style="color:#f92672">--;</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                prev <span style="color:#f92672">=</span> p<span style="color:#f92672">;</span>
+                p <span style="color:#f92672">=</span> next<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>接下来分析一个 <code>finalizer()</code>方法被调用的过程。</p>
+<hr>
+<h4 id="finalizer方法被调用的过程">finalizer()方法被调用的过程</h4>
+<h4 id="jvm-中的实现">JVM 中的实现</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">//share/vm/oops/instanceKlass.cpp
+</span><span style="color:#75715e"></span>instanceOop InstanceKlass<span style="color:#f92672">::</span>allocate_instance(TRAPS) {
+  <span style="color:#66d9ef">bool</span> has_finalizer_flag <span style="color:#f92672">=</span> has_finalizer(); <span style="color:#75715e">// Query before possible GC
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> size <span style="color:#f92672">=</span> size_helper();  <span style="color:#75715e">// Query before forming handle.
+</span><span style="color:#75715e"></span>
+  KlassHandle <span style="color:#a6e22e">h_k</span>(THREAD, <span style="color:#66d9ef">this</span>);
+
+  instanceOop i;
+
+  i <span style="color:#f92672">=</span> (instanceOop)CollectedHeap<span style="color:#f92672">::</span>obj_allocate(h_k, size, CHECK_NULL);
+  <span style="color:#75715e">//&lt;1&gt; 如果该类复写 Object.finalizer() 方法 则把_has_finalizer_flag置为true
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (has_finalizer_flag <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>RegisterFinalizersAtInit) {
+    i <span style="color:#f92672">=</span> register_finalizer(i, CHECK_NULL);
+  }
+  <span style="color:#66d9ef">return</span> i;
+}
+
+<span style="color:#75715e">//然后会调用register_finalizer
+</span><span style="color:#75715e"></span>instanceOop InstanceKlass<span style="color:#f92672">::</span>register_finalizer(instanceOop i, TRAPS) {
+  <span style="color:#66d9ef">if</span> (TraceFinalizerRegistration) {
+    tty<span style="color:#f92672">-&gt;</span>print(<span style="color:#e6db74">&#34;Registered &#34;</span>);
+    i<span style="color:#f92672">-&gt;</span>print_value_on(tty);
+    tty<span style="color:#f92672">-&gt;</span>print_cr(<span style="color:#e6db74">&#34; (&#34;</span> INTPTR_FORMAT <span style="color:#e6db74">&#34;) as finalizable&#34;</span>, (address)i);
+  }
+  instanceHandle <span style="color:#a6e22e">h_i</span>(THREAD, i);
+  <span style="color:#75715e">// Pass the handle as argument, JavaCalls::call expects oop as jobjects
+</span><span style="color:#75715e"></span>  JavaValue <span style="color:#a6e22e">result</span>(T_VOID);
+  JavaCallArguments <span style="color:#a6e22e">args</span>(h_i);
+  <span style="color:#75715e">//&lt;2&gt; 这里就是调用Java里面Finalizer 类中的 register 方法
+</span><span style="color:#75715e"></span>  methodHandle <span style="color:#a6e22e">mh</span> (THREAD, Universe<span style="color:#f92672">::</span>finalizer_register_method());
+  JavaCalls<span style="color:#f92672">::</span>call(<span style="color:#f92672">&amp;</span>result, mh, <span style="color:#f92672">&amp;</span>args, CHECK_NULL);
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">h_i</span>();
+}
+</code></pre></div><ul>
+<li>&lt;1&gt; 在上面的JVM 代码中<code>//share/vm/oops/instanceKlass.cpp</code> 在解析 class 的时候，如果这个类复写了 Object里面的finalizer方法的话，会把_has_finalizer 置为true 并且调用 <code>register_finalizer()</code>方法</li>
+<li>&lt;2&gt; 这里会调用 Java里面Finalizer 类中的 <code>register</code> 方法</li>
+</ul>
+<p><strong>到这里就是JVM 发现如果一个类复写了finalizer方法就会调用Finalizer类里面的register方法，接下来看一下Finalizer类是如何实现的</strong></p>
+<hr>
+<h4 id="finalizerregister-">Finalizer.register( )</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/* Invoked by VM */</span>
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">register</span><span style="color:#f92672">(</span>Object finalizee<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//&lt;1&gt; 创建实例
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">new</span> Finalizer<span style="color:#f92672">(</span>finalizee<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> <span style="color:#a6e22e">Finalizer</span><span style="color:#f92672">(</span>Object finalizee<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//&lt;2&gt; 放入父类中的ReferenceQueue中(Reference类)
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>finalizee<span style="color:#f92672">,</span> queue<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//&lt;3&gt; 所有的复写finalizer 方法的类组成一个双向链表 叫unfinalized
+</span><span style="color:#75715e"></span>        add<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">add</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>unfinalized <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> unfinalized<span style="color:#f92672">;</span>
+                unfinalized<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            unfinalized <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li><code>&lt;1&gt;</code> 可以看到<code>Finalizer.register()</code>方法中创建<code>Finalizer</code>的实例， <strong>Finalizer 类中的静态代码块。</strong></li>
+<li><code>&lt;2&gt;</code>  放入父类中的ReferenceQueue中(Reference类)</li>
+<li><code>&lt;3&gt;</code>  所有的复写finalizer 方法的类组成一个双向链表 叫<code>unfinalized</code></li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">static</span> <span style="color:#f92672">{</span>
+        ThreadGroup tg <span style="color:#f92672">=</span> Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getThreadGroup</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>ThreadGroup tgn <span style="color:#f92672">=</span> tg<span style="color:#f92672">;</span>
+             tgn <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+             tg <span style="color:#f92672">=</span> tgn<span style="color:#f92672">,</span> tgn <span style="color:#f92672">=</span> tg<span style="color:#f92672">.</span><span style="color:#a6e22e">getParent</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//创建FinalizerThread 线程
+</span><span style="color:#75715e"></span>        Thread finalizer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FinalizerThread<span style="color:#f92672">(</span>tg<span style="color:#f92672">);</span>
+        finalizer<span style="color:#f92672">.</span><span style="color:#a6e22e">setPriority</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_PRIORITY</span> <span style="color:#f92672">-</span> 2<span style="color:#f92672">);</span>
+        finalizer<span style="color:#f92672">.</span><span style="color:#a6e22e">setDaemon</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+        finalizer<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+
+
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FinalizerThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">boolean</span> running<span style="color:#f92672">;</span>
+        FinalizerThread<span style="color:#f92672">(</span>ThreadGroup g<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>g<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Finalizer&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// in case of recursive call to run()
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>running<span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+
+            <span style="color:#75715e">// Finalizer thread starts before System.initializeSystemClass
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// is called.  Wait until JavaLangAccess is available
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>VM<span style="color:#f92672">.</span><span style="color:#a6e22e">isBooted</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// delay until VM completes initialization
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    VM<span style="color:#f92672">.</span><span style="color:#a6e22e">awaitBooted</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// ignore and continue
+</span><span style="color:#75715e"></span>                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">final</span> JavaLangAccess jla <span style="color:#f92672">=</span> SharedSecrets<span style="color:#f92672">.</span><span style="color:#a6e22e">getJavaLangAccess</span><span style="color:#f92672">();</span>
+            running <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#75715e">//死循环调用 runFinalizer方法
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(;;)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    Finalizer f <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>Finalizer<span style="color:#f92672">)</span>queue<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
+                    f<span style="color:#f92672">.</span><span style="color:#a6e22e">runFinalizer</span><span style="color:#f92672">(</span>jla<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// ignore and continue
+</span><span style="color:#75715e"></span>                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">runFinalizer</span><span style="color:#f92672">(</span>JavaLangAccess jla<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>hasBeenFinalized<span style="color:#f92672">())</span> <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+            remove<span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Object finalizee <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>finalizee <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!(</span>finalizee <span style="color:#66d9ef">instanceof</span> java<span style="color:#f92672">.</span><span style="color:#a6e22e">lang</span><span style="color:#f92672">.</span><span style="color:#a6e22e">Enum</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                jla<span style="color:#f92672">.</span><span style="color:#a6e22e">invokeFinalize</span><span style="color:#f92672">(</span>finalizee<span style="color:#f92672">);</span>
+
+                <span style="color:#75715e">/* Clear stack slot containing this variable, to decrease
+</span><span style="color:#75715e">                   the chances of false retention with a conservative GC */</span>
+                finalizee <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Throwable x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>可以看到在<code>Finalizer</code> 类中的静态代码块中创建了<code>FinalizerThread</code>线程，在线程中又死循环从ReferenceQueue中不断取Reference对象，取到之后调用<code>invokeFinalize</code>方法，这此方法就是调用该类的 <code>finalizer</code> 方法。</p>
+<hr>
+<h3 id="总结">总结</h3>
+<ul>
+<li>创建对象时，如果对象<code>override</code>了<code>finalize()</code>方法，jvm会同时创建一个<code>Finalizer</code>对象</li>
+<li>所有Finalizer对象组成了一个<code>双向链表</code></li>
+<li>所有Finalizer对象都有一个名为queue的成员变量，指向的都是Finalizer类的静态Queue。</li>
+<li>cms gc执行到mark阶段的最后时，会把需要gc的对象加入到Reference的pending list中。</li>
+<li>有一个专门的高级别线程<code>Reference Handler</code>处理<code>pending list</code>，把pending list中的对象取出来，放到这个对象所指的Reference Queue中，对于Finalizer对象来说， 这个queue指向Finalizer类的静态Queue。</li>
+<li>Finalizer类有一个专门的线程负责从queue中取对象，并且执行finalizer引用的对象的finalize函数。 根据cms来将如果一个对象<code>override finalize()</code>方法，那么并不意味着这个对象的会立马被gc给回收，在cms中会进行remark 重新标记，如果该对象原本是要被回收的但是又被引用了那么它就不会被回收，而finalize只会被调用一次，因为前面已经调用过了，所以不会在调用finalize方法，而产生问题。</li>
+<li><code>DirectByteBuffer</code> 创建实例的时候会创建Cleaner，通过<code>Cleaner#run</code>方法进行回收内存</li>
+<li>WeakHashMap 操作<code>expungeStaleEntries</code>方法，不断的从ReferenceQueue中获取然后进行清除对应的Entry。</li>
+</ul>
+<hr>
+<h4 id="参考">参考</h4>
+<p>《深入理解Java虚拟机》</p>
+<p><a href="https://juejin.im/post/5d9c61d0e51d45780c34a83a">Java Reference核心原理分析</a></p>
+<p><a href="http://blog.2baxb.me/archives/974">finalize、Finalizer和Finalizer Queue的原理</a></p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/" data-toggle="tooltip" data-placement="top" title="println、sleep、Integer与线程安全的一些故事">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/" data-toggle="tooltip" data-placement="top" title="Java8—日期时间API">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/"><i class="fa fa-link"></i>JVM 内存区域与内存溢出异常</a></li>
+         
+        <li><a href="/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/"><i class="fa fa-link"></i>println、sleep、Integer与线程安全的一些故事</a></li>
+         
+        <li><a href="/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/"><i class="fa fa-link"></i>synchronized 的实现原理</a></li>
+         
+        <li><a href="/blog/volatile-%E8%A7%A3%E6%9E%90/"><i class="fa fa-link"></i>volatile 解析</a></li>
+         
+        <li><a href="/blog/hashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>HashMap 源码分析</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

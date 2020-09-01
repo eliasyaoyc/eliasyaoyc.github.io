@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTTP 拾遗——TCP建立连接为什么需要三次握手 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="计算机, HTTP">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="HTTP 拾遗——TCP建立连接为什么需要三次握手" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/http-%E6%8B%BE%E9%81%97tcp%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="在整理HTTP 协议的时候，同事问我为什么TCP传输层协议在建立连接的时候需要三次才能建立起一个真正的可靠连接，可是为什么是三次呢，不可以是两">
+  <meta property="og:description" content="在整理HTTP 协议的时候，同事问我为什么TCP传输层协议在建立连接的时候需要三次才能建立起一个真正的可靠连接，可是为什么是三次呢，不可以是两">
+  <meta name="twitter:description" content="在整理HTTP 协议的时候，同事问我为什么TCP传输层协议在建立连接的时候需要三次才能建立起一个真正的可靠连接，可是为什么是三次呢，不可以是两">
+  <meta property="og:description" content="在整理HTTP 协议的时候，同事问我为什么TCP传输层协议在建立连接的时候需要三次才能建立起一个真正的可靠连接，可是为什么是三次呢，不可以是两" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="HTTP 拾遗——TCP建立连接为什么需要三次握手 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="HTTP 拾遗——TCP建立连接为什么需要三次握手 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">HTTP 拾遗——TCP建立连接为什么需要三次握手 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="HTTP 拾遗——TCP建立连接为什么需要三次握手 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="HTTP 拾遗——TCP建立连接为什么需要三次握手 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">HTTP 拾遗——TCP建立连接为什么需要三次握手 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="HTTP 拾遗——TCP建立连接为什么需要三次握手 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="HTTP 拾遗——TCP建立连接为什么需要三次握手 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">HTTP 拾遗——TCP建立连接为什么需要三次握手 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>HTTP 拾遗——TCP建立连接为什么需要三次握手</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月21日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            2300字 | 阅读大约需要5分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba">计算机</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/%E5%8D%8F%E8%AE%AE/"><i>#协议</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <p>在整理HTTP 协议的时候，同事问我为什么TCP传输层协议在建立连接的时候需要三次才能建立起一个真正的可靠连接，可是为什么是三次呢，不可以是两次，四次等等呢。
+报着这个问题，查阅了一番资料，故记录总结。</p>
+<h3 id="三次握手">三次握手</h3>
+<p><strong>试想一个问题</strong>：浏览器发送一个报文过去并且报文没有丢失，但是因为在网络上发生滞留，导致延迟。
+连接释放以后的某个时间，服务端才达到接收到这个报文，但是这个报文已经失效了。服务端误以为A再次发出的一个新的连接请求，于是服务端就向浏览器又发出确认报文，表示同意建立连接。
+那么这个时候浏览器并没有发出建立连接的请求(请求过时了)，所以不会向服务端发送报文，服务端则没有收到报文就会一直等待，这样就会浪费很多资源。</p>
+<p><code>问题的本质是</code>，信道是不可靠的，但是我们要建立可靠的连接发送可靠的数据，也就是数据传输是需要可靠的。在这个时候<strong>三次握手是一个理论上的最小值</strong>，并不是说是tcp协议要求的，而是为了满足在不可靠的信道上传输可靠的数据所要求的。</p>
+<p><strong>假如没有三次握手，浏览器和服务端要进行通信：</strong></p>
+<ul>
+<li><code>第一次</code>：首先浏览器发送一个(<code>SYN</code>)到服务端，意思是<code>浏览器</code>要和<code>服务端</code>建立连接进行通信；
+<ul>
+<li>如果是只有一次握手的话，这样肯定是不行的，浏览器压根都不知道服务端是不是收到了这个请求。就如上面说的问题一样</li>
+</ul>
+</li>
+<li><code>第二次</code>：<code>服务端</code>收到<code>浏览器</code>要建立连接的请求之后，发送一个确认(<code>SYN+ACK</code>)给浏览器，意思是收到浏览器的消息了，服务端这里也是通的，表示可以建立连接；
+<ul>
+<li>如果只有两次通信的话，这时候服务端不确定浏览器是否收到了确认消息，有可能这个确认消息由于某些原因丢了。</li>
+</ul>
+</li>
+<li><code>第三次</code>：浏览器如果收到了服务端的确认消息之后，再发出一个确认(<code>ACK</code>)消息，意思是告诉服务端，这边是通的，然后浏览器和服务端就可以建立连接相互通信了；
+<ul>
+<li>这个时候经过了三次握手，浏览器和服务端双方确认了两边都是通的，可以相互通信了，已经可以建立一个可靠的连接，并且可以相互发送数据。</li>
+</ul>
+</li>
+<li><code>第四次</code>：这个时候已经不需要服务端再发送一个确认消息了，两边已经通过前三次建立了一个可靠的连接，如果再发送第四次确认消息的话，就浪费资源了。
+<ul>
+<li>如果第二个报文段服务端发出的(SYN+ACK)分别发送的话，也是可以理解为四次，但是被优化了，一起发送了。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="超时重传机制">超时重传机制</h4>
+<ol>
+<li><code>如果第一个包</code>，浏览器发送给服务端请求建立连接的报文(SYN)如果丢掉了，浏览器会周期性的超时重传，直到服务端发出确认(SYN+ACK)；</li>
+<li><code>如果第二个包</code>，服务端发送给浏览器的确认报文(SYN+ACK)如果丢掉了，服务端会周期性的超时重传，直到浏览器发出确认(ACK)；</li>
+<li><code>如果第三个包</code>，浏览器发送给服务端的确认报文(ACK)如果丢掉了：
+<ul>
+<li>
+<p>浏览器在发送完确认报文之后，单方面会进入ESTABLISHED的状态，服务端还是SYN_RCVD状态</p>
+</li>
+<li>
+<p>如果此时双方都没有数据需要发送，服务端会周期性的超时发送(SYN+ACK)，直到收到A的确认报文(ACK)，此时服务端也进入ESTABLISHED状态，双方可以发送数据；</p>
+</li>
+<li>
+<p>如果浏览器有数据发送，浏览器发送的是(ACK+DATA)，服务端会在收到这个数据包的时候自动切换到ESTABLISHED状态，并接受数据(DATA)；</p>
+</li>
+<li>
+<p>如果这个时候服务端要发送数据，服务端是发送不了数据的，会周期性的超时重传(SYN+ACK)直到收到浏览器的确认(ACK)服务端才能发送数据。</p>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4 id="三次握手牵扯到的状态转换">三次握手牵扯到的状态转换</h4>
+<ul>
+<li>
+<p><code>LISTEN</code> 表示socket已经处于listen状态了，可以建立连接；</p>
+</li>
+<li>
+<p><code>SYN_SENT</code> 表示socket在发出connect连接的时候，会首先发送SYN报文，然后等待另一端发送的确认报文(ACK)，表示这端已经发送完SYN报文了；</p>
+</li>
+<li>
+<p><code>SYN_RCVD</code> 表示一端已经接收到SYN报文了；</p>
+</li>
+<li>
+<p><code>ESTABLISHED</code> 表示已经建立连接了，可以发送数据了。</p>
+</li>
+</ul>
+<p><img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/http/20180225220222887.png" alt=""></p>
+<hr>
+<h3 id="四次挥手">四次挥手</h3>
+<p>说完TCP建立连接的时候为什么是三次，相对的就会想到为什么断开连接的时候是需要四次呢，而不是三次，五次等等呢；</p>
+<p>本质的原因是tcp是<code>全双公</code>的，要实现可靠的连接关闭，浏览器发出结束<code>报文FIN</code>，收到服务端<code>确认</code>后浏览器知道自己没有数据需要发送了，服务端知道浏览器不再发送数据了，自己也不会接收数据了，但是此时浏览器还是可以接收数据，服务端也可以发送数据；当服务端发出<code>FIN报文</code>的时候此时两边才会真正的断开连接，读写分开。</p>
+<hr>
+<h4 id="四次挥手牵扯到的状态装换">四次挥手牵扯到的状态装换</h4>
+<ul>
+<li><code>FIN_WAIT_1</code> 表示在等待另一方的FIN报文，<strong>和FIN_WAIT_2的区别是，FIN_WAIT_1表示socket现在要主动关闭连接</strong>，在发送完FIN报文后socket进入<code>FIN_WAIT_1</code>状态，当收到另一方发送FIN的ACK之后立即进入<code>FIN_WAIT_2</code>状态；</li>
+<li><code>FIN_WAIT_2</code> 同上，此时需要做的事情是可能还会接收数据，然后等待另一方的FIN；</li>
+<li><code>TIME_WAIT</code> 存在主动关闭的一方，表示收到了对方的FIN报文，并发送出了ACK报文，就等2MSL(Max Segment Lifetime))后即可回到CLOSED可用状态了，需要等一段时间时原因是网络是不可靠的，不能保证这个ACK发送成功了，如果失败了，对端会超时重传FIN；</li>
+<li><code>CLOSING</code> 表示在发送FIN之后，没有收到对方的ACK，而是收到了对方的FIN，这中情况很少见，只有在两端几乎同时关闭同一个socket的时候才会出现CLOSING状态；</li>
+<li><code>CLOSE_WAIT</code> 表示收到对方的FIN之后，回给对方ACK，此时处于CLOSE_WAIT状态，等待关闭，要看自己是否还有数据要发送；</li>
+<li><code>LAST_ACK</code> 表示收到对方的FIN之后，回给对方ACK，然后自己也要关闭发送FIN，等待另一方的ACK时候的状态；</li>
+<li><code>CLOSED</code> 这个状态表示连接已经断开。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/http/20180225220519263.png" alt=""></li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" data-toggle="tooltip" data-placement="top" title="synchronized 的实现原理">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/guava-%E4%B8%80-ratelimiter/" data-toggle="tooltip" data-placement="top" title="Guava (一) ：RateLimiter">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/http-%E5%8D%8F%E8%AE%AE%E6%80%BB%E7%BB%93/"><i class="fa fa-link"></i>HTTP 协议总结.md</a></li>
+         
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/"><i class="fa fa-link"></i>计算机之文件系统</a></li>
+         
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><i class="fa fa-link"></i>计算机之内存管理</a></li>
+         
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"><i class="fa fa-link"></i>计算机之进程与线程</a></li>
+         
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu/"><i class="fa fa-link"></i>计算机之CPU</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

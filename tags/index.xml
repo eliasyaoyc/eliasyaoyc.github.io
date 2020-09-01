@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on 拳拳到肉</title>
+    <link>/tags/</link>
+    <description>Recent content in Tags on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 06 Jun 2020 07:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>kafka</title>
+      <link>/tags/kafka/</link>
+      <pubDate>Sat, 06 Jun 2020 07:37:42 +0800</pubDate>
+      
+      <guid>/tags/kafka/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Skywalking</title>
+      <link>/tags/skywalking/</link>
+      <pubDate>Sat, 02 May 2020 23:37:42 +0800</pubDate>
+      
+      <guid>/tags/skywalking/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>分布式</title>
+      <link>/tags/%E5%88%86%E5%B8%83%E5%BC%8F/</link>
+      <pubDate>Fri, 24 Apr 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/tags/%E5%88%86%E5%B8%83%E5%BC%8F/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>gateway</title>
+      <link>/tags/gateway/</link>
+      <pubDate>Sat, 18 Apr 2020 18:37:42 +0800</pubDate>
+      
+      <guid>/tags/gateway/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>spring boot</title>
+      <link>/tags/spring-boot/</link>
+      <pubDate>Fri, 17 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/tags/spring-boot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Resilience4j</title>
+      <link>/tags/resilience4j/</link>
+      <pubDate>Wed, 15 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/tags/resilience4j/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Java</title>
+      <link>/tags/java/</link>
+      <pubDate>Thu, 09 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/tags/java/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>JVM</title>
+      <link>/tags/jvm/</link>
+      <pubDate>Tue, 31 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/tags/jvm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>并发理论</title>
+      <link>/tags/%E5%B9%B6%E5%8F%91%E7%90%86%E8%AE%BA/</link>
+      <pubDate>Mon, 23 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/tags/%E5%B9%B6%E5%8F%91%E7%90%86%E8%AE%BA/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Guava</title>
+      <link>/tags/guava/</link>
+      <pubDate>Sat, 21 Mar 2020 22:12:42 +0800</pubDate>
+      
+      <guid>/tags/guava/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>协议</title>
+      <link>/tags/%E5%8D%8F%E8%AE%AE/</link>
+      <pubDate>Sat, 21 Mar 2020 15:12:42 +0800</pubDate>
+      
+      <guid>/tags/%E5%8D%8F%E8%AE%AE/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>并发关键字</title>
+      <link>/tags/%E5%B9%B6%E5%8F%91%E5%85%B3%E9%94%AE%E5%AD%97/</link>
+      <pubDate>Fri, 20 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/tags/%E5%B9%B6%E5%8F%91%E5%85%B3%E9%94%AE%E5%AD%97/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Map</title>
+      <link>/tags/map/</link>
+      <pubDate>Thu, 19 Mar 2020 10:30:42 +0800</pubDate>
+      
+      <guid>/tags/map/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>计算机</title>
+      <link>/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/</link>
+      <pubDate>Tue, 17 Mar 2020 15:12:42 +0800</pubDate>
+      
+      <guid>/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>算法</title>
+      <link>/tags/%E7%AE%97%E6%B3%95/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/tags/%E7%AE%97%E6%B3%95/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>原子类</title>
+      <link>/tags/%E5%8E%9F%E5%AD%90%E7%B1%BB/</link>
+      <pubDate>Thu, 05 Mar 2020 12:37:42 +0800</pubDate>
+      
+      <guid>/tags/%E5%8E%9F%E5%AD%90%E7%B1%BB/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pulsar</title>
+      <link>/tags/pulsar/</link>
+      <pubDate>Wed, 04 Mar 2020 22:37:42 +0800</pubDate>
+      
+      <guid>/tags/pulsar/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>AQS</title>
+      <link>/tags/aqs/</link>
+      <pubDate>Sun, 01 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/tags/aqs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>线程池</title>
+      <link>/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/</link>
+      <pubDate>Sat, 15 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Queue</title>
+      <link>/tags/queue/</link>
+      <pubDate>Wed, 12 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/tags/queue/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

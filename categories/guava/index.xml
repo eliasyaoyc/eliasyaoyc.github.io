@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Guava on 拳拳到肉</title>
+    <link>/categories/guava/</link>
+    <description>Recent content in Guava on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 21 Mar 2020 22:12:42 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/guava/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Guava (一) ：RateLimiter</title>
+      <link>/blog/guava-%E4%B8%80-ratelimiter/</link>
+      <pubDate>Sat, 21 Mar 2020 22:12:42 +0800</pubDate>
+      
+      <guid>/blog/guava-%E4%B8%80-ratelimiter/</guid>
+      <description>每个API接口都是有访问上限的，当访问频率或者并发量超过其承受范围时候,我们就必须考虑限流来保证接口的可用性或者降级可用性。以防止非预期的请求对系统压力过大而引起的系统瘫痪。</description>
+    </item>
+    
+  </channel>
+</rss>

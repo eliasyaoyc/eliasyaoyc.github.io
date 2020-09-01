@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>spring boot on 拳拳到肉</title>
+    <link>/tags/spring-boot/</link>
+    <description>Recent content in spring boot on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Fri, 17 Apr 2020 15:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/spring-boot/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Spring Boot 注解 @ConfigurationProperties</title>
+      <link>/blog/spring-boot-%E6%B3%A8%E8%A7%A3-configurationproperties/</link>
+      <pubDate>Fri, 17 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/spring-boot-%E6%B3%A8%E8%A7%A3-configurationproperties/</guid>
+      <description>简述 由于在分析Gateway的时候，Gateway通过 GatewayProperties 来自动配置外部配置，故写此文章。 先思考一个问题 Springboot 中我们加入Redis 配置文件，Spr</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot additional—location 参数</title>
+      <link>/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0/</link>
+      <pubDate>Tue, 14 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0/</guid>
+      <description>问题： 今天同事问我一个问题：Springboot 能否指定加载不同文件夹里的配置文件？ 原本的样子： 根据他的意思是想要变成以下的样子： 多个相同名</description>
+    </item>
+    
+  </channel>
+</rss>

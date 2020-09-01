@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LongAdder 详解 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="原子类, Jdk源码, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="LongAdder 详解" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/longadder-%E8%AF%A6%E8%A7%A3//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="LongAdder 类是jdk1.8新增的原子类，在多线程环境下，它的性能比普通的Atomic类性能高很多，继承 Striped64，通过Striped64的Cell来实现功能，并且在ConcurrentHashMap中也用了Striped64的Cell。">
+  <meta property="og:description" content="LongAdder 类是jdk1.8新增的原子类，在多线程环境下，它的性能比普通的Atomic类性能高很多，继承 Striped64，通过Striped64的Cell来实现功能，并且在ConcurrentHashMap中也用了Striped64的Cell。">
+  <meta name="twitter:description" content="LongAdder 类是jdk1.8新增的原子类，在多线程环境下，它的性能比普通的Atomic类性能高很多，继承 Striped64，通过Striped64的Cell来实现功能，并且在ConcurrentHashMap中也用了Striped64的Cell。">
+  <meta property="og:description" content="LongAdder 类是jdk1.8新增的原子类，在多线程环境下，它的性能比普通的Atomic类性能高很多，继承 Striped64，通过Striped64的Cell来实现功能，并且在ConcurrentHashMap中也用了Striped64的Cell。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="LongAdder 详解 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="LongAdder 详解 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">LongAdder 详解 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="LongAdder 详解 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="LongAdder 详解 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">LongAdder 详解 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="LongAdder 详解 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="LongAdder 详解 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">LongAdder 详解 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>LongAdder 详解</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月5日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            3800字 | 阅读大约需要8分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b">并发编程</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/%E5%8E%9F%E5%AD%90%E7%B1%BB/"><i>#原子类</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="问题">问题</h3>
+<ol>
+<li>LongAdder 的实现原理？</li>
+<li>LongAdder 与 AtomicLong 差别？</li>
+<li>LongAdder 是强一致性还是最终一致性的？</li>
+<li>LongAdder 中的Cell 数组是无限制扩容的吗？</li>
+<li>LongAdder 是如何消除伪共享的？</li>
+</ol>
+<hr>
+<h3 id="简介">简介</h3>
+<blockquote>
+<p>LongAdder 类是jdk1.8新增的原子类，在多线程环境下，它的性能比普通的Atomic类性能高很多，
+继承 Striped64，通过Striped64的Cell来实现功能，并且在ConcurrentHashMap中也用了Striped64的Cell。</p>
+</blockquote>
+<hr>
+<h3 id="源码分析">源码分析</h3>
+<h4 id="实现原理">实现原理</h4>
+<blockquote>
+<p>在初始无竞争时，只更新base的值，当有多线程竞争时通过<code>分段的思想</code>，让不同的线程更新不同的段，最后把这些段相加(sum)就得到了完整的LongAdder存储的值，最终一致性。</p>
+</blockquote>
+<p><img src="/img/blog/%E5%8E%9F%E5%AD%90%E7%B1%BB/LongAdder.png" alt=""></p>
+<hr>
+<h4 id="内部类">内部类</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// Striped64中的内部类，使用@sun.misc.Contended注解，说明里面的值消除伪共享。 
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@sun.misc.Contended</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Cell</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//每个cell中的值，在LongAdder中就是每次添加的值。使用volatile 来确保内存可见
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">long</span> value<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//构造器
+</span><span style="color:#75715e"></span>        Cell<span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> value <span style="color:#f92672">=</span> x<span style="color:#f92672">;</span> <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//cas修改value的值
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">cas</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> cmp<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> val<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> UNSAFE<span style="color:#f92672">.</span><span style="color:#a6e22e">compareAndSwapLong</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> valueOffset<span style="color:#f92672">,</span> cmp<span style="color:#f92672">,</span> val<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">// Unsafe 实力 在静态代码块中实例化
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> sun<span style="color:#f92672">.</span><span style="color:#a6e22e">misc</span><span style="color:#f92672">.</span><span style="color:#a6e22e">Unsafe</span> UNSAFE<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> valueOffset<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">static</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                UNSAFE <span style="color:#f92672">=</span> sun<span style="color:#f92672">.</span><span style="color:#a6e22e">misc</span><span style="color:#f92672">.</span><span style="color:#a6e22e">Unsafe</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getUnsafe</span><span style="color:#f92672">();</span>
+                Class<span style="color:#f92672">&lt;?&gt;</span> ak <span style="color:#f92672">=</span> Cell<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">;</span>
+                valueOffset <span style="color:#f92672">=</span> UNSAFE<span style="color:#f92672">.</span><span style="color:#a6e22e">objectFieldOffset</span>
+                    <span style="color:#f92672">(</span>ak<span style="color:#f92672">.</span><span style="color:#a6e22e">getDeclaredField</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;value&#34;</span><span style="color:#f92672">));</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error<span style="color:#f92672">(</span>e<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="主要属性">主要属性</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#75715e">//这些属性都是在Striped64中的
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//CPU数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> NCPU <span style="color:#f92672">=</span> Runtime<span style="color:#f92672">.</span><span style="color:#a6e22e">getRuntime</span><span style="color:#f92672">().</span><span style="color:#a6e22e">availableProcessors</span><span style="color:#f92672">();</span>
+    <span style="color:#75715e">//cells数组，存储各个段的值，Cell的数组长度最大是CPU * 2 在下面的#longAccumulate方法中会有体现
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">transient</span> <span style="color:#66d9ef">volatile</span> Cell<span style="color:#f92672">[]</span> cells<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//初始值，如果没有线程修改的话，就会直接通过CAS来修改这个值，不会创建cell
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">transient</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">long</span> base<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//标记是否有线程在扩容或者创建Cell，会通过cas来更新该值
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">transient</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">int</span> cellsBusy<span style="color:#f92672">;</span>
+</code></pre></div><hr>
+<h4 id="add-方法">add() 方法</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> x<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Cell<span style="color:#f92672">[]</span> as<span style="color:#f92672">;</span> <span style="color:#75715e">//as 是 Striped64中的cells属性 存储各个段的值
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">long</span> b<span style="color:#f92672">,</span> v<span style="color:#f92672">;</span> <span style="color:#75715e">//b是Striped64中的base属性 最初的base属性，还没发生竞争; v是当前线程hash到的Cell中存储的值
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> m<span style="color:#f92672">;</span> <span style="color:#75715e">//m是cells的长度减1，hash时作为掩码使用
+</span><span style="color:#75715e"></span>        Cell a<span style="color:#f92672">;</span> <span style="color:#75715e">//a是当前线程hash到的Cell
+</span><span style="color:#75715e"></span>
+        <span style="color:#75715e">//条件1： cells不为空说明已经出现过竞争了，cells已经创建了
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//条件2： cas修改base值 失败，说明已经被其他线程改过了，出现竞争
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>as <span style="color:#f92672">=</span> cells<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> <span style="color:#f92672">!</span>casBase<span style="color:#f92672">(</span>b <span style="color:#f92672">=</span> base<span style="color:#f92672">,</span> b <span style="color:#f92672">+</span> x<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//true表示当前竞争还不激烈; false表示竞争激烈，多个线程hash到同一个Cell，可能要扩容
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">boolean</span> uncontended <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#75715e">//条件1：cells为空，说明正在出现竞争，上面是从条件2过来的
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//条件2：从上面的条件2过来，正在出现竞争，还没有创建cell放入数组，所以这个时候会满足此条件
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//条件3：当前线程所在的Cell为空，说明当前线程还没有更新过Cell，应初始化一个Cell
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// 条件4：更新当前线程所在的Cell失败，说明现在竞争很激烈，多个线程hash到了同一个Cell，应扩容
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>as <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> <span style="color:#f92672">(</span>m <span style="color:#f92672">=</span> as<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> 0 <span style="color:#f92672">||</span>
+                    <span style="color:#75715e">// getProbe()方法返回的是线程中的threadLocalRandomProbe字段
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// 它是通过随机数生成的一个值，对于一个确定的线程这个值是固定的
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// 除非刻意修改它
+</span><span style="color:#75715e"></span>                    <span style="color:#f92672">(</span>a <span style="color:#f92672">=</span> as<span style="color:#f92672">[</span>getProbe<span style="color:#f92672">()</span> <span style="color:#f92672">&amp;</span> m<span style="color:#f92672">])</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span>
+                    <span style="color:#f92672">!(</span>uncontended <span style="color:#f92672">=</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">cas</span><span style="color:#f92672">(</span>v <span style="color:#f92672">=</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span><span style="color:#f92672">,</span> v <span style="color:#f92672">+</span> x<span style="color:#f92672">)))</span>
+                <span style="color:#75715e">// 调用Striped64中的方法处理
+</span><span style="color:#75715e"></span>                longAccumulate<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> uncontended<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ol>
+<li>最初无竞争时只更新base</li>
+<li>直到更新base失败时就是出现了竞争，创建cells数组</li>
+<li>当多个线程竞争同一个Cell比较激烈时，可能要扩容</li>
+</ol>
+<hr>
+<h4 id="longaccumulate-方法">longAccumulate 方法</h4>
+<p>只有当在上面的#add方法出现了竞争，需要创建或者扩容cell的时候才会调用此方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">longAccumulate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> x<span style="color:#f92672">,</span> LongBinaryOperator fn<span style="color:#f92672">,</span>
+                              <span style="color:#66d9ef">boolean</span> wasUncontended<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">int</span> h<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//&lt;1&gt; 获取存储线程的probe值，会通过#ThreadLocalRandom.current()方法随机生成一个，之后就不会改变除非自己手动去修改
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>h <span style="color:#f92672">=</span> getProbe<span style="color:#f92672">())</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//如果没有初始化，那么进行初始化
+</span><span style="color:#75715e"></span>            ThreadLocalRandom<span style="color:#f92672">.</span><span style="color:#a6e22e">current</span><span style="color:#f92672">();</span> <span style="color:#75715e">// force initialization
+</span><span style="color:#75715e"></span>            h <span style="color:#f92672">=</span> getProbe<span style="color:#f92672">();</span>
+            <span style="color:#75715e">// 还没初始化，说明竞争的不激烈
+</span><span style="color:#75715e"></span>            wasUncontended <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//是否出现碰撞
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">boolean</span> collide <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>                <span style="color:#75715e">// True if last slot nonempty
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(;;)</span> <span style="color:#f92672">{</span>
+            Cell<span style="color:#f92672">[]</span> as<span style="color:#f92672">;</span> Cell a<span style="color:#f92672">;</span> <span style="color:#66d9ef">int</span> n<span style="color:#f92672">;</span> <span style="color:#66d9ef">long</span> v<span style="color:#f92672">;</span>
+            <span style="color:#75715e">//&lt;2&gt; 如果Cells数组已经初始化
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>as <span style="color:#f92672">=</span> cells<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">=</span> as<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//&lt;2.1&gt; 当前线程进行hash获取在Cells数组中的值，判断是否为空，如果为空的话，进行初始化当前线程的cell然后塞入Cells数组中
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>a <span style="color:#f92672">=</span> as<span style="color:#f92672">[(</span>n <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;</span> h<span style="color:#f92672">])</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//判断是否有竞争，其他线程在创建或者扩容Cells
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cellsBusy <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>       <span style="color:#75715e">// Try to attach new Cell
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//创建cell
+</span><span style="color:#75715e"></span>                        Cell r <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Cell<span style="color:#f92672">(</span>x<span style="color:#f92672">);</span>   <span style="color:#75715e">// Optimistically create
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//再次判断cellsBusy的值，并且cas的修改 意味着获取锁
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cellsBusy <span style="color:#f92672">==</span> 0 <span style="color:#f92672">&amp;&amp;</span> casCellsBusy<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">//标记是否创建成功
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">boolean</span> created <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>               <span style="color:#75715e">// Recheck under lock
+</span><span style="color:#75715e"></span>                                Cell<span style="color:#f92672">[]</span> rs<span style="color:#f92672">;</span> <span style="color:#66d9ef">int</span> m<span style="color:#f92672">,</span> j<span style="color:#f92672">;</span>
+                                <span style="color:#75715e">//重新获取Cells数组，找到当前线程hash到Cells数组中的位置。如果为null的话，则加入Cells数组中，create标记为true
+</span><span style="color:#75715e"></span>                                <span style="color:#75715e">//note : 这里重新获取Cells数组的原因是因为可能有其他线程已经扩容了或者修改了里面的值
+</span><span style="color:#75715e"></span>                                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>rs <span style="color:#f92672">=</span> cells<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span>
+                                    <span style="color:#f92672">(</span>m <span style="color:#f92672">=</span> rs<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span> <span style="color:#f92672">&gt;</span> 0 <span style="color:#f92672">&amp;&amp;</span>
+                                    rs<span style="color:#f92672">[</span>j <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>m <span style="color:#f92672">-</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;</span> h<span style="color:#f92672">]</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                                    rs<span style="color:#f92672">[</span>j<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> r<span style="color:#f92672">;</span>
+                                    created <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                                <span style="color:#f92672">}</span>
+                            <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                                <span style="color:#75715e">//释放锁
+</span><span style="color:#75715e"></span>                                cellsBusy <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                            <span style="color:#f92672">}</span>
+                            <span style="color:#75715e">//创建成功直接返回
+</span><span style="color:#75715e"></span>                            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>created<span style="color:#f92672">)</span>
+                                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                            <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>           <span style="color:#75715e">// Slot is now non-empty
+</span><span style="color:#75715e"></span>                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#75715e">//标记没有发生冲突
+</span><span style="color:#75715e"></span>                    collide <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">// 这里对应了&lt;2.1&gt; 如果当前线程hash到Cells数组的位置不为null，并且wasUncontended的值为false 出现了竞争。则更新失败，继续自旋
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>wasUncontended<span style="color:#f92672">)</span>       <span style="color:#75715e">// CAS already known to fail
+</span><span style="color:#75715e"></span>                    wasUncontended <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>      <span style="color:#75715e">// Continue after rehash
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// 上面的else if 中如果wasUncontended为true 则没有出现竞争，尝试修改当前线程所在的cell的值，成功直接返回
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>a<span style="color:#f92672">.</span><span style="color:#a6e22e">cas</span><span style="color:#f92672">(</span>v <span style="color:#f92672">=</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span><span style="color:#f92672">,</span> <span style="color:#f92672">((</span>fn <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">?</span> v <span style="color:#f92672">+</span> x <span style="color:#f92672">:</span>
+                                             fn<span style="color:#f92672">.</span><span style="color:#a6e22e">applyAsLong</span><span style="color:#f92672">(</span>v<span style="color:#f92672">,</span> x<span style="color:#f92672">))))</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#75715e">// 查看是否要进行扩容，因为每次扩容是 * 2 所以当到了cpu的核数就不会在扩容了
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">&gt;=</span> NCPU <span style="color:#f92672">||</span> cells <span style="color:#f92672">!=</span> as<span style="color:#f92672">)</span>
+                    collide <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>            <span style="color:#75715e">// At max size or stale
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//如果上上个elseif 修改cell的值失败了 且上个条件不成立  出现了冲突，collide值改为true
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>collide<span style="color:#f92672">)</span>
+                    collide <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                <span style="color:#75715e">// 到这里就说明已经出现了冲突了，尝试获取占有锁，并且扩容
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cellsBusy <span style="color:#f92672">==</span> 0 <span style="color:#f92672">&amp;&amp;</span> casCellsBusy<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//检查是否有其它线程已经扩容过了
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cells <span style="color:#f92672">==</span> as<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>      <span style="color:#75715e">// Expand table unless stale
+</span><span style="color:#75715e"></span>                            <span style="color:#75715e">//扩大2倍 旧数组拷贝到新数组中，重新赋值
+</span><span style="color:#75715e"></span>                            Cell<span style="color:#f92672">[]</span> rs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Cell<span style="color:#f92672">[</span>n <span style="color:#f92672">&lt;&lt;</span> 1<span style="color:#f92672">];</span>
+                            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> n<span style="color:#f92672">;</span> <span style="color:#f92672">++</span>i<span style="color:#f92672">)</span>
+                                rs<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> as<span style="color:#f92672">[</span>i<span style="color:#f92672">];</span>
+                            cells <span style="color:#f92672">=</span> rs<span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//释放锁
+</span><span style="color:#75715e"></span>                        cellsBusy <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#75715e">//解决了冲突，继续尝试
+</span><span style="color:#75715e"></span>                    collide <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>                   <span style="color:#75715e">// Retry with expanded table
+</span><span style="color:#75715e"></span>                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">//更新失败或者达到了CPU核心数，重新生成probe，并重试
+</span><span style="color:#75715e"></span>                h <span style="color:#f92672">=</span> advanceProbe<span style="color:#f92672">(</span>h<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+
+            <span style="color:#75715e">//&lt;3&gt; 对应&lt;2&gt; Cell数组还没初始化，cas修改cellsBusy的值，相当于是一个独占锁
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cellsBusy <span style="color:#f92672">==</span> 0 <span style="color:#f92672">&amp;&amp;</span> cells <span style="color:#f92672">==</span> as <span style="color:#f92672">&amp;&amp;</span> casCellsBusy<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//初始化是否成功
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">boolean</span> init <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>                           <span style="color:#75715e">// Initialize table
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">//检测是否有其它线程初始化过
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cells <span style="color:#f92672">==</span> as<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">//初始容量为2
+</span><span style="color:#75715e"></span>                        Cell<span style="color:#f92672">[]</span> rs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Cell<span style="color:#f92672">[</span>2<span style="color:#f92672">];</span>
+                        <span style="color:#75715e">//当前线程会进行hash然后放置到cell数组中
+</span><span style="color:#75715e"></span>                        rs<span style="color:#f92672">[</span>h <span style="color:#f92672">&amp;</span> 1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Cell<span style="color:#f92672">(</span>x<span style="color:#f92672">);</span>
+                        cells <span style="color:#f92672">=</span> rs<span style="color:#f92672">;</span>
+                        init <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//释放锁
+</span><span style="color:#75715e"></span>                    cellsBusy <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">// 初始化成功直接返回
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// 因为增加的值已经同时创建到Cell中了
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>init<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+
+            <span style="color:#75715e">//&lt;4&gt; 对应&lt;3&gt; 已经有线程在初始化Cell数组了 也就是&lt;3&gt;中的cellsBusy = 1，那么尝试cas更新base。如果成功直接返回
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>casBase<span style="color:#f92672">(</span>v <span style="color:#f92672">=</span> base<span style="color:#f92672">,</span> <span style="color:#f92672">((</span>fn <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">?</span> v <span style="color:#f92672">+</span> x <span style="color:#f92672">:</span>
+                                        fn<span style="color:#f92672">.</span><span style="color:#a6e22e">applyAsLong</span><span style="color:#f92672">(</span>v<span style="color:#f92672">,</span> x<span style="color:#f92672">))))</span>
+                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>                          <span style="color:#75715e">// Fall back on using base
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>总结一下：</strong></p>
+<ol>
+<li>如果Cells数组未初始化，当前线程会尝试占有cellsBusy锁并创建cells数组；</li>
+<li>如果当前线程尝试创建Cells数组时，发现有其它线程已经在创建了，就尝试更新base，如果成功就返回；</li>
+<li>通过线程的probe值找到当前线程应该更新Cells数组中的哪个Cell；</li>
+<li>如果当前线程所在的Cell未初始化，就尝试占有cellsBusy锁并在相应的位置创建一个Cell；</li>
+<li>尝试CAS更新当前线程所在的Cell，如果成功就返回，如果失败说明出现冲突；</li>
+<li>当前线程更新Cell失败后并不是立即扩容，而是尝试更新probe值后再重试一次；</li>
+<li>如果在重试的时候还是更新失败，就扩容；</li>
+<li>扩容时当前线程占有cellsBusy锁，并把数组容量扩大到两倍，再迁移原cells数组中元素到新数组中；</li>
+<li>cellsBusy在创建Cells数组、创建Cell、扩容Cells数组三个地方用到；</li>
+</ol>
+<hr>
+<h4 id="sum-方法">sum 方法</h4>
+<p>获取LongAdder中真正存储的值的大小，通过把base和所有段相加得到。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">sum</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        Cell<span style="color:#f92672">[]</span> as <span style="color:#f92672">=</span> cells<span style="color:#f92672">;</span>
+        Cell a<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//&lt;1&gt; sum初始等于base
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">long</span> sum <span style="color:#f92672">=</span> base<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//&lt;2&gt; 如果Cells不为空
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>as <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//遍历所有的Cell
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> as<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">;</span> <span style="color:#f92672">++</span>i<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//如果所在的Cell不为空，就把它的value累加到sum中
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>a <span style="color:#f92672">=</span> as<span style="color:#f92672">[</span>i<span style="color:#f92672">])</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                    sum <span style="color:#f92672">+=</span> a<span style="color:#f92672">.</span><span style="color:#a6e22e">value</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//返回sum
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> sum<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><code>note：</code>如果前面已经累加到sum上的Cell的value有修改，没法计算到了。所以说LongAdder是最终一致性</p>
+<hr>
+<h4 id="longadder-vs-atomiclong">LongAdder VS AtomicLong</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LongAddrVSAtomicLongTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        testAtomicLongVSLongAdder<span style="color:#f92672">(</span>1<span style="color:#f92672">,</span>10000000<span style="color:#f92672">);</span>
+        testAtomicLongVSLongAdder<span style="color:#f92672">(</span>10<span style="color:#f92672">,</span>10000000<span style="color:#f92672">);</span>
+        testAtomicLongVSLongAdder<span style="color:#f92672">(</span>20<span style="color:#f92672">,</span>10000000<span style="color:#f92672">);</span>
+        testAtomicLongVSLongAdder<span style="color:#f92672">(</span>40<span style="color:#f92672">,</span>10000000<span style="color:#f92672">);</span>
+        testAtomicLongVSLongAdder<span style="color:#f92672">(</span>80<span style="color:#f92672">,</span>10000000<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testAtomicLongVSLongAdder</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> threadCount<span style="color:#f92672">,</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> times<span style="color:#f92672">){</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;threadCount: &#34;</span> <span style="color:#f92672">+</span> threadCount <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;,times: &#34;</span> <span style="color:#f92672">+</span> times<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">long</span> start <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">currentTimeMillis</span><span style="color:#f92672">();</span>
+            testLongAdder<span style="color:#f92672">(</span>threadCount<span style="color:#f92672">,</span>times<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;LongAdder elapse: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">currentTimeMillis</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> start<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;ms&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">long</span> start2 <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">currentTimeMillis</span><span style="color:#f92672">();</span>
+            testAtomicLong<span style="color:#f92672">(</span>threadCount<span style="color:#f92672">,</span>times<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Atomic elapse: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">currentTimeMillis</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> start2<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;ms&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testLongAdder</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> threadCount<span style="color:#f92672">,</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> times<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        LongAdder longAdder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LongAdder<span style="color:#f92672">();</span>
+        List<span style="color:#f92672">&lt;</span>Thread<span style="color:#f92672">&gt;</span> list <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> threadCount<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            list<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(()-&gt;{</span>
+                <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> j <span style="color:#f92672">&lt;</span> times<span style="color:#f92672">;</span> j<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+                    longAdder<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Thread thread <span style="color:#f92672">:</span> list<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            thread<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Thread thread <span style="color:#f92672">:</span> list<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            thread<span style="color:#f92672">.</span><span style="color:#a6e22e">join</span><span style="color:#f92672">();;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testAtomicLong</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> threadCount<span style="color:#f92672">,</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> times<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        AtomicLong atomicLong <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AtomicLong<span style="color:#f92672">();</span>
+        List<span style="color:#f92672">&lt;</span>Thread<span style="color:#f92672">&gt;</span> list <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> threadCount<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            list<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">((</span><span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(()-&gt;{</span>
+                <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> j <span style="color:#f92672">&lt;</span> times<span style="color:#f92672">;</span> j<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+                    atomicLong<span style="color:#f92672">.</span><span style="color:#a6e22e">incrementAndGet</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">})));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Thread thread <span style="color:#f92672">:</span> list<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            thread<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Thread thread <span style="color:#f92672">:</span> list<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            thread<span style="color:#f92672">.</span><span style="color:#a6e22e">join</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="结果">结果：</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">threadCount: 1<span style="color:#f92672">,</span>times<span style="color:#f92672">:</span> 10000000
+LongAdder elapse<span style="color:#f92672">:</span> 219ms
+Atomic elapse<span style="color:#f92672">:</span> 72ms
+threadCount: 10<span style="color:#f92672">,</span>times<span style="color:#f92672">:</span> 10000000
+LongAdder elapse<span style="color:#f92672">:</span> 232ms
+Atomic elapse<span style="color:#f92672">:</span> 1948ms
+threadCount: 20<span style="color:#f92672">,</span>times<span style="color:#f92672">:</span> 10000000
+LongAdder elapse<span style="color:#f92672">:</span> 462ms
+Atomic elapse<span style="color:#f92672">:</span> 4113ms
+threadCount: 40<span style="color:#f92672">,</span>times<span style="color:#f92672">:</span> 10000000
+LongAdder elapse<span style="color:#f92672">:</span> 952ms
+Atomic elapse<span style="color:#f92672">:</span> 9520ms
+threadCount: 80<span style="color:#f92672">,</span>times<span style="color:#f92672">:</span> 10000000
+LongAdder elapse<span style="color:#f92672">:</span> 1508ms
+Atomic elapse<span style="color:#f92672">:</span> 21143ms
+</code></pre></div><blockquote>
+<p>可以看到线程数越多，竞争越多的情况下，对LongAdder的性能没有太大的影响而AtomicInteger则越来越慢。</p>
+</blockquote>
+<hr>
+<h3 id="总结">总结</h3>
+<ol>
+<li><strong>LongAdder通过base和cells数组来存储值，无竞争的时候直接cas的修改base的值，出现竞争创建cell使用分段的思想来提交性能</strong></li>
+<li><strong>不同的线程会hash到不同的cell上去更新，减少了竞争</strong></li>
+<li><strong>LongAdder中Cell的数组最大容量就是当前cpu数</strong></li>
+<li><strong>LongAddr 是最终一致性的。</strong></li>
+</ol>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/pulsar-topic-discovery/" data-toggle="tooltip" data-placement="top" title="Pulsar - Topic Discovery">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/atomicstampedreference-%E8%AF%A6%E8%A7%A3/" data-toggle="tooltip" data-placement="top" title="AtomicStampedReference 详解">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>Condition 源码分析</a></li>
+         
+        <li><a href="/blog/priorityqueue-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>PriorityQueue 源码分析</a></li>
+         
+        <li><a href="/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>CountDownLatch 源码分析</a></li>
+         
+        <li><a href="/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>ReentrantReadWriteLock 源码分析</a></li>
+         
+        <li><a href="/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>CyclicBarrier 源码分析</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

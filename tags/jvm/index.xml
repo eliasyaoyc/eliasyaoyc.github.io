@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>JVM on 拳拳到肉</title>
+    <link>/tags/jvm/</link>
+    <description>Recent content in JVM on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Tue, 31 Mar 2020 11:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/jvm/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>引用以及Reference类</title>
+      <link>/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/</link>
+      <pubDate>Tue, 31 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/</guid>
+      <description>Java与C++之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。</description>
+    </item>
+    
+    <item>
+      <title>JVM 内存区域与内存溢出异常</title>
+      <link>/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/</link>
+      <pubDate>Sun, 22 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/</guid>
+      <description>Java 虚拟机在执行Java 程序的过程中会把它所管理的内存划分为若干个不同的数据区域。这些区域有各自的用途，以及创建和销毁的时间</description>
+    </item>
+    
+  </channel>
+</rss>

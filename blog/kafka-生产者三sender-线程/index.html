@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kafka 生产者（三）Sender 线程 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Kafka">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Kafka 生产者（三）Sender 线程" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%89sender-%E7%BA%BF%E7%A8%8B//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="1.概述 在分析了 KafkaProducer 如何把消息存入 RecordAccumulator 中，那么这些ProducerBatch 是如何发送给 Kafka Server 的呢？ 如下图： 当每次调用 RecordAccumulator#append( ) 追加消息的的时候，如果发">
+  <meta property="og:description" content="1.概述 在分析了 KafkaProducer 如何把消息存入 RecordAccumulator 中，那么这些ProducerBatch 是如何发送给 Kafka Server 的呢？ 如下图： 当每次调用 RecordAccumulator#append( ) 追加消息的的时候，如果发">
+  <meta name="twitter:description" content="1.概述 在分析了 KafkaProducer 如何把消息存入 RecordAccumulator 中，那么这些ProducerBatch 是如何发送给 Kafka Server 的呢？ 如下图： 当每次调用 RecordAccumulator#append( ) 追加消息的的时候，如果发">
+  <meta property="og:description" content="1.概述 在分析了 KafkaProducer 如何把消息存入 RecordAccumulator 中，那么这些ProducerBatch 是如何发送给 Kafka Server 的呢？ 如下图： 当每次调用 RecordAccumulator#append( ) 追加消息的的时候，如果发" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（三）Sender 线程 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（三）Sender 线程 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 生产者（三）Sender 线程 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（三）Sender 线程 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（三）Sender 线程 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 生产者（三）Sender 线程 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（三）Sender 线程 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（三）Sender 线程 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 生产者（三）Sender 线程 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Kafka 生产者（三）Sender 线程</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月22日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            4200字 | 阅读大约需要9分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/kafka/"><i>#kafka</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="1概述">1.概述</h3>
+<p>在分析了 <code>KafkaProducer</code> 如何把消息存入 <code>RecordAccumulator</code> 中，那么这些ProducerBatch 是如何发送给 Kafka Server 的呢？</p>
+<p>如下图：
+<img src="http://img.sirann.cn//siran/WeChat18fc9cec53272bb03f08e1aa8005ec3d.png" alt="">
+当每次调用 <code>RecordAccumulator#append( )</code> 追加消息的的时候，如果发现当前的 ProducerBatch 满了或者说创建了一个新的 ProducerBatch ，那么就会唤醒 Sender 线程来获取消息进行发送。</p>
+<p><strong>代码如下：</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">batchIsFull</span> <span style="color:#f92672">||</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">newBatchCreated</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                log<span style="color:#f92672">.</span><span style="color:#a6e22e">trace</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Waking up the sender since topic {} partition {} is either full or getting a new batch&#34;</span><span style="color:#f92672">,</span> record<span style="color:#f92672">.</span><span style="color:#a6e22e">topic</span><span style="color:#f92672">(),</span> partition<span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sender</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wakeup</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>那这一章，我们就来分析一下 <code>Sender 线程</code>是如何拉取消息并且发送消息的。</p>
+<h3 id="2-源码分析">2. 源码分析</h3>
+<h4 id="21-sender-线程">2.1 Sender 线程</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Sender</span> <span style="color:#66d9ef">implements</span> Runnable <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//① kafka 网络通信客户端，主要封装与 broker 的网络通信。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> KafkaClient client<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//② 消息记录累积器
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> RecordAccumulator accumulator<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//③ 元数据
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ProducerMetadata metadata<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//④ 是否需要保证消息的顺序性。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> guaranteeMessageOrder<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑤ 调用 send 方法发送的最大请求大小，通过参数 max.request.size 来设置。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> maxRequestSize<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑥ ack，通过acks 设置
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">short</span> acks<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑦ 重试次数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> retries<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//时间工具类
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Time time<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑧ 该线程状态，为 true 表示运行中。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">boolean</span> running<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑨ 是否强制关闭，此时会忽略正在发送中的消息。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">boolean</span> forceClose<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑩ 消息发送相关的统计指标收集器。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> SenderMetrics sensors<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑪ 请求的超时时间，
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> requestTimeoutMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑫ 当发送消息失败时，重试的间隔时间，默认100，可以通过`retry.backoff.ms`配置
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> retryBackoffMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑬ 版本信息
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ApiVersions apiVersions<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑭ 事务处理器
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> TransactionManager transactionManager<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑮ 正在执行发送相关的消息批次。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Map<span style="color:#f92672">&lt;</span>TopicPartition<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;&gt;</span> inFlightBatches<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① <code>client</code> kafka 网络通信客户端，主要封装与 broker 的网络通信。</li>
+<li>② <code>accumulator</code> 消息记录累积器</li>
+<li>③ <code>metadata</code> 元数据</li>
+<li>④ <code>guaranteeMessageOrder</code> 是否需要保证消息的顺序性。</li>
+<li>⑤ <code>maxRequestSize</code> 调用 send 方法发送的最大请求大小，通过参数 max.request.size 来设置。</li>
+<li>⑥ <code>ack</code> 通过acks 设置</li>
+<li>⑦ <code>retries</code> 重试次数</li>
+<li>⑧ <code>running</code> 该线程状态，为 true 表示运行中。</li>
+<li>⑨ <code>forceClose</code> 是否强制关闭，此时会忽略正在发送中的消息。</li>
+<li>⑩ <code>sensors</code> 消息发送相关的统计指标收集器。</li>
+<li>⑪ <code>requestTimeoutMs</code> 请求的超时时间，</li>
+<li>⑫ <code>retryBackoffMs</code> 当发送消息失败时，重试的间隔时间，默认100，可以通过<code>retry.backoff.ms</code>配置</li>
+<li>⑬ <code>apiVersions</code> 版本信息</li>
+<li>⑭ <code>transactionManager</code> 事务处理器</li>
+<li>⑮ <code>inFlightBatches</code> 正在执行发送相关的消息批次。</li>
+</ul>
+<p><strong>2.1.1 Sender线程流程图</strong><br>
+<img src="http://img.sirann.cn//siran/Sender.png" alt=""></p>
+<p>由于Sender 线程是实现 <code>Runnable</code> 接口的，所以当它唤醒的时候就会执行 <code>run</code> 方法</p>
+<ul>
+<li>① 判断状态是否是运行中，根据 <code>running</code> 属性。</li>
+<li>② 如果是 <code>close</code> 状态，那就通过 <code>forceClose</code> 是否要强制关闭。</li>
+<li>③ 如果 <code>forceClose</code> 是true的话 那就直接调用<code>NetworkClient#close</code>方法关闭</li>
+<li>④ 如果 <code>running</code> 属性是运行中，那么调用 <code>runOnce</code> 进行发送消息</li>
+<li>⑤ 调用 <code>Sender#sendProducerData</code> 方法准备要发送的数据封装成 <code>ClientRequest</code>，放入KafkaChannel 的 send字段中，</li>
+<li>⑥ 调用 <code>NetworkClient#poll</code> 方法，进行发送消息</li>
+</ul>
+<p><strong>2.1.2 run 方法</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Starting Kafka producer I/O thread.&#34;</span><span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">//① 判断状态
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>running<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                runOnce<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                log<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Uncaught error in kafka producer I/O thread: &#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Beginning shutdown of Kafka producer I/O thread, sending remaining records.&#34;</span><span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">//② forceClose 
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>forceClose <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">((</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">hasUndrained</span><span style="color:#f92672">()</span> <span style="color:#f92672">||</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">client</span><span style="color:#f92672">.</span><span style="color:#a6e22e">inFlightRequestCount</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">||</span> hasPendingTransactionalRequests<span style="color:#f92672">()))</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                runOnce<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                log<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Uncaught error in kafka producer I/O thread: &#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>forceClose <span style="color:#f92672">&amp;&amp;</span> transactionManager <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">hasOngoingTransaction</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">isCompleting</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                log<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Aborting incomplete transaction due to shutdown&#34;</span><span style="color:#f92672">);</span>
+                transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">beginAbort</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                runOnce<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                log<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Uncaught error in kafka producer I/O thread: &#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>forceClose<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>transactionManager <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Aborting incomplete transactional requests due to forced shutdown&#34;</span><span style="color:#f92672">);</span>
+                transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Aborting incomplete batches due to forced shutdown&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">abortIncompleteBatches</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">client</span><span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Failed to close network client&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+
+        log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Shutdown of Kafka producer I/O thread has completed.&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+</code></pre></div><p><strong>2.1.3 runOnce 方法</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">runOnce</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>transactionManager <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeResolveSequences</span><span style="color:#f92672">();</span>
+
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">hasFatalError</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                    RuntimeException lastError <span style="color:#f92672">=</span> transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">lastError</span><span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>lastError <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                        maybeAbortBatches<span style="color:#f92672">(</span>lastError<span style="color:#f92672">);</span>
+                    client<span style="color:#f92672">.</span><span style="color:#a6e22e">poll</span><span style="color:#f92672">(</span>retryBackoffMs<span style="color:#f92672">,</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span><span style="color:#f92672">());</span>
+                    <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+
+                transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">bumpIdempotentEpochAndResetIdIfNeeded</span><span style="color:#f92672">();</span>
+
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>maybeSendAndPollTransactionalRequest<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>AuthenticationException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                log<span style="color:#f92672">.</span><span style="color:#a6e22e">trace</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Authentication exception while processing transactional request&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+                transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">authenticationFailed</span><span style="color:#f92672">(</span>e<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#66d9ef">long</span> currentTimeMs <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//① sendProducerData 准备发送消息
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">long</span> pollTimeout <span style="color:#f92672">=</span> sendProducerData<span style="color:#f92672">(</span>currentTimeMs<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//② 发送消息
+</span><span style="color:#75715e"></span>        client<span style="color:#f92672">.</span><span style="color:#a6e22e">poll</span><span style="color:#f92672">(</span>pollTimeout<span style="color:#f92672">,</span> currentTimeMs<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>接下来分析比较重要的两个方法  <code>sendProducerData</code>  和 <code>poll</code></p>
+<p><strong>2.1.4 sendProducerData 方法</strong>
+与 <code>2.1.1</code> 中的流程图相对应</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">sendProducerData</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> now<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//5.1 拉取集群的元数据
+</span><span style="color:#75715e"></span>        Cluster cluster <span style="color:#f92672">=</span> metadata<span style="color:#f92672">.</span><span style="color:#a6e22e">fetch</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//5.2 调用 accumulator.ready 获取准备好发送给的ProducerBatch
+</span><span style="color:#75715e"></span>        RecordAccumulator<span style="color:#f92672">.</span><span style="color:#a6e22e">ReadyCheckResult</span> result <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ready</span><span style="color:#f92672">(</span>cluster<span style="color:#f92672">,</span> now<span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">//5.3 更新找不到Leader 节点的ProducerBatch 的元数据
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">unknownLeaderTopics</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>String topic <span style="color:#f92672">:</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">unknownLeaderTopics</span><span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">metadata</span><span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>topic<span style="color:#f92672">,</span> now<span style="color:#f92672">);</span>
+
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Requesting metadata update due to unknown leader topics from the batched records: {}&#34;</span><span style="color:#f92672">,</span>
+                result<span style="color:#f92672">.</span><span style="color:#a6e22e">unknownLeaderTopics</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">metadata</span><span style="color:#f92672">.</span><span style="color:#a6e22e">requestUpdate</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+
+        Iterator<span style="color:#f92672">&lt;</span>Node<span style="color:#f92672">&gt;</span> iter <span style="color:#f92672">=</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">readyNodes</span><span style="color:#f92672">.</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">long</span> notReadyTimeout <span style="color:#f92672">=</span> Long<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//5.4 调用NetworkClient.ready 把没有准备好的Node 从readyNodes 集合中剔除
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>iter<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            Node node <span style="color:#f92672">=</span> iter<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">client</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ready</span><span style="color:#f92672">(</span>node<span style="color:#f92672">,</span> now<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                iter<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
+                notReadyTimeout <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>notReadyTimeout<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">client</span><span style="color:#f92672">.</span><span style="color:#a6e22e">pollDelayMs</span><span style="color:#f92672">(</span>node<span style="color:#f92672">,</span> now<span style="color:#f92672">));</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">//5.5 调用 accumulator.drain 方法把准备的ProducerBatch 进行转换
+</span><span style="color:#75715e"></span>        Map<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;&gt;</span> batches <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">drain</span><span style="color:#f92672">(</span>cluster<span style="color:#f92672">,</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">readyNodes</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maxRequestSize</span><span style="color:#f92672">,</span> now<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//5.6 添加到 InflightBatches，主要作用是缓存发送出去的消息但是还没有得到响应的请求
+</span><span style="color:#75715e"></span>        addToInflightBatches<span style="color:#f92672">(</span>batches<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>guaranteeMessageOrder<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> batchList <span style="color:#f92672">:</span> batches<span style="color:#f92672">.</span><span style="color:#a6e22e">values</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>ProducerBatch batch <span style="color:#f92672">:</span> batchList<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">mutePartition</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        accumulator<span style="color:#f92672">.</span><span style="color:#a6e22e">resetNextBatchExpiryTime</span><span style="color:#f92672">();</span>
+        List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> expiredInflightBatches <span style="color:#f92672">=</span> getExpiredInflightBatches<span style="color:#f92672">(</span>now<span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> expiredBatches <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">expiredBatches</span><span style="color:#f92672">(</span>now<span style="color:#f92672">);</span>
+        expiredBatches<span style="color:#f92672">.</span><span style="color:#a6e22e">addAll</span><span style="color:#f92672">(</span>expiredInflightBatches<span style="color:#f92672">);</span>
+
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>expiredBatches<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">trace</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Expired {} batches in accumulator&#34;</span><span style="color:#f92672">,</span> expiredBatches<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//5.7 处理过期的Batch
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>ProducerBatch expiredBatch <span style="color:#f92672">:</span> expiredBatches<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            String errorMessage <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Expiring &#34;</span> <span style="color:#f92672">+</span> expiredBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">recordCount</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; record(s) for &#34;</span> <span style="color:#f92672">+</span> expiredBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span>
+                <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;:&#34;</span> <span style="color:#f92672">+</span> <span style="color:#f92672">(</span>now <span style="color:#f92672">-</span> expiredBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">createdMs</span><span style="color:#f92672">)</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; ms has passed since batch creation&#34;</span><span style="color:#f92672">;</span>
+            failBatch<span style="color:#f92672">(</span>expiredBatch<span style="color:#f92672">,</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">,</span> NO_TIMESTAMP<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> TimeoutException<span style="color:#f92672">(</span>errorMessage<span style="color:#f92672">),</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>transactionManager <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> expiredBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">inRetry</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// This ensures that no new batches are drained until the current in flight batches are fully resolved.
+</span><span style="color:#75715e"></span>                transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">markSequenceUnresolved</span><span style="color:#f92672">(</span>expiredBatch<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        sensors<span style="color:#f92672">.</span><span style="color:#a6e22e">updateProduceRequestMetrics</span><span style="color:#f92672">(</span>batches<span style="color:#f92672">);</span>
+
+        <span style="color:#66d9ef">long</span> pollTimeout <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">nextReadyCheckDelayMs</span><span style="color:#f92672">,</span> notReadyTimeout<span style="color:#f92672">);</span>
+        pollTimeout <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>pollTimeout<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nextExpiryTimeMs</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> now<span style="color:#f92672">);</span>
+        pollTimeout <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span>pollTimeout<span style="color:#f92672">,</span> 0<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">readyNodes</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">trace</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Nodes with data ready to send: {}&#34;</span><span style="color:#f92672">,</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">readyNodes</span><span style="color:#f92672">);</span>
+            pollTimeout <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">//5.8 将ProducerBatch 放入 KafkaChannel 中的send 等待发送
+</span><span style="color:#75715e"></span>        sendProduceRequests<span style="color:#f92672">(</span>batches<span style="color:#f92672">,</span> now<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> pollTimeout<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p>5.1 拉取集群的元数据</p>
+</li>
+<li>
+<p>5.2 调用 <code>accumulator.ready</code> 获取准备好发送给的ProducerBatch</p>
+<ul>
+<li>在<a href="http://www.sirann.cn/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate/">Kafka 生产者（二）RecordAccumulate</a>的 <code>2.1.2</code>小节中已经分析过了</li>
+</ul>
+</li>
+<li>
+<p>5.3 更新找不到Leader 节点的ProducerBatch 的元数据</p>
+</li>
+<li>
+<p>5.4 调用 <code>NetworkClient.ready</code> 把没有准备好的Node 从readyNodes 集合中剔除。和 <code>accumulator.ready</code> 方法的区别是：</p>
+<ul>
+<li><code>NetworkClient.ready</code> ：与KafkaServer 建立Tcp连接 三次握手，如果建立不成功那么肯定无法发送这里就会剔除</li>
+</ul>
+</li>
+<li>
+<p>5.5 调用 <code>accumulator.drain</code> 方法把准备的ProducerBatch 进行转换</p>
+<ul>
+<li>在<a href="http://www.sirann.cn/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate/">Kafka 生产者（二）RecordAccumulate</a>的 <code>2.1.3</code>小节中已经分析过了</li>
+</ul>
+</li>
+<li>
+<p>5.6 添加到 <code>InflightBatches</code>，主要作用是缓存发送出去的消息但是还没有得到响应的请求</p>
+</li>
+<li>
+<p>5.7 处理过期的Batch</p>
+</li>
+<li>
+<p>5.8 将 <code>ProducerBatch</code> 放入 <code>KafkaChannel</code> 中的 send 字段等待发送</p>
+</li>
+</ul>
+<p><strong>2.1.5 NetworkClient.poll 方法</strong>
+发送数据</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//org.apache.kafka.clients.NetworkClient
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> List<span style="color:#f92672">&lt;</span>ClientResponse<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">poll</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> timeout<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> now<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ensureActive<span style="color:#f92672">();</span>
+
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>abortedSends<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            List<span style="color:#f92672">&lt;</span>ClientResponse<span style="color:#f92672">&gt;</span> responses <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+            handleAbortedSends<span style="color:#f92672">(</span>responses<span style="color:#f92672">);</span>
+            completeResponses<span style="color:#f92672">(</span>responses<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> responses<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#66d9ef">long</span> metadataTimeout <span style="color:#f92672">=</span> metadataUpdater<span style="color:#f92672">.</span><span style="color:#a6e22e">maybeUpdate</span><span style="color:#f92672">(</span>now<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 发送数据
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">selector</span><span style="color:#f92672">.</span><span style="color:#a6e22e">poll</span><span style="color:#f92672">(</span>Utils<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>timeout<span style="color:#f92672">,</span> metadataTimeout<span style="color:#f92672">,</span> defaultRequestTimeoutMs<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Unexpected error during I/O&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">// process completed actions
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">long</span> updatedNow <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">time</span><span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span><span style="color:#f92672">();</span>
+        List<span style="color:#f92672">&lt;</span>ClientResponse<span style="color:#f92672">&gt;</span> responses <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        handleCompletedSends<span style="color:#f92672">(</span>responses<span style="color:#f92672">,</span> updatedNow<span style="color:#f92672">);</span>
+        handleCompletedReceives<span style="color:#f92672">(</span>responses<span style="color:#f92672">,</span> updatedNow<span style="color:#f92672">);</span>
+        handleDisconnections<span style="color:#f92672">(</span>responses<span style="color:#f92672">,</span> updatedNow<span style="color:#f92672">);</span>
+        handleConnections<span style="color:#f92672">();</span>
+        handleInitiateApiVersionRequests<span style="color:#f92672">(</span>updatedNow<span style="color:#f92672">);</span>
+        handleTimedOutRequests<span style="color:#f92672">(</span>responses<span style="color:#f92672">,</span> updatedNow<span style="color:#f92672">);</span>
+        completeResponses<span style="color:#f92672">(</span>responses<span style="color:#f92672">);</span>
+
+        <span style="color:#66d9ef">return</span> responses<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><code>NetworkClient</code> 那一块没有进行分析，因为我觉得这一块放在 <code>Network Layer</code> 那分析更加容易理解。</p>
+<p><a href="">Kafka 服务端（一）网络层</a></p>
+<hr>
+<h3 id="3总结">3.总结</h3>
+<ul>
+<li>
+<p>在主线程中由<code>KafkaProducer</code>创建消息，然后通过<code>拦截器</code>、<code>序列化器</code>和<code>分区器</code>的之后缓存到消息累加器<code>（RecordAccumulator）</code>中。</p>
+</li>
+<li>
+<p><code>Sender</code> 线程负责从RecordAccumulator中获取消息并将其发送到Kafka中。</p>
+</li>
+<li>
+<p><code>RecordAccumulator</code> 主要用来缓存消息以便 Sender 线程可以批量发送，进而减少网络传输的资源消耗以提升性能。</p>
+</li>
+<li>
+<p>RecordAccumulator 缓存的大小可以通过生产者<code>客户端参数buffer.memory</code> 配置，默认值为 33554432B，即 <code>32MB</code>。</p>
+</li>
+<li>
+<p>如果生产者发送消息的速度超过发送到服务器的速度，则会导致生产者空间不足，这个时候KafkaProducer的send（）方法调用要么被阻塞，要么抛出异常，这个取决于参数max.block.ms的配置，此参数的默认值为60000，即60秒。</p>
+</li>
+<li>
+<p>主线程中发送过来的消息都会被追加到<code>RecordAccumulator</code>的某个双端队列（Deque）中，在RecordAccumulator 的内部为每个分区都维护了一个<code>双端队列</code>，队列中的内容就是<code>ProducerBatch</code>，即 <code>Deque＜ProducerBatch＞</code>。消息写入缓存时，追加到双端队列的尾部；</p>
+</li>
+<li>
+<p>Sender读取消息时，从双端队列的头部读取。注意ProducerBatch不是ProducerRecord，ProducerBatch中可以包含一至多个 <code>ProducerRecord</code>。</p>
+<ul>
+<li>
+<p><code>ProducerRecord</code> ：是生产者中创建的消息</p>
+</li>
+<li>
+<p><code>ProducerBatch</code>：是指一个消息批次，ProducerRecord会被包含在ProducerBatch中，这样可以使字节的使用更加紧凑，减少网络请求的次数以提升整体的吞吐量</p>
+</li>
+<li>
+<p>如果生产者客户端需要向很多分区发送消息，则可以将buffer.memory参数适当调大以增加整体的吞吐量</p>
+</li>
+</ul>
+</li>
+<li>
+<p>消息在网络上都是以<code>字节（Byte）</code>的形式传输的，在发送之前需要创建一块内存区域来保存对应的消息。在Kafka生产者客户端中，通过<code>java.io.ByteBuffer</code>实现消息内存的创建和释放。</p>
+<ul>
+<li>不过频繁的创建和释放是比较耗费资源的，在<code>RecordAccumulator</code>的内部还有一个<code>BufferPool</code>，它主要用来实现ByteBuffer的复用，以实现缓存的高效利用。</li>
+<li>BufferPool只针对特定大小的ByteBuffer进行管理，而其他大小的ByteBuffer不会缓存进BufferPool中。</li>
+<li>这个特定的大小由<code>batch.size</code>参数来指定，默认值为16384B，即<code>16KB</code>。我们可以适当地调大batch.size参数以便多缓存一些消息。</li>
+</ul>
+</li>
+<li>
+<p>Sender 从 RecordAccumulator 中获取缓存的消息之后，会进一步将原本<code>＜分区，Deque＜ProducerBatch＞＞</code>的保存形式转变成<code>＜Node，List＜ ProducerBatch＞</code>的形式。</p>
+<ul>
+<li><code>Node</code>表示Kafka集群的broker节点。对于网络连接来说，生产者客户端是与具体的broker节点建立的连接，也就是向具体的 broker 节点发送消息，而并不关心消息属于哪一个分区</li>
+<li>而对于KafkaProducer的应用逻辑而言，我们只关注向哪个分区中发送哪些消息，所以在这里需要做一个应用逻辑层面到网络I/O层面的转换。</li>
+</ul>
+</li>
+<li>
+<p>在转换成<code>＜Node，List＜ProducerBatch＞＞</code>的形式之后，Sender 还会进一步封装成<code>＜Node，Request＞</code>的形式，这样就可以将Request请求发往各个Node了，这里的Request是指Kafka的各种协议请求，对于消息发送而言就是指具体的 <code>ProduceRequest</code></p>
+</li>
+<li>
+<p>请求在从Sender线程发往Kafka之前还会保存到<code>InFlightRequests</code>中，InFlightRequests保存对象的具体形式为 <code>Map＜NodeId，Deque＜Request＞＞</code>，</p>
+<ul>
+<li>
+<p>它的主要作用是缓存了已经发出去但还没有收到响应的请求（NodeId 是一个 String 类型，表示节点的 id 编号）。</p>
+</li>
+<li>
+<p><code>InFlightRequests</code>还提供了许多管理类的方法，并且通过配置参数还可以限制每个连接（也就是客户端与Node之间的连接）最多缓存的请求数。这个配置参数为<code>max.in.flight.requests.per.connection</code>，默认值为 5，即每个连接最多只能缓存 5 个未响应的请求，超过该数值之后就不能再向这个连接发送更多的请求了，除非有缓存的请求收到了响应（Response）。 有点像Java中 Semaphore 的意思</p>
+</li>
+<li>
+<p>通过比较<code>Deque＜Request＞</code>的size与这个参数的大小来判断对应的Node中是否已经堆积了很多未响应的消息，如果真是如此，那么说明这个 Node 节点负载较大或网络连接有问题，再继续向其发送请求会增大请求超时的可能。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>InFlightRequests</code> 还可以获得<code>leastLoadedNode</code>，即所有Node中负载最小的那一个。</p>
+<ul>
+<li>这里的负载最小是通过每个 Node 在 InFlightRequests 中还未确认的请求决定的，未确认的请求越多则认为负载越大。</li>
+</ul>
+</li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/kafkatools/" data-toggle="tooltip" data-placement="top" title="KafkaTools">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%80%E7%BD%91%E7%BB%9C%E5%B1%82/" data-toggle="tooltip" data-placement="top" title="Kafka 服务端（一）网络层">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%80%E7%BD%91%E7%BB%9C%E5%B1%82/"><i class="fa fa-link"></i>Kafka 服务端（一）网络层</a></li>
+         
+        <li><a href="/blog/kafkatools/"><i class="fa fa-link"></i>KafkaTools</a></li>
+         
+        <li><a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate/"><i class="fa fa-link"></i>Kafka 生产者（二）RecordAccumulate</a></li>
+         
+        <li><a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%80kafkaproducer/"><i class="fa fa-link"></i>Kafka 生产者（一）KafkaProducer</a></li>
+         
+        <li><a href="/blog/kafka-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/"><i class="fa fa-link"></i>Kafka 基础概念</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

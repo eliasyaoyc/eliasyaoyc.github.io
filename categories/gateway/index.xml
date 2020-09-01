@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>gateway on 拳拳到肉</title>
+    <link>/categories/gateway/</link>
+    <description>Recent content in gateway on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 18 Apr 2020 18:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/gateway/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Gateway（四）Filter</title>
+      <link>/blog/gateway%E5%9B%9Bfilter/</link>
+      <pubDate>Sat, 18 Apr 2020 18:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E5%9B%9Bfilter/</guid>
+      <description>1. 概述 在Gateway（三）Predicate 一文中，如果Handler Mapping 匹配成功则会通过 GatewayWebHandler 创建请求对应的Route 对应的Filter Chain 来进</description>
+    </item>
+    
+    <item>
+      <title>Gateway（三）Predicate</title>
+      <link>/blog/gateway%E4%B8%89predicate/</link>
+      <pubDate>Sat, 18 Apr 2020 17:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E4%B8%89predicate/</guid>
+      <description>1.概述 Gateway 创建 Route 对象时，使用 RoutePredicateFactory 创建 Predicate 对象。Predicate 对象可以赋值给 Route.predicate 属性，用于匹配请求对应的 Route 。 在Gateway（二）Route一文</description>
+    </item>
+    
+    <item>
+      <title>Gateway（二）Route</title>
+      <link>/blog/gateway%E4%BA%8Croute/</link>
+      <pubDate>Sat, 18 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E4%BA%8Croute/</guid>
+      <description>1.简述 在之前 Gateway（一）初始化 文章中，已经把Gateway初始化阐述完了，接下来就是分析我们平时在Properties或者yml中</description>
+    </item>
+    
+    <item>
+      <title>Gateway（一）初始化</title>
+      <link>/blog/gateway%E4%B8%80%E5%88%9D%E5%A7%8B%E5%8C%96/</link>
+      <pubDate>Sat, 18 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E4%B8%80%E5%88%9D%E5%A7%8B%E5%8C%96/</guid>
+      <description>1.简述 由于加入了公司的微服务组，最近在做一些网关方面的工作，由于公司使用了Gateway 作为网关的技术选型，所以只有自己充分了解才能在之后</description>
+    </item>
+    
+  </channel>
+</rss>

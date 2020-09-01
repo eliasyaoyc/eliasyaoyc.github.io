@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AQS on 拳拳到肉</title>
+    <link>/tags/aqs/</link>
+    <description>Recent content in AQS on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sun, 01 Mar 2020 19:12:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/aqs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Condition 源码分析</title>
+      <link>/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 01 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效。</description>
+    </item>
+    
+    <item>
+      <title>CountDownLatch 源码分析</title>
+      <link>/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 05 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>CountDownLatch是通过一个计数器来实现的，计数器的初始值为线程的数量。每当一个线程完成了自己的任务后，计数器的值就会减1。当计数器值到达0时，它表示所有的线程已经完成了任务，然后在闭锁上等待的线程就可以恢复执行任务。</description>
+    </item>
+    
+    <item>
+      <title>ReentrantReadWriteLock 源码分析</title>
+      <link>/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 05 Feb 2020 11:12:42 +0800</pubDate>
+      
+      <guid>/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ReentrantReadWriteLock 是什么?</description>
+    </item>
+    
+    <item>
+      <title>CyclicBarrier 源码分析</title>
+      <link>/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Tue, 04 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>CyclicBarrier(回声栅栏)根据Javadoc描述，它会阻塞一组线程直到这些线程同时达到某个条件才继续执行。它就像一个栅栏一样，当一组线程都到达了栅栏处才继续往下走。</description>
+    </item>
+    
+    <item>
+      <title>ReentrantLock 源码分析</title>
+      <link>/blog/reentrantlock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 05 Jan 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/reentrantlock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>通常使用锁就是 synchronized，经过 jdk 的一系列优化引入偏向锁、轻量级锁、重量级锁等概念，性能也是有很大的提高。</description>
+    </item>
+    
+    <item>
+      <title>Semaphore 源码分析</title>
+      <link>/blog/semaphore-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Tue, 05 Jun 2018 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/semaphore-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>基于微服务的架构是未来的趋势，但是实现这种架构会面临许多困难。现代应用架构远比过去的架构复杂，因此实现微服务架构将会带来了一系列特殊的挑战，而服务网格可以帮我们解决很多问题。</description>
+    </item>
+    
+  </channel>
+</rss>

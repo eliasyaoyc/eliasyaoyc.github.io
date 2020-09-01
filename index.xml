@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>拳拳到肉</title>
+    <link>/</link>
+    <description>Recent content on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Sat, 06 Jun 2020 07:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Kafka Controller 模块（一）概述</title>
+      <link>/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/</link>
+      <pubDate>Sat, 06 Jun 2020 07:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/</guid>
+      <description>概述 在 Kafka 集群中会有一个或多个 broker，其中有一个 broker 会被选举为控制器（KafkaController），它负责管理整个集群中所有分区和副本</description>
+    </item>
+    
+    <item>
+      <title>Kafka 副本模块 ReplicaManager</title>
+      <link>/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/</link>
+      <pubDate>Mon, 01 Jun 2020 10:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/</guid>
+      <description>Kafka 的 Replication Mechanism 是为了保证 Kafka 的高可用性，也就是说一个每个分区可以有多个副本，并且会其副本集合中(AR) 选出一个副本作为 Leader 副本，所有的读写请求都由选举出来的 Leader 副本处理</description>
+    </item>
+    
+    <item>
+      <title>Kafka 时间轮 Java 版本实现</title>
+      <link>/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/</link>
+      <pubDate>Thu, 14 May 2020 20:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/</guid>
+      <description>概述 用Java 简单实现了 Kafka 中的时间轮。具体文章请看 Kafka 延迟操作（一）DelayedOperationPurgatory 具体实现 时间轮实现 public class TimingWheel</description>
+    </item>
+    
+    <item>
+      <title>Kafka 延迟操作（二）DelayedProduce</title>
+      <link>/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%BA%8Cdelayedproduce/</link>
+      <pubDate>Thu, 07 May 2020 18:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%BA%8Cdelayedproduce/</guid>
+      <description>Kafka Producer ack 设置为 all，需要所有的ISR 都接收到这条消息后才会返回。这里就用到了延迟操作。</description>
+    </item>
+    
+    <item>
+      <title>Kafka 延迟操作（一）DelayedOperationPurgatory</title>
+      <link>/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%B8%80delayedoperationpurgatory/</link>
+      <pubDate>Thu, 07 May 2020 08:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%B8%80delayedoperationpurgatory/</guid>
+      <description>概述 Kafka中存在大量的延迟操作，比如延迟生产、延迟拉取以及延迟删除等，DelayedOperationPurgatory 则是来管理这些延</description>
+    </item>
+    
+    <item>
+      <title>Kafka 日志模块（四）LogManager</title>
+      <link>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E5%9B%9Blogmanager/</link>
+      <pubDate>Tue, 05 May 2020 08:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E5%9B%9Blogmanager/</guid>
+      <description>Kafka 的所有的消息都是通过日志来存储的，它是通过 LogManager 来进行初始化的，Log 类是真正操作日志的，LogManager 是用来管理 Log 的。</description>
+    </item>
+    
+    <item>
+      <title>Kafka 日志模块（三）索引</title>
+      <link>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%89%E7%B4%A2%E5%BC%95/</link>
+      <pubDate>Sun, 03 May 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%89%E7%B4%A2%E5%BC%95/</guid>
+      <description>1. 概述 在 Kafka 日志模块（二）LogSegment 一文中说过，每次添加 log 的时候都会，添加相对应的索引，索引是用来快速定义 message (通过二分查找)。 2. 源码</description>
+    </item>
+    
+    <item>
+      <title>Kafka 日志模块（二）LogSegment</title>
+      <link>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%BA%8Clogsegment/</link>
+      <pubDate>Sun, 03 May 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%BA%8Clogsegment/</guid>
+      <description>概述 在 Kafka 日志模块（一）Log 一文中讲到了Kafka 为了防止日志文件太大，把日志文件分成多个 LogSegment ，而在每个 Segment 中又有索引文件，为了快速查找所需要的</description>
+    </item>
+    
+    <item>
+      <title>SkyWalking（二）SkyWalkingAgent 初始化</title>
+      <link>/blog/skywalking%E4%BA%8Cskywalkingagent-%E5%88%9D%E5%A7%8B%E5%8C%96/</link>
+      <pubDate>Sat, 02 May 2020 23:37:42 +0800</pubDate>
+      
+      <guid>/blog/skywalking%E4%BA%8Cskywalkingagent-%E5%88%9D%E5%A7%8B%E5%8C%96/</guid>
+      <description>概述 SkyWalking 分为两个部分，一部分是探针用于收集指标，另一部分是服务端用于接收探针发来的指标进行展示。 其中SkyWalking 的探针是基于 JavaAgent 机制。可</description>
+    </item>
+    
+    <item>
+      <title>Skywalking（一）OpenTracing</title>
+      <link>/blog/skywalking%E4%B8%80opentracing/</link>
+      <pubDate>Sat, 02 May 2020 22:37:42 +0800</pubDate>
+      
+      <guid>/blog/skywalking%E4%B8%80opentracing/</guid>
+      <description>SkyWalking 是 google 发表的 OpenTracing 标准的实现之一。</description>
+    </item>
+    
+    <item>
+      <title>Kafka 日志模块（一）Log</title>
+      <link>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%80log/</link>
+      <pubDate>Fri, 01 May 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%80log/</guid>
+      <description>Kafka 使用&lt;code&gt;日志文件&lt;/code&gt;的方式保存生产者发送的消息。每条消息都有一个 &lt;code&gt;offset&lt;/code&gt; 值来标识它在分区中的偏移量，这个offset 是&lt;code&gt;逻辑值&lt;/code&gt;，并不是消息实际存放的物理地址。</description>
+    </item>
+    
+    <item>
+      <title>Kafka 源码环境 Log 输出问题</title>
+      <link>/blog/kafka-%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83-log-%E8%BE%93%E5%87%BA%E9%97%AE%E9%A2%98/</link>
+      <pubDate>Mon, 27 Apr 2020 10:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83-log-%E8%BE%93%E5%87%BA%E9%97%AE%E9%A2%98/</guid>
+      <description>① 在 Modules 中找到core 加入 slf4j-log4j12 和 log4j ② 加入 log4j.properties</description>
+    </item>
+    
+    <item>
+      <title>Kafka 服务端（三）kafka-server-start.sh</title>
+      <link>/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%89kafka-server-start.sh/</link>
+      <pubDate>Sun, 26 Apr 2020 09:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%89kafka-server-start.sh/</guid>
+      <description>概述 在开始分析 Kafka 服务端的一些组件之前，来先看看有哪些组件，这些组件又是通过哪个类进行初始化的。 我们在启动Kafka 的时候，通常使用 bin/kafka-server-start.sh config/server.properties 执行 kafka-server-start.sh</description>
+    </item>
+    
+    <item>
+      <title>分布式一致性算法 — Bully</title>
+      <link>/blog/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95-bully/</link>
+      <pubDate>Fri, 24 Apr 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95-bully/</guid>
+      <description>概述 最近在看一些 es 方面的东西，了解到在es 的7.x版本之前 Master Election 算法采用的是Bully，但是在7.x改用了 Raft。 Bully 算法原理 消息类型： Election 消息</description>
+    </item>
+    
+    <item>
+      <title>Kafka 服务端（二）KafkaApis</title>
+      <link>/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BA%8Ckafkaapis/</link>
+      <pubDate>Thu, 23 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BA%8Ckafkaapis/</guid>
+      <description>1. 概述 根据Kafka 服务端（一）网络层中，KafkaRequestHandler线程 会从 RequestChannel 的requestQueue中取出请求进行处理，并将</description>
+    </item>
+    
+    <item>
+      <title>Kafka 服务端（一）网络层</title>
+      <link>/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%80%E7%BD%91%E7%BB%9C%E5%B1%82/</link>
+      <pubDate>Wed, 22 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%80%E7%BD%91%E7%BB%9C%E5%B1%82/</guid>
+      <description>1. 概述 Kafka 的网络层使用了 Reactor 模式，其中又有两种类型： date-plane：专门处理来自 客户端 和 broker 的请求 一个 Acceptor 线程，用于接收并处理所有的新连接 N个</description>
+    </item>
+    
+    <item>
+      <title>Kafka 生产者（三）Sender 线程</title>
+      <link>/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%89sender-%E7%BA%BF%E7%A8%8B/</link>
+      <pubDate>Wed, 22 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%89sender-%E7%BA%BF%E7%A8%8B/</guid>
+      <description>1.概述 在分析了 KafkaProducer 如何把消息存入 RecordAccumulator 中，那么这些ProducerBatch 是如何发送给 Kafka Server 的呢？ 如下图： 当每次调用 RecordAccumulator#append( ) 追加消息的的时候，如果发</description>
+    </item>
+    
+    <item>
+      <title>KafkaTools</title>
+      <link>/blog/kafkatools/</link>
+      <pubDate>Wed, 22 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafkatools/</guid>
+      <description>创建 topic &amp;ndash;replication-factor 副本因子数量 &amp;ndash;partitions 分区数量 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test 查看 topic 的信息 topics-with-overrides 查看与集群配置不一样的 topic under-replicated-partitions 查看所有包含失效副本的分区 topics-with-overrides 没有 leader 副本的分区 bin/kafka-topics.sh --zookeeper localhost:2181/kafka</description>
+    </item>
+    
+    <item>
+      <title>Kafka 生产者（二）RecordAccumulate</title>
+      <link>/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate/</link>
+      <pubDate>Tue, 21 Apr 2020 10:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate/</guid>
+      <description>1.概述 在 Kafka 生产者（一）KafkaProducer 中分析了图中红色区域，也就是说每次调用 send 方法发送消息，都会经过Interceptors、 Serializer</description>
+    </item>
+    
+    <item>
+      <title>Kafka 生产者（一）KafkaProducer</title>
+      <link>/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%80kafkaproducer/</link>
+      <pubDate>Mon, 20 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%80kafkaproducer/</guid>
+      <description>1. 概述 以Kafka Producer doc 中的例子作为开场( 基于Kafka-2.5.0 )，Producer 用于发消息到 Kafka Broker ，代码如下： public void main(String[] args){ //① 配置 Properties props = new</description>
+    </item>
+    
+    <item>
+      <title>Kafka 基础概念</title>
+      <link>/blog/kafka-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/</link>
+      <pubDate>Sun, 19 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/kafka-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/</guid>
+      <description>Producer：生产者，也就是发送消息的一方。生产者负责创建消息，然后将其投递到Kafka中。 Consumer：消费者，也就是接收消息的一</description>
+    </item>
+    
+    <item>
+      <title>Gateway（四）Filter</title>
+      <link>/blog/gateway%E5%9B%9Bfilter/</link>
+      <pubDate>Sat, 18 Apr 2020 18:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E5%9B%9Bfilter/</guid>
+      <description>1. 概述 在Gateway（三）Predicate 一文中，如果Handler Mapping 匹配成功则会通过 GatewayWebHandler 创建请求对应的Route 对应的Filter Chain 来进</description>
+    </item>
+    
+    <item>
+      <title>Gateway（三）Predicate</title>
+      <link>/blog/gateway%E4%B8%89predicate/</link>
+      <pubDate>Sat, 18 Apr 2020 17:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E4%B8%89predicate/</guid>
+      <description>1.概述 Gateway 创建 Route 对象时，使用 RoutePredicateFactory 创建 Predicate 对象。Predicate 对象可以赋值给 Route.predicate 属性，用于匹配请求对应的 Route 。 在Gateway（二）Route一文</description>
+    </item>
+    
+    <item>
+      <title>Gateway（二）Route</title>
+      <link>/blog/gateway%E4%BA%8Croute/</link>
+      <pubDate>Sat, 18 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E4%BA%8Croute/</guid>
+      <description>1.简述 在之前 Gateway（一）初始化 文章中，已经把Gateway初始化阐述完了，接下来就是分析我们平时在Properties或者yml中</description>
+    </item>
+    
+    <item>
+      <title>Gateway（一）初始化</title>
+      <link>/blog/gateway%E4%B8%80%E5%88%9D%E5%A7%8B%E5%8C%96/</link>
+      <pubDate>Sat, 18 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/gateway%E4%B8%80%E5%88%9D%E5%A7%8B%E5%8C%96/</guid>
+      <description>1.简述 由于加入了公司的微服务组，最近在做一些网关方面的工作，由于公司使用了Gateway 作为网关的技术选型，所以只有自己充分了解才能在之后</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot 注解 @ConfigurationProperties</title>
+      <link>/blog/spring-boot-%E6%B3%A8%E8%A7%A3-configurationproperties/</link>
+      <pubDate>Fri, 17 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/spring-boot-%E6%B3%A8%E8%A7%A3-configurationproperties/</guid>
+      <description>简述 由于在分析Gateway的时候，Gateway通过 GatewayProperties 来自动配置外部配置，故写此文章。 先思考一个问题 Springboot 中我们加入Redis 配置文件，Spr</description>
+    </item>
+    
+    <item>
+      <title>Resilience4j CircuitBreaker 源码分析</title>
+      <link>/blog/resilience4j-circuitbreaker-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 15 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/resilience4j-circuitbreaker-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>简述 在Resilience4j 中所有模块的事件机制采用了观察者模式，所以先写一个观察者模式熟悉一下以便在之后的源码分析。 //抽象的主体角色 interface</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot additional—location 参数</title>
+      <link>/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0/</link>
+      <pubDate>Tue, 14 Apr 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0/</guid>
+      <description>问题： 今天同事问我一个问题：Springboot 能否指定加载不同文件夹里的配置文件？ 原本的样子： 根据他的意思是想要变成以下的样子： 多个相同名</description>
+    </item>
+    
+    <item>
+      <title>Java8—新特性汇总.md</title>
+      <link>/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/</link>
+      <pubDate>Thu, 09 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/</guid>
+      <description>书籍《Java实战》一些操作的汇总</description>
+    </item>
+    
+    <item>
+      <title>Java8—日期时间API</title>
+      <link>/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/</link>
+      <pubDate>Thu, 09 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/</guid>
+      <description>书籍《Java实战》一些操作的汇总</description>
+    </item>
+    
+    <item>
+      <title>引用以及Reference类</title>
+      <link>/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/</link>
+      <pubDate>Tue, 31 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%BC%95%E7%94%A8%E4%BB%A5%E5%8F%8Areference%E7%B1%BB/</guid>
+      <description>Java与C++之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。</description>
+    </item>
+    
+    <item>
+      <title>println、sleep、Integer与线程安全的一些故事</title>
+      <link>/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/</link>
+      <pubDate>Mon, 23 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/</guid>
+      <description>看到一篇文章增加了我对JMM的认知，故做此记录。 设计一个程序定义一个 boolean 型的 flag 并设置为 false。主线程一直循环，直到 flag 变为 true。 子线程休</description>
+    </item>
+    
+    <item>
+      <title>JVM 内存区域与内存溢出异常</title>
+      <link>/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/</link>
+      <pubDate>Sun, 22 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/jvm-%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E5%BC%82%E5%B8%B8/</guid>
+      <description>Java 虚拟机在执行Java 程序的过程中会把它所管理的内存划分为若干个不同的数据区域。这些区域有各自的用途，以及创建和销毁的时间</description>
+    </item>
+    
+    <item>
+      <title>Guava (一) ：RateLimiter</title>
+      <link>/blog/guava-%E4%B8%80-ratelimiter/</link>
+      <pubDate>Sat, 21 Mar 2020 22:12:42 +0800</pubDate>
+      
+      <guid>/blog/guava-%E4%B8%80-ratelimiter/</guid>
+      <description>每个API接口都是有访问上限的，当访问频率或者并发量超过其承受范围时候,我们就必须考虑限流来保证接口的可用性或者降级可用性。以防止非预期的请求对系统压力过大而引起的系统瘫痪。</description>
+    </item>
+    
+    <item>
+      <title>HTTP 拾遗——TCP建立连接为什么需要三次握手</title>
+      <link>/blog/http-%E6%8B%BE%E9%81%97tcp%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/</link>
+      <pubDate>Sat, 21 Mar 2020 15:12:42 +0800</pubDate>
+      
+      <guid>/blog/http-%E6%8B%BE%E9%81%97tcp%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/</guid>
+      <description>在整理HTTP 协议的时候，同事问我为什么TCP传输层协议在建立连接的时候需要三次才能建立起一个真正的可靠连接，可是为什么是三次呢，不可以是两</description>
+    </item>
+    
+    <item>
+      <title>synchronized 的实现原理</title>
+      <link>/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Fri, 20 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</guid>
+      <description>synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成 mointorenter 和 mointerexit 字节码指令，这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。</description>
+    </item>
+    
+    <item>
+      <title>volatile 解析</title>
+      <link>/blog/volatile-%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Fri, 20 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/volatile-%E8%A7%A3%E6%9E%90/</guid>
+      <description>在多线程并发编程中synchronized 和 volatile 扮演着很重要的角色，volatile是轻量级的 synchronized,它能保证共享变量在多处理器下的可见性</description>
+    </item>
+    
+    <item>
+      <title>HTTP 协议总结.md</title>
+      <link>/blog/http-%E5%8D%8F%E8%AE%AE%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Thu, 19 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/http-%E5%8D%8F%E8%AE%AE%E6%80%BB%E7%BB%93/</guid>
+      <description>HTTP 是一个在计算机世界里专门在两点之间传输文字、图片、音频、视频等超文本数据的约定和规范</description>
+    </item>
+    
+    <item>
+      <title>并发集合——ConcurrentHashMap 源码分析</title>
+      <link>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrenthashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Thu, 19 Mar 2020 10:30:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrenthashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ConcurrentHashMap是HashMap的线程安全版本，内部也是使用（数组 + 链表 + 红黑树）的结构来存储元素。</description>
+    </item>
+    
+    <item>
+      <title>并发集合——ConcurrentSkipListMap 源码分析</title>
+      <link>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrentskiplistmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Thu, 19 Mar 2020 10:30:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88concurrentskiplistmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>跳表是一个随机化的数据结构，实质就是一种可以进行二分查找的有序链表。</description>
+    </item>
+    
+    <item>
+      <title>HashMap 源码分析</title>
+      <link>/blog/hashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Thu, 19 Mar 2020 10:20:42 +0800</pubDate>
+      
+      <guid>/blog/hashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>HashMap 采用key/value存储结构，每个key 对应唯一的value，查询和修改的速度都很快，能达到O(1)的平均时间复杂度。它是非线程安全的，且不保证元素存储的顺序。</description>
+    </item>
+    
+    <item>
+      <title>深入理解 String</title>
+      <link>/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/</link>
+      <pubDate>Thu, 19 Mar 2020 09:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/</guid>
+      <description>由于String 使用过于频繁，Java为了避免在一个系统中产生大量的String对象引入了字符串常量池</description>
+    </item>
+    
+    <item>
+      <title>计算机之文件系统</title>
+      <link>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/</link>
+      <pubDate>Tue, 17 Mar 2020 15:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/</guid>
+      <description>所有的应用程序都需要存储和检索信息。当进程运行时，它能够在自己的存储空间内存储一定量的信息。然而，存储容量受虚拟地址空间大小的限制。对于一些应用程序来说，存储空间的大小是充足的，但是对于其他一些应用程序，比如航空订票系统、银行系统、企业记账系统来说，这些容量又显得太小了</description>
+    </item>
+    
+    <item>
+      <title>计算机之内存管理</title>
+      <link>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</link>
+      <pubDate>Mon, 16 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</guid>
+      <description>内存(RAM) 是一件非常重要的资源，必须要认真对待内存。虽然目前大多数内存的增长速度要比 IBM 7094 要快的多，但是，程序大小的增长要比内存的增长还快很多。不管存储器有多大，程序大小的增长速度比内存容量的增长速度要快的多。</description>
+    </item>
+    
+    <item>
+      <title>计算机之进程与线程</title>
+      <link>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</link>
+      <pubDate>Sun, 15 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</guid>
+      <description>操作系统中最核心的概念是进程，这是对正在运行程序的一个抽象。即时可以使用的CPU只有一个，但是它们也具有支持(伪)并发操作的能力，它们将一个单独的CPU变换成多个 虚拟的CPU</description>
+    </item>
+    
+    <item>
+      <title>计算机之CPU</title>
+      <link>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu/</link>
+      <pubDate>Sat, 14 Mar 2020 12:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu/</guid>
+      <description>CPU 的全称是 Central Processing Unit ，它是你的电脑中最硬件的组件</description>
+    </item>
+    
+    <item>
+      <title>计算机之基础</title>
+      <link>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%9F%BA%E7%A1%80/</link>
+      <pubDate>Fri, 13 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%9F%BA%E7%A1%80/</guid>
+      <description>系统的硬件组成 总线 贯穿整个系统的是一组电子管道，称作总线，它携带信息字节并负责在各个部件间传递。总线通常被设计成传送定长的字节块，也就是字(</description>
+    </item>
+    
+    <item>
+      <title>自学计算机科学指南</title>
+      <link>/blog/%E8%87%AA%E5%AD%A6%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%8C%87%E5%8D%97/</link>
+      <pubDate>Thu, 12 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E8%87%AA%E5%AD%A6%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%8C%87%E5%8D%97/</guid>
+      <description>如果你是一个自学成才的工程师，或者从编程培训班毕业，那么你很有必要学习计算机科学。幸运的是，不必为此花上数年光阴和不菲费用去攻读一个学位：仅仅依靠自己，你就可以获得世界一流水平的教育</description>
+    </item>
+    
+    <item>
+      <title>Java内存模型详解</title>
+      <link>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</guid>
+      <description>操作系统为了方便用户使用对硬件进行抽象，屏蔽各种细节的处理，而Java内存模型是在硬件内存模型上的更高层的抽象，它屏蔽了各种硬件和操作系统访问的差异性，保证了Java程序在各种平台下对内存的访问都能达到一致的效果。</description>
+    </item>
+    
+    <item>
+      <title>LinkedHashMap 源码分析</title>
+      <link>/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>LinkedHashMap 继承HashMap，拥有HashMap的所有特性，并且添加了顺序访问的特点，HashMap是无序的内部维护一个双向链表， 能保证元素的插入是顺序访问的，也能以访问顺序访问，可以用来实现LRU缓存策略。</description>
+    </item>
+    
+    <item>
+      <title>WeakHashMap 源码分析</title>
+      <link>/blog/weakhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/weakhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>WeakHashMap是一种弱引用map，内部的key会存储为弱引用，当jvm gc的时候，如果这些key没有强引用存在的话，会被gc回收掉，下一次当我们操作map的时候会把对应的Entry整个删除掉，基于这种特性，WeakHashMap特别适用于缓存处理。</description>
+    </item>
+    
+    <item>
+      <title>动态规划经典问题- 股票买卖</title>
+      <link>/blog/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98-%E8%82%A1%E7%A5%A8%E4%B9%B0%E5%8D%96/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98-%E8%82%A1%E7%A5%A8%E4%B9%B0%E5%8D%96/</guid>
+      <description>来自于LeetCode liweiwei1419 股票问题通用解法自我总结 以188号问题为例: 题目： 给定一个数组，它的第 i 个元素是一支给定的股票在第 i 天的价格。 设计一</description>
+    </item>
+    
+    <item>
+      <title>如何实现LFU算法</title>
+      <link>/blog/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0lfu%E7%AE%97%E6%B3%95/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0lfu%E7%AE%97%E6%B3%95/</guid>
+      <description>设计并实现最不经常使用（LFU）缓存的数据结构。它应该支持以下操作：get 和 put。 get(key) - 如果键存在于缓存中，则获取键的值（总是正数），否则返</description>
+    </item>
+    
+    <item>
+      <title>如何实现LRU算法</title>
+      <link>/blog/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0lru%E7%AE%97%E6%B3%95/</link>
+      <pubDate>Sun, 08 Mar 2020 15:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0lru%E7%AE%97%E6%B3%95/</guid>
+      <description>LRU 缓存淘汰算法就是一种常用策略。LRU 的全称是 Least Recently Used，也就是说我们认为最近使用过的数据应该是是「有用的」，很久都没用过的数据应该是无用</description>
+    </item>
+    
+    <item>
+      <title>AtomicStampedReference 详解</title>
+      <link>/blog/atomicstampedreference-%E8%AF%A6%E8%A7%A3/</link>
+      <pubDate>Thu, 05 Mar 2020 12:37:42 +0800</pubDate>
+      
+      <guid>/blog/atomicstampedreference-%E8%AF%A6%E8%A7%A3/</guid>
+      <description>AtomicStampedReference是jdk1.5出的一个类，用于解决其他原子类无法解决的ABA问题。</description>
+    </item>
+    
+    <item>
+      <title>LongAdder 详解</title>
+      <link>/blog/longadder-%E8%AF%A6%E8%A7%A3/</link>
+      <pubDate>Thu, 05 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/blog/longadder-%E8%AF%A6%E8%A7%A3/</guid>
+      <description>LongAdder 类是jdk1.8新增的原子类，在多线程环境下，它的性能比普通的Atomic类性能高很多，继承 Striped64，通过Striped64的Cell来实现功能，并且在ConcurrentHashMap中也用了Striped64的Cell。</description>
+    </item>
+    
+    <item>
+      <title>Pulsar - Topic Discovery</title>
+      <link>/blog/pulsar-topic-discovery/</link>
+      <pubDate>Wed, 04 Mar 2020 22:37:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-topic-discovery/</guid>
+      <description>Topic Assignment Pulsar 作为多租户消息系统，具有层级命名空间，这个在之前我们也提到了「Tenant &amp;amp; Namespace」相关概念。除去前两层，第三层就是 top</description>
+    </item>
+    
+    <item>
+      <title>Pulsar - Message Lifecycle</title>
+      <link>/blog/pulsar-message-lifecycle/</link>
+      <pubDate>Wed, 04 Mar 2020 13:38:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-message-lifecycle/</guid>
+      <description>Data Flow Pulsar 集群 1. Brokers + Bookies 前边我们提到过，broker 是各零件之间进行交换的对象。因 Pulsar 为分层架构模式，使用了 BookKeeper 作为额外的存储系统，bookies 就是</description>
+    </item>
+    
+    <item>
+      <title>Pulsar VS. Kafka（二）: 以Segment为中心的架构</title>
+      <link>/blog/pulsar-vs.-kafka%E4%BA%8C-%E4%BB%A5segment%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84/</link>
+      <pubDate>Wed, 04 Mar 2020 13:38:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-vs.-kafka%E4%BA%8C-%E4%BB%A5segment%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84/</guid>
+      <description>Pulsar的分层架构 Pulsar和其他消息系统最根本的不同是采用分层架构。Pulsar集群由两层组成：无状态服务层，由一组接收和传递消息的</description>
+    </item>
+    
+    <item>
+      <title>Pulsar VS. Kafka (一): 消息消费模型</title>
+      <link>/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B/</link>
+      <pubDate>Wed, 04 Mar 2020 13:37:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B/</guid>
+      <description>Pulsar的特性包括消息的持久化存储，多租户，多机房互联互备，加密和安全性等。有比较强的健壮性，高可用性和可预测的延迟等。</description>
+    </item>
+    
+    <item>
+      <title>Condition 源码分析</title>
+      <link>/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 01 Mar 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>Condition可以替代传统的Object中的wait()、notify()和notifyAll()方法来实现线程间的通信，使线程间协作更加安全和高效。</description>
+    </item>
+    
+    <item>
+      <title>FutureTask 源码分析</title>
+      <link>/blog/futuretask-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sat, 15 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/futuretask-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>FutureTask 是一个可以取消的异步计算任务，实现Future，Runnable。提供超时控制、可以获取线程执行后的返回结果、可以取消。</description>
+    </item>
+    
+    <item>
+      <title>分布式一致性算法 — Raft</title>
+      <link>/blog/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95-raft/</link>
+      <pubDate>Thu, 13 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95-raft/</guid>
+      <description>Raft 是一种为了管理复制日志的一致性算法。它提供了和 Paxos 算法相同的功能和性能，但是比 Paxos 更容易理解并且更容易实现。</description>
+    </item>
+    
+    <item>
+      <title>PriorityQueue 源码分析</title>
+      <link>/blog/priorityqueue-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 12 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/priorityqueue-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>PriorityQueue里的每个元素都会进行排序，每次弹出一个元素要么是最大的要么是最小的，取决于排序规则。</description>
+    </item>
+    
+    <item>
+      <title>CountDownLatch 源码分析</title>
+      <link>/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 05 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>CountDownLatch是通过一个计数器来实现的，计数器的初始值为线程的数量。每当一个线程完成了自己的任务后，计数器的值就会减1。当计数器值到达0时，它表示所有的线程已经完成了任务，然后在闭锁上等待的线程就可以恢复执行任务。</description>
+    </item>
+    
+    <item>
+      <title>Raft 思维导图</title>
+      <link>/blog/raft-%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/</link>
+      <pubDate>Wed, 05 Feb 2020 12:12:42 +0800</pubDate>
+      
+      <guid>/blog/raft-%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/</guid>
+      <description>本人对Raft的实现</description>
+    </item>
+    
+    <item>
+      <title>ReentrantReadWriteLock 源码分析</title>
+      <link>/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Wed, 05 Feb 2020 11:12:42 +0800</pubDate>
+      
+      <guid>/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ReentrantReadWriteLock 是什么?</description>
+    </item>
+    
+    <item>
+      <title>CyclicBarrier 源码分析</title>
+      <link>/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Tue, 04 Feb 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/cyclicbarrier-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>CyclicBarrier(回声栅栏)根据Javadoc描述，它会阻塞一组线程直到这些线程同时达到某个条件才继续执行。它就像一个栅栏一样，当一组线程都到达了栅栏处才继续往下走。</description>
+    </item>
+    
+    <item>
+      <title>ThreadPoolExecutor 源码分析</title>
+      <link>/blog/threadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sat, 18 Jan 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/threadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ThreadPoolExecutor中常用参数有哪些，作用是什么？任务提交后，ThreadPoolExecutor会按照什么策略去创建线程用于执行提交任务？</description>
+    </item>
+    
+    <item>
+      <title>ReentrantLock 源码分析</title>
+      <link>/blog/reentrantlock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 05 Jan 2020 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/reentrantlock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>通常使用锁就是 synchronized，经过 jdk 的一系列优化引入偏向锁、轻量级锁、重量级锁等概念，性能也是有很大的提高。</description>
+    </item>
+    
+    <item>
+      <title>ScheduledThreadPoolExecutor 源码分析</title>
+      <link>/blog/scheduledthreadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sun, 05 Jan 2020 12:12:42 +0800</pubDate>
+      
+      <guid>/blog/scheduledthreadpoolexecutor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>ScheduledThreadPoolExecutor 定义了一个延迟队列 DelayedWorkQueue，这个队列是基于二叉堆来实现的，每次都会把最快要执行的任务放入堆顶(最小堆)。</description>
+    </item>
+    
+    <item>
+      <title>Semaphore 源码分析</title>
+      <link>/blog/semaphore-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Tue, 05 Jun 2018 19:12:42 +0800</pubDate>
+      
+      <guid>/blog/semaphore-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>基于微服务的架构是未来的趋势，但是实现这种架构会面临许多困难。现代应用架构远比过去的架构复杂，因此实现微服务架构将会带来了一系列特殊的挑战，而服务网格可以帮我们解决很多问题。</description>
+    </item>
+    
+    <item>
+      <title>联系我</title>
+      <link>/contact/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/contact/</guid>
+      <description>联系方式 个人微信 请扫描下面的二维码，并注明姓名-公司信息 个人邮箱 siran0611@gmail.com GitHub https://github.com/sirann</description>
+    </item>
+    
+  </channel>
+</rss>

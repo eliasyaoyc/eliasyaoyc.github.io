@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spring Boot additional—location 参数 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="spring, Jdk源码, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Spring Boot additional—location 参数" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="问题： 今天同事问我一个问题：Springboot 能否指定加载不同文件夹里的配置文件？ 原本的样子： 根据他的意思是想要变成以下的样子： 多个相同名">
+  <meta property="og:description" content="问题： 今天同事问我一个问题：Springboot 能否指定加载不同文件夹里的配置文件？ 原本的样子： 根据他的意思是想要变成以下的样子： 多个相同名">
+  <meta name="twitter:description" content="问题： 今天同事问我一个问题：Springboot 能否指定加载不同文件夹里的配置文件？ 原本的样子： 根据他的意思是想要变成以下的样子： 多个相同名">
+  <meta property="og:description" content="问题： 今天同事问我一个问题：Springboot 能否指定加载不同文件夹里的配置文件？ 原本的样子： 根据他的意思是想要变成以下的样子： 多个相同名" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Spring Boot additional—location 参数 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Spring Boot additional—location 参数 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Spring Boot additional—location 参数 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Spring Boot additional—location 参数 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Spring Boot additional—location 参数 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Spring Boot additional—location 参数 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Spring Boot additional—location 参数 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Spring Boot additional—location 参数 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Spring Boot additional—location 参数 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Spring Boot additional—location 参数</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月14日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            3700字 | 阅读大约需要8分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/spring">spring</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/spring-boot/"><i>#spring boot</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="问题">问题：</h3>
+<p>今天同事问我一个问题：Springboot 能否指定加载不同文件夹里的配置文件？</p>
+<p><strong>原本的样子</strong>：</p>
+<p><img src="/img/blog/spring/1586830574255.jpg" alt=""></p>
+<p><strong>根据他的意思是想要变成以下的样子</strong>：</p>
+<p><img src="/img/blog/spring/1586830665664.jpg" alt=""></p>
+<ul>
+<li>多个相同名字的配置在不同的文件夹。</li>
+<li>项目启动扫描指定文件夹下面的配置文件。</li>
+</ul>
+<p>带着这个问题我去查阅了一番Spring的官网配置文档，得到如下参数：</p>
+<hr>
+<h3 id="相关参数">相关参数：</h3>
+<p><code>Spring.config.additional-location</code>：添加配置的扫描路径，注意如果同名在resources的配置文件会优先加载</p>
+<p><code>Spring.config.localtion</code>：这个配置会替换默认的扫描路径，建议使用上面的配置</p>
+<hr>
+<h3 id="使用方式">使用方式：</h3>
+<p>启动的时候添加参数：<code>-Dspring.config.additional-location=classpath:/test1/</code>  即可，当然你也可以换成绝对路径。</p>
+<p>本着探究真理的准则，接下来debug一下源码，看看是如何运作的。</p>
+<hr>
+<h3 id="源码分析">源码分析：</h3>
+<h4 id="1springboot启动类">1.SpringBoot启动类</h4>
+<p>这里是Springboot启动的入口。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//&lt;1&gt; 开启自动装配
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@SpringBootApplication</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SpringbootApplication</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//&lt;2&gt; 调用 SpringApplication#run() 方法启动Spring Boot 应用
+</span><span style="color:#75715e"></span>        SpringApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>SpringbootApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+<span style="color:#75715e">//在上面代码中的 `&lt;2&gt;` 调用`SpringApplication#run`方法来启动 Spring Boot应用，就从这分析整个Spring Boot的启动过程
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">//org.springframework.boot.SpringApplication中的静态方法
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> ConfigurableApplicationContext <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>Class<span style="color:#f92672">&lt;?&gt;</span> primarySource<span style="color:#f92672">,</span> String<span style="color:#f92672">...</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> run<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]{</span>primarySource<span style="color:#f92672">},</span> args<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> ConfigurableApplicationContext <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>Class<span style="color:#f92672">&lt;?&gt;[]</span> primarySources<span style="color:#f92672">,</span> String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> SpringApplication<span style="color:#f92672">(</span>primarySources<span style="color:#f92672">)).</span><span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>args<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>可以看到最终创建一个 <code>SpringApplication</code> 对象。 进行初始化 <code>SpringApplication</code></li>
+<li>初始化完毕后开始调用<code>run</code>方法，运行<code>spring</code> 应用</li>
+</ul>
+<hr>
+<h4 id="2初始化-springapplication"><strong>2.初始化 SpringApplication</strong></h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 资源加载器
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">private</span> ResourceLoader resourceLoader<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 主要的 Java Config 类的数组
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">private</span> Set<span style="color:#f92672">&lt;</span>Class<span style="color:#f92672">&lt;?&gt;&gt;</span> primarySources<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Web 应用类型
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">private</span> WebApplicationType webApplicationType<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * ApplicationContextInitializer 数组
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">private</span> List<span style="color:#f92672">&lt;</span>ApplicationContextInitializer<span style="color:#f92672">&lt;?&gt;&gt;</span> initializers<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * ApplicationListener 数组
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">private</span> List<span style="color:#f92672">&lt;</span>ApplicationListener<span style="color:#f92672">&lt;?&gt;&gt;</span> listeners<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">SpringApplication</span><span style="color:#f92672">(</span>Class<span style="color:#f92672">&lt;?&gt;...</span> primarySources<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">((</span>ResourceLoader<span style="color:#f92672">)</span><span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> primarySources<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">SpringApplication</span><span style="color:#f92672">(</span>ResourceLoader resourceLoader<span style="color:#f92672">,</span> Class<span style="color:#f92672">&lt;?&gt;...</span> primarySources<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//...省略
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//主要的 Java Config 类的数组。在文初提供的示例，就是 TestApplication 类。
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">primarySources</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedHashSet<span style="color:#f92672">(</span>Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>primarySources<span style="color:#f92672">));</span>
+        <span style="color:#75715e">//调用 WebApplicationType#deduceFromClasspath() 方法，通过 classpath ，判断 Web 应用类型。             REACTIVE / SERVLET
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">webApplicationType</span> <span style="color:#f92672">=</span> WebApplicationType<span style="color:#f92672">.</span><span style="color:#a6e22e">deduceFromClasspath</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//初始化 initializers 属性
+</span><span style="color:#75715e"></span>                              <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">setInitializers</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getSpringFactoriesInstances</span><span style="color:#f92672">(</span>ApplicationContextInitializer<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">));</span>
+        <span style="color:#75715e">//初始化 listeners 属性
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">setListeners</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getSpringFactoriesInstances</span><span style="color:#f92672">(</span>ApplicationListener<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">mainApplicationClass</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">deduceMainApplicationClass</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="3run-方法"><strong>3.run( )方法</strong></h4>
+<p>在上面初始化完<code>SpringApplication</code>实例后，调用此方法运行SpringBoot应用。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> ConfigurableApplicationContext <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>String<span style="color:#f92672">...</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// &lt;1&gt; 创建 StopWatch 对象，并启动。StopWatch 主要用于简单统计 run 启动过程的时长。
+</span><span style="color:#75715e"></span>		StopWatch stopWatch <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StopWatch<span style="color:#f92672">();</span>
+		stopWatch<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+		ConfigurableApplicationContext context <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+		Collection<span style="color:#f92672">&lt;</span>SpringBootExceptionReporter<span style="color:#f92672">&gt;</span> exceptionReporters <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+    <span style="color:#75715e">// &lt;2&gt; 配置 headless 属性
+</span><span style="color:#75715e"></span>		configureHeadlessProperty<span style="color:#f92672">();</span>
+    <span style="color:#75715e">// &lt;3&gt; 获得 SpringApplicationRunListener 的数组，并启动监听
+</span><span style="color:#75715e"></span>		SpringApplicationRunListeners listeners <span style="color:#f92672">=</span> getRunListeners<span style="color:#f92672">(</span>args<span style="color:#f92672">);</span>
+		listeners<span style="color:#f92672">.</span><span style="color:#a6e22e">starting</span><span style="color:#f92672">();</span>
+		<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+			ApplicationArguments applicationArguments <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DefaultApplicationArguments<span style="color:#f92672">(</span>args<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;4&gt; 加载属性配置。执行完成后，所有的 environment 的属性都会加载进来，包括 application.properties 和外部的属性配置。
+</span><span style="color:#75715e"></span>			ConfigurableEnvironment environment <span style="color:#f92672">=</span> prepareEnvironment<span style="color:#f92672">(</span>listeners<span style="color:#f92672">,</span> applicationArguments<span style="color:#f92672">);</span>
+			configureIgnoreBeanInfo<span style="color:#f92672">(</span>environment<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;5&gt; 打印 Spring Banner
+</span><span style="color:#75715e"></span>			Banner printedBanner <span style="color:#f92672">=</span> printBanner<span style="color:#f92672">(</span>environment<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;6&gt; 创建 Spring 容器。
+</span><span style="color:#75715e"></span>			context <span style="color:#f92672">=</span> createApplicationContext<span style="color:#f92672">();</span>
+      <span style="color:#75715e">// &lt;7&gt; 异常报告器
+</span><span style="color:#75715e"></span>			exceptionReporters <span style="color:#f92672">=</span> getSpringFactoriesInstances<span style="color:#f92672">(</span>SpringBootExceptionReporter<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span>
+					<span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]</span> <span style="color:#f92672">{</span> ConfigurableApplicationContext<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span> <span style="color:#f92672">},</span> context<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;8&gt; 主要是调用所有初始化类的 initialize 方法
+</span><span style="color:#75715e"></span>			prepareContext<span style="color:#f92672">(</span>context<span style="color:#f92672">,</span> environment<span style="color:#f92672">,</span> listeners<span style="color:#f92672">,</span> applicationArguments<span style="color:#f92672">,</span> printedBanner<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;9&gt; 初始化 Spring 容器。
+</span><span style="color:#75715e"></span>			refreshContext<span style="color:#f92672">(</span>context<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;10&gt; 执行 Spring 容器的初始化的后置逻辑。默认实现为空
+</span><span style="color:#75715e"></span>			afterRefresh<span style="color:#f92672">(</span>context<span style="color:#f92672">,</span> applicationArguments<span style="color:#f92672">);</span>
+       <span style="color:#75715e">// &lt;11&gt; 停止 StopWatch 统计时长
+</span><span style="color:#75715e"></span>			stopWatch<span style="color:#f92672">.</span><span style="color:#a6e22e">stop</span><span style="color:#f92672">();</span>
+      <span style="color:#75715e">// &lt;12&gt; 打印 Spring Boot 启动的时长日志。
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">logStartupInfo</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+				<span style="color:#66d9ef">new</span> StartupInfoLogger<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">mainApplicationClass</span><span style="color:#f92672">).</span><span style="color:#a6e22e">logStarted</span><span style="color:#f92672">(</span>getApplicationLog<span style="color:#f92672">(),</span> stopWatch<span style="color:#f92672">);</span>
+			<span style="color:#f92672">}</span>
+      <span style="color:#75715e">// &lt;13&gt; 通知 SpringApplicationRunListener 的数组，Spring 容器启动完成。
+</span><span style="color:#75715e"></span>			listeners<span style="color:#f92672">.</span><span style="color:#a6e22e">started</span><span style="color:#f92672">(</span>context<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;14&gt; 调用 ApplicationRunner 或者 CommandLineRunner 的运行方法。
+</span><span style="color:#75715e"></span>			callRunners<span style="color:#f92672">(</span>context<span style="color:#f92672">,</span> applicationArguments<span style="color:#f92672">);</span>
+		<span style="color:#f92672">}</span>
+		<span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Throwable ex<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">// &lt;14.1&gt; 如果发生异常，则进行处理，并抛出 IllegalStateException 异常
+</span><span style="color:#75715e"></span>			handleRunFailure<span style="color:#f92672">(</span>context<span style="color:#f92672">,</span> ex<span style="color:#f92672">,</span> exceptionReporters<span style="color:#f92672">,</span> listeners<span style="color:#f92672">);</span>
+			<span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException<span style="color:#f92672">(</span>ex<span style="color:#f92672">);</span>
+		<span style="color:#f92672">}</span>
+
+		<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">// &lt;15&gt; 通知 SpringApplicationRunListener 的数组，Spring 容器运行中。
+</span><span style="color:#75715e"></span>			listeners<span style="color:#f92672">.</span><span style="color:#a6e22e">running</span><span style="color:#f92672">(</span>context<span style="color:#f92672">);</span>
+		<span style="color:#f92672">}</span>
+		<span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Throwable ex<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">// &lt;15.1&gt; 如果发生异常，则进行处理，并抛出 IllegalStateException 异常
+</span><span style="color:#75715e"></span>			handleRunFailure<span style="color:#f92672">(</span>context<span style="color:#f92672">,</span> ex<span style="color:#f92672">,</span> exceptionReporters<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+			<span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException<span style="color:#f92672">(</span>ex<span style="color:#f92672">);</span>
+		<span style="color:#f92672">}</span>
+		<span style="color:#66d9ef">return</span> context<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+</code></pre></div><p>这里只分析Springboot 如何通过<code>Spring.config.additional-location</code>和<code>Spring.config.localtion</code>这两个参数来加载指定文件夹下面的配置文件。所以这里只分析<!-- raw HTML omitted -->第三步和第四步。<!-- raw HTML omitted --></p>
+<hr>
+<h4 id="31-getrunlisteners--方法">3.1 getRunListeners( ) 方法</h4>
+<p>获得 SpringApplicationRunListener 的数组，并启动监听</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> SpringApplicationRunListeners <span style="color:#a6e22e">getRunListeners</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		Class<span style="color:#f92672">&lt;?&gt;[]</span> types <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">&lt;?&gt;[]</span> <span style="color:#f92672">{</span> SpringApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> String<span style="color:#f92672">[].</span><span style="color:#a6e22e">class</span> <span style="color:#f92672">};</span>
+    <span style="color:#75715e">//调用getSpringFactoriesInstances()方法
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> SpringApplicationRunListeners<span style="color:#f92672">(</span>logger<span style="color:#f92672">,</span> getSpringFactoriesInstances<span style="color:#f92672">(</span>
+				SpringApplicationRunListener<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> types<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> args<span style="color:#f92672">));</span>
+	<span style="color:#f92672">}</span>
+
+
+<span style="color:#66d9ef">private</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> Collection<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getSpringFactoriesInstances</span><span style="color:#f92672">(</span>Class<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> type<span style="color:#f92672">,</span>
+			Class<span style="color:#f92672">&lt;?&gt;[]</span> parameterTypes<span style="color:#f92672">,</span> Object<span style="color:#f92672">...</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		ClassLoader classLoader <span style="color:#f92672">=</span> getClassLoader<span style="color:#f92672">();</span>
+		<span style="color:#75715e">// Use names and ensure unique to protect against duplicates
+</span><span style="color:#75715e"></span>		Set<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> names <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedHashSet<span style="color:#f92672">&lt;&gt;(</span>
+        <span style="color:#75715e">//&lt;1&gt; 调用SpringFactoriesLoader.loadFactoryNames来加载listener
+</span><span style="color:#75715e"></span>				SpringFactoriesLoader<span style="color:#f92672">.</span><span style="color:#a6e22e">loadFactoryNames</span><span style="color:#f92672">(</span>type<span style="color:#f92672">,</span> classLoader<span style="color:#f92672">));</span>
+        <span style="color:#75715e">//&lt;2&gt; 获取到listener的classname 之后 通过反射实例化
+</span><span style="color:#75715e"></span>		List<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> instances <span style="color:#f92672">=</span> createSpringFactoriesInstances<span style="color:#f92672">(</span>type<span style="color:#f92672">,</span> parameterTypes<span style="color:#f92672">,</span>
+				classLoader<span style="color:#f92672">,</span> args<span style="color:#f92672">,</span> names<span style="color:#f92672">);</span>
+		AnnotationAwareOrderComparator<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>instances<span style="color:#f92672">);</span>
+		<span style="color:#66d9ef">return</span> instances<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>&lt;1&gt;</code>  调用SpringFactoriesLoader.loadFactoryNames来加载listener</p>
+<p>这个loadFactoryNames方法就是Springboot的<code>自动装配</code>机制的具体实现。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">loadFactoryNames</span><span style="color:#f92672">(</span>Class<span style="color:#f92672">&lt;?&gt;</span> factoryClass<span style="color:#f92672">,</span> <span style="color:#a6e22e">@Nullable</span> ClassLoader classLoader<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      String factoryClassName <span style="color:#f92672">=</span> factoryClass<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">();</span>
+      <span style="color:#66d9ef">return</span> loadSpringFactories<span style="color:#f92672">(</span>classLoader<span style="color:#f92672">).</span><span style="color:#a6e22e">getOrDefault</span><span style="color:#f92672">(</span>factoryClassName<span style="color:#f92672">,</span> Collections<span style="color:#f92672">.</span><span style="color:#a6e22e">emptyList</span><span style="color:#f92672">());</span>
+  <span style="color:#f92672">}</span>
+  
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;&gt;</span> <span style="color:#a6e22e">loadSpringFactories</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@Nullable</span> ClassLoader classLoader<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      MultiValueMap<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> result <span style="color:#f92672">=</span> cache<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>classLoader<span style="color:#f92672">);</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>result <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">return</span> result<span style="color:#f92672">;</span>
+      <span style="color:#f92672">}</span>
+  
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//&lt;1&gt; 获取 META-INF/spring.factories 文件，然后加载 SpringApplicationRunListener
+</span><span style="color:#75715e"></span>          Enumeration<span style="color:#f92672">&lt;</span>URL<span style="color:#f92672">&gt;</span> urls <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>classLoader <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span>
+                  classLoader<span style="color:#f92672">.</span><span style="color:#a6e22e">getResources</span><span style="color:#f92672">(</span>FACTORIES_RESOURCE_LOCATION<span style="color:#f92672">)</span> <span style="color:#f92672">:</span>
+                  ClassLoader<span style="color:#f92672">.</span><span style="color:#a6e22e">getSystemResources</span><span style="color:#f92672">(</span>FACTORIES_RESOURCE_LOCATION<span style="color:#f92672">));</span>
+          result <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedMultiValueMap<span style="color:#f92672">&lt;&gt;();</span>
+          <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>urls<span style="color:#f92672">.</span><span style="color:#a6e22e">hasMoreElements</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+              URL url <span style="color:#f92672">=</span> urls<span style="color:#f92672">.</span><span style="color:#a6e22e">nextElement</span><span style="color:#f92672">();</span>
+              UrlResource resource <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UrlResource<span style="color:#f92672">(</span>url<span style="color:#f92672">);</span>
+              Properties properties <span style="color:#f92672">=</span> PropertiesLoaderUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">loadProperties</span><span style="color:#f92672">(</span>resource<span style="color:#f92672">);</span>
+              <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Map<span style="color:#f92672">.</span><span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;?,</span> <span style="color:#f92672">?&gt;</span> entry <span style="color:#f92672">:</span> properties<span style="color:#f92672">.</span><span style="color:#a6e22e">entrySet</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                  String factoryClassName <span style="color:#f92672">=</span> <span style="color:#f92672">((</span>String<span style="color:#f92672">)</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getKey</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">trim</span><span style="color:#f92672">();</span>
+                  <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>String factoryName <span style="color:#f92672">:</span> StringUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">commaDelimitedListToStringArray</span><span style="color:#f92672">((</span>String<span style="color:#f92672">)</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getValue</span><span style="color:#f92672">()))</span> <span style="color:#f92672">{</span>
+                      result<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>factoryClassName<span style="color:#f92672">,</span> factoryName<span style="color:#f92672">.</span><span style="color:#a6e22e">trim</span><span style="color:#f92672">());</span>
+                  <span style="color:#f92672">}</span>
+              <span style="color:#f92672">}</span>
+          <span style="color:#f92672">}</span>
+          cache<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>classLoader<span style="color:#f92672">,</span> result<span style="color:#f92672">);</span>
+          <span style="color:#66d9ef">return</span> result<span style="color:#f92672">;</span>
+      <span style="color:#f92672">}</span>
+      <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException ex<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Unable to load factories from location [&#34;</span> <span style="color:#f92672">+</span>
+                  FACTORIES_RESOURCE_LOCATION <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;]&#34;</span><span style="color:#f92672">,</span> ex<span style="color:#f92672">);</span>
+      <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li><code>loadSpringFactories</code> 方法中<code>&lt;1&gt;</code> 中的常量，以及<code>spring.factories</code>文件</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String FACTORIES_RESOURCE_LOCATION <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;META-INF/spring.factories&#34;</span><span style="color:#f92672">;</span>
+  
+<span style="color:#960050;background-color:#1e0010">#</span> Run Listeners
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">boot</span><span style="color:#f92672">.</span><span style="color:#a6e22e">SpringApplicationRunListener</span><span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">boot</span><span style="color:#f92672">.</span><span style="color:#a6e22e">context</span><span style="color:#f92672">.</span><span style="color:#a6e22e">event</span><span style="color:#f92672">.</span><span style="color:#a6e22e">EventPublishingRunListener</span>
+</code></pre></div><p>可以看到在这个<code>spring.factories</code>文件中，SpringApplicationRunListener 对应的具体实现是<code>EventPublishingRunListener</code>类。</p>
+</li>
+</ul>
+<p><img src="/img/blog/spring/1586852756085.jpg" alt=""></p>
+<ul>
+<li><code>&lt;2&gt;</code>  获取到listener的classname 之后 通过反射实例化</li>
+</ul>
+<hr>
+<h4 id="32-prepareenvironment--方法">3.2 prepareEnvironment( ) 方法</h4>
+<p>到此方法获取了<code>EventPublishingRunListener</code>类实例。然后通过 <code>prepareEnvironment( )</code> 方法来加载配置文件。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> ConfigurableEnvironment <span style="color:#a6e22e">prepareEnvironment</span><span style="color:#f92672">(</span>
+			SpringApplicationRunListeners listeners<span style="color:#f92672">,</span>
+			ApplicationArguments applicationArguments<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#75715e">// Create and configure the environment
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//&lt;1&gt; 获取 ConfigurableEnvironment 如果存在直接返回，如果不存在就创建一个
+</span><span style="color:#75715e"></span>		ConfigurableEnvironment environment <span style="color:#f92672">=</span> getOrCreateEnvironment<span style="color:#f92672">();</span>
+    <span style="color:#75715e">//&lt;2&gt; 对environment进行配置
+</span><span style="color:#75715e"></span>		configureEnvironment<span style="color:#f92672">(</span>environment<span style="color:#f92672">,</span> applicationArguments<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceArgs</span><span style="color:#f92672">());</span>
+    <span style="color:#75715e">//&lt;3&gt; 通知 SpringApplicationRunListener 的数组，环境变量已经准备完成。
+</span><span style="color:#75715e"></span>		listeners<span style="color:#f92672">.</span><span style="color:#a6e22e">environmentPrepared</span><span style="color:#f92672">(</span>environment<span style="color:#f92672">);</span>
+    <span style="color:#75715e">//&lt;4&gt; 把配置文件与当前的application 进行绑定
+</span><span style="color:#75715e"></span>		bindToSpringApplication<span style="color:#f92672">(</span>environment<span style="color:#f92672">);</span>
+		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isCustomEnvironment</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+			environment <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> EnvironmentConverter<span style="color:#f92672">(</span>getClassLoader<span style="color:#f92672">())</span>
+					<span style="color:#f92672">.</span><span style="color:#a6e22e">convertEnvironmentIfNecessary</span><span style="color:#f92672">(</span>environment<span style="color:#f92672">,</span> deduceEnvironmentClass<span style="color:#f92672">());</span>
+		<span style="color:#f92672">}</span>
+		ConfigurationPropertySources<span style="color:#f92672">.</span><span style="color:#a6e22e">attach</span><span style="color:#f92672">(</span>environment<span style="color:#f92672">);</span>
+		<span style="color:#66d9ef">return</span> environment<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>&lt;1&gt;</code> 获取 ConfigurableEnvironment 如果存在直接返回，如果不存在就创建一个</p>
+</li>
+<li>
+<p><code>&lt;2&gt;</code> 对environment进行配置</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">configureEnvironment</span><span style="color:#f92672">(</span>ConfigurableEnvironment environment<span style="color:#f92672">,</span> String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">// &lt;2.1&gt; 设置 environment 的 conversionService 属性
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">addConversionService</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          ConversionService conversionService <span style="color:#f92672">=</span> ApplicationConversionService<span style="color:#f92672">.</span><span style="color:#a6e22e">getSharedInstance</span><span style="color:#f92672">();</span>
+          environment<span style="color:#f92672">.</span><span style="color:#a6e22e">setConversionService</span><span style="color:#f92672">((</span>ConfigurableConversionService<span style="color:#f92672">)</span> conversionService<span style="color:#f92672">);</span>
+      <span style="color:#f92672">}</span>
+      <span style="color:#75715e">// &lt;2.2&gt; 增加 environment 的 PropertySource 属性源
+</span><span style="color:#75715e"></span>      configurePropertySources<span style="color:#f92672">(</span>environment<span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+      <span style="color:#75715e">// &lt;2.3&gt; 配置 environment 的 activeProfiles 属性
+</span><span style="color:#75715e"></span>      configureProfiles<span style="color:#f92672">(</span>environment<span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>&lt;2.2&gt;</code> 增加 environment 的 PropertySource 属性源</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">configurePropertySources</span><span style="color:#f92672">(</span>ConfigurableEnvironment environment<span style="color:#f92672">,</span> String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        MutablePropertySources sources <span style="color:#f92672">=</span> environment<span style="color:#f92672">.</span><span style="color:#a6e22e">getPropertySources</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 配置的 defaultProperties
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">defaultProperties</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">defaultProperties</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            sources<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> MapPropertySource<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;defaultProperties&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">defaultProperties</span><span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 来自启动参数的
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">addCommandLineProperties</span> <span style="color:#f92672">&amp;&amp;</span> args<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            String name <span style="color:#f92672">=</span> CommandLinePropertySource<span style="color:#f92672">.</span><span style="color:#a6e22e">COMMAND_LINE_PROPERTY_SOURCE_NAME</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>sources<span style="color:#f92672">.</span><span style="color:#a6e22e">contains</span><span style="color:#f92672">(</span>name<span style="color:#f92672">))</span> <span style="color:#f92672">{</span><span style="color:#75715e">// 已存在，就进行替换
+</span><span style="color:#75715e"></span>                PropertySource<span style="color:#f92672">&lt;?&gt;</span> source <span style="color:#f92672">=</span> sources<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+                CompositePropertySource composite <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CompositePropertySource<span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+                composite<span style="color:#f92672">.</span><span style="color:#a6e22e">addPropertySource</span><span style="color:#f92672">(</span>
+                        <span style="color:#66d9ef">new</span> SimpleCommandLinePropertySource<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;springApplicationCommandLineArgs&#34;</span><span style="color:#f92672">,</span> args<span style="color:#f92672">));</span>
+                composite<span style="color:#f92672">.</span><span style="color:#a6e22e">addPropertySource</span><span style="color:#f92672">(</span>source<span style="color:#f92672">);</span>
+                sources<span style="color:#f92672">.</span><span style="color:#a6e22e">replace</span><span style="color:#f92672">(</span>name<span style="color:#f92672">,</span> composite<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span><span style="color:#75715e">// 不存在，就进行添加
+</span><span style="color:#75715e"></span>                sources<span style="color:#f92672">.</span><span style="color:#a6e22e">addFirst</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> SimpleCommandLinePropertySource<span style="color:#f92672">(</span>args<span style="color:#f92672">));</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p><code>&lt;2.3&gt;</code> 配置 environment 的 activeProfiles 属性</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">configureProfiles</span><span style="color:#f92672">(</span>ConfigurableEnvironment environment<span style="color:#f92672">,</span> String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Set<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> profiles <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedHashSet<span style="color:#f92672">&lt;&gt;(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">additionalProfiles</span><span style="color:#f92672">);</span>
+        profiles<span style="color:#f92672">.</span><span style="color:#a6e22e">addAll</span><span style="color:#f92672">(</span>Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>environment<span style="color:#f92672">.</span><span style="color:#a6e22e">getActiveProfiles</span><span style="color:#f92672">()));</span>
+        <span style="color:#75715e">// 设置 activeProfiles
+</span><span style="color:#75715e"></span>        environment<span style="color:#f92672">.</span><span style="color:#a6e22e">setActiveProfiles</span><span style="color:#f92672">(</span>StringUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">toStringArray</span><span style="color:#f92672">(</span>profiles<span style="color:#f92672">));</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ul>
+</li>
+<li>
+<p><code>&lt;3&gt;</code> <code>重点方法</code>：通知 SpringApplicationRunListener 的数组，环境变量已经准备完成。</p>
+<p>这里会调用<code>listener#environmentPrepared</code>方法，根据 <code>3.1</code> 的 <code>getRunListeners（）</code> 方法得知，这里只有一个EventPublishingRunListener监听器</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//org.springframework.boot.context.event.EventPublishingRunListener
+</span><span style="color:#75715e"></span><span style="color:#75715e">/**
+</span><span style="color:#75715e">  * 事件广播器
+</span><span style="color:#75715e">  */</span>
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> SimpleApplicationEventMulticaster initialMulticaster<span style="color:#f92672">;</span>
+  
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">environmentPrepared</span><span style="color:#f92672">(</span>ConfigurableEnvironment environment<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">initialMulticaster</span>
+              <span style="color:#f92672">.</span><span style="color:#a6e22e">multicastEvent</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ApplicationEnvironmentPreparedEvent<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">application</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">args</span><span style="color:#f92672">,</span> environment<span style="color:#f92672">));</span>
+  <span style="color:#f92672">}</span>
+  
+<span style="color:#75715e">//org.springframework.context.event.SimpleApplicationEventMulticaster
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">multicastEvent</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> ApplicationEvent event<span style="color:#f92672">,</span> <span style="color:#a6e22e">@Nullable</span> ResolvableType eventType<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      ResolvableType type <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>eventType <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> eventType <span style="color:#f92672">:</span> resolveDefaultEventType<span style="color:#f92672">(</span>event<span style="color:#f92672">));</span>
+      Executor executor <span style="color:#f92672">=</span> getTaskExecutor<span style="color:#f92672">();</span>
+    <span style="color:#75715e">//&lt;1&gt; 获取监听器
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>ApplicationListener<span style="color:#f92672">&lt;?&gt;</span> listener <span style="color:#f92672">:</span> getApplicationListeners<span style="color:#f92672">(</span>event<span style="color:#f92672">,</span> type<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>executor <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+              executor<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(()</span> <span style="color:#f92672">-&gt;</span> invokeListener<span style="color:#f92672">(</span>listener<span style="color:#f92672">,</span> event<span style="color:#f92672">));</span>
+          <span style="color:#f92672">}</span>
+          <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//&lt;2&gt; 依次执行
+</span><span style="color:#75715e"></span>              invokeListener<span style="color:#f92672">(</span>listener<span style="color:#f92672">,</span> event<span style="color:#f92672">);</span>
+          <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p>在这里this.initialMulticaster 指的是SimpleApplicationEventMulticaster 事件传播器</p>
+</li>
+<li>
+<p>调用<code>SimpleApplicationEventMulticaster#multicastEvent（）</code>事件进行传播出去</p>
+</li>
+<li>
+<p><code>&lt;1&gt;</code> 获取所有的监听器，具体流程是根据类型选出具体的listener  依次执行，可以查看<code>retrieveApplicationListeners</code>方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Application Listeners</span>
+org.springframework.context.ApplicationListener<span style="color:#f92672">=</span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.ClearCachesApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.builder.ParentContextCloserApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.context.FileEncodingApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.context.config.AnsiOutputApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.context.config.ConfigFileApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.context.config.DelegatingApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.context.logging.ClasspathLoggingApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.context.logging.LoggingApplicationListener,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener
+</code></pre></div></li>
+<li>
+<p><code>&lt;2&gt;</code> 依次执行这些处理器</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">invokeListener</span><span style="color:#f92672">(</span>ApplicationListener<span style="color:#f92672">&lt;?&gt;</span> listener<span style="color:#f92672">,</span> ApplicationEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ErrorHandler errorHandler <span style="color:#f92672">=</span> getErrorHandler<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>errorHandler <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                doInvokeListener<span style="color:#f92672">(</span>listener<span style="color:#f92672">,</span> event<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Throwable err<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                errorHandler<span style="color:#f92672">.</span><span style="color:#a6e22e">handleError</span><span style="color:#f92672">(</span>err<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            doInvokeListener<span style="color:#f92672">(</span>listener<span style="color:#f92672">,</span> event<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doInvokeListener</span><span style="color:#f92672">(</span>ApplicationListener listener<span style="color:#f92672">,</span> ApplicationEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//是一个接口，具体的实现
+</span><span style="color:#75715e"></span>            listener<span style="color:#f92672">.</span><span style="color:#a6e22e">onApplicationEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>ClassCastException ex<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            String msg <span style="color:#f92672">=</span> ex<span style="color:#f92672">.</span><span style="color:#a6e22e">getMessage</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>msg <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> matchesClassCastMessage<span style="color:#f92672">(</span>msg<span style="color:#f92672">,</span> event<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">()))</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// Possibly a lambda-defined listener which we could not resolve the generic event type for
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// -&gt; let&#39;s suppress the exception and just log a debug message.
+</span><span style="color:#75715e"></span>                Log logger <span style="color:#f92672">=</span> LogFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">getLog</span><span style="color:#f92672">(</span>getClass<span style="color:#f92672">());</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>logger<span style="color:#f92672">.</span><span style="color:#a6e22e">isTraceEnabled</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                    logger<span style="color:#f92672">.</span><span style="color:#a6e22e">trace</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Non-matching event type for listener: &#34;</span> <span style="color:#f92672">+</span> listener<span style="color:#f92672">,</span> ex<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">throw</span> ex<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>在getApplicationListeners 方法获取监听器后，然后进行调用。由于今天是加载指定目录下的配置文件，那么我们重点看一下<code>ConfigFileApplicationListener</code> 这个监听器的 <code>onApplicationEvent</code> 方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//org.springframework.boot.context.config.ConfigFileApplicationListener
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onApplicationEvent</span><span style="color:#f92672">(</span>ApplicationEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//由于是加载配置文件 所以这里会走onApplicationEnvironmentPreparedEvent方法
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>event <span style="color:#66d9ef">instanceof</span> ApplicationEnvironmentPreparedEvent<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            onApplicationEnvironmentPreparedEvent<span style="color:#f92672">(</span>
+                    <span style="color:#f92672">(</span>ApplicationEnvironmentPreparedEvent<span style="color:#f92672">)</span> event<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>event <span style="color:#66d9ef">instanceof</span> ApplicationPreparedEvent<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            onApplicationPreparedEvent<span style="color:#f92672">(</span>event<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    
+    
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onApplicationEnvironmentPreparedEvent</span><span style="color:#f92672">(</span>
+        ApplicationEnvironmentPreparedEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//&lt;1&gt; 通过自配装配 获取所有的Processors
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>EnvironmentPostProcessor<span style="color:#f92672">&gt;</span> postProcessors <span style="color:#f92672">=</span> loadPostProcessors<span style="color:#f92672">();</span>
+    <span style="color:#75715e">//添加自己
+</span><span style="color:#75715e"></span>        postProcessors<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+    <span style="color:#75715e">//排序
+</span><span style="color:#75715e"></span>        AnnotationAwareOrderComparator<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>postProcessors<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>EnvironmentPostProcessor postProcessor <span style="color:#f92672">:</span> postProcessors<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//&lt;2&gt; 依次执行
+</span><span style="color:#75715e"></span>            postProcessor<span style="color:#f92672">.</span><span style="color:#a6e22e">postProcessEnvironment</span><span style="color:#f92672">(</span>event<span style="color:#f92672">.</span><span style="color:#a6e22e">getEnvironment</span><span style="color:#f92672">(),</span>
+                    event<span style="color:#f92672">.</span><span style="color:#a6e22e">getSpringApplication</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>&lt;1&gt;</code> 通过自配配置 获取所有的Processors</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">List<span style="color:#f92672">&lt;</span>EnvironmentPostProcessor<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">loadPostProcessors</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> SpringFactoriesLoader<span style="color:#f92672">.</span><span style="color:#a6e22e">loadFactories</span><span style="color:#f92672">(</span>EnvironmentPostProcessor<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span>
+              getClass<span style="color:#f92672">().</span><span style="color:#a6e22e">getClassLoader</span><span style="color:#f92672">());</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Environment Post Processors</span>
+org.springframework.boot.env.EnvironmentPostProcessor<span style="color:#f92672">=</span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.env.SpringApplicationJsonEnvironmentPostProcessor,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor,<span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>org.springframework.boot.reactor.DebugAgentEnvironmentPostProcessor
+</code></pre></div><p>可以看到getApplicationListeners 方法只获取到了三个处理器，<code>DebugAgentEnvironmentPostProcessor</code> 这个Processor 没有加载，因为这个Processor 只有在Web Type 是Reactor 的时候才能被加载。</p>
+<ul>
+<li><code>&lt;2&gt;</code> 当准备好Processor 之后，依次执行他们的<code>postProcessEnvironment</code> 方法，每个Processor 处理不同的配置文件，这里我们找到ConfigFileApplicationListener 他是处理指定位置的配置文件，如下图：与我加的参数一模一样，到这里就真相大白了。     <code>-Dspring.config.additional-location=classpath:/test1/</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/blog/spring/1586916558420.jpg" alt=""></p>
+</li>
+</ul>
+<hr>
+<p>这边文章是分析Springboot如何加载指定位置的配置文件：具体来说通过自动装配，加载监听器和处理器，监听器监听EnvironmentEvent 事件，然后传给具体的处理器来进行处理。<code>ConfigFileApplicationListener</code>是来加载指定位置的配置文件的处理器。</p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/" data-toggle="tooltip" data-placement="top" title="Java8—新特性汇总.md">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/resilience4j-circuitbreaker-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" data-toggle="tooltip" data-placement="top" title="Resilience4j CircuitBreaker 源码分析">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/longadder-%E8%AF%A6%E8%A7%A3/"><i class="fa fa-link"></i>LongAdder 详解</a></li>
+         
+        <li><a href="/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>Condition 源码分析</a></li>
+         
+        <li><a href="/blog/priorityqueue-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>PriorityQueue 源码分析</a></li>
+         
+        <li><a href="/blog/countdownlatch-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>CountDownLatch 源码分析</a></li>
+         
+        <li><a href="/blog/reentrantreadwritelock-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>ReentrantReadWriteLock 源码分析</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>并发关键字 on 拳拳到肉</title>
+    <link>/tags/%E5%B9%B6%E5%8F%91%E5%85%B3%E9%94%AE%E5%AD%97/</link>
+    <description>Recent content in 并发关键字 on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Fri, 20 Mar 2020 16:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E5%B9%B6%E5%8F%91%E5%85%B3%E9%94%AE%E5%AD%97/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>synchronized 的实现原理</title>
+      <link>/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Fri, 20 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/</guid>
+      <description>synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成 mointorenter 和 mointerexit 字节码指令，这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。</description>
+    </item>
+    
+    <item>
+      <title>volatile 解析</title>
+      <link>/blog/volatile-%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Fri, 20 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/volatile-%E8%A7%A3%E6%9E%90/</guid>
+      <description>在多线程并发编程中synchronized 和 volatile 扮演着很重要的角色，volatile是轻量级的 synchronized,它能保证共享变量在多处理器下的可见性</description>
+    </item>
+    
+  </channel>
+</rss>

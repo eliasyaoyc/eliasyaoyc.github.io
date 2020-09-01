@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pulsar on 拳拳到肉</title>
+    <link>/tags/pulsar/</link>
+    <description>Recent content in Pulsar on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Wed, 04 Mar 2020 22:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/pulsar/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Pulsar - Topic Discovery</title>
+      <link>/blog/pulsar-topic-discovery/</link>
+      <pubDate>Wed, 04 Mar 2020 22:37:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-topic-discovery/</guid>
+      <description>Topic Assignment Pulsar 作为多租户消息系统，具有层级命名空间，这个在之前我们也提到了「Tenant &amp;amp; Namespace」相关概念。除去前两层，第三层就是 top</description>
+    </item>
+    
+    <item>
+      <title>Pulsar - Message Lifecycle</title>
+      <link>/blog/pulsar-message-lifecycle/</link>
+      <pubDate>Wed, 04 Mar 2020 13:38:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-message-lifecycle/</guid>
+      <description>Data Flow Pulsar 集群 1. Brokers + Bookies 前边我们提到过，broker 是各零件之间进行交换的对象。因 Pulsar 为分层架构模式，使用了 BookKeeper 作为额外的存储系统，bookies 就是</description>
+    </item>
+    
+    <item>
+      <title>Pulsar VS. Kafka（二）: 以Segment为中心的架构</title>
+      <link>/blog/pulsar-vs.-kafka%E4%BA%8C-%E4%BB%A5segment%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84/</link>
+      <pubDate>Wed, 04 Mar 2020 13:38:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-vs.-kafka%E4%BA%8C-%E4%BB%A5segment%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84/</guid>
+      <description>Pulsar的分层架构 Pulsar和其他消息系统最根本的不同是采用分层架构。Pulsar集群由两层组成：无状态服务层，由一组接收和传递消息的</description>
+    </item>
+    
+    <item>
+      <title>Pulsar VS. Kafka (一): 消息消费模型</title>
+      <link>/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B/</link>
+      <pubDate>Wed, 04 Mar 2020 13:37:42 +0800</pubDate>
+      
+      <guid>/blog/pulsar-vs.-kafka-%E4%B8%80-%E6%B6%88%E6%81%AF%E6%B6%88%E8%B4%B9%E6%A8%A1%E5%9E%8B/</guid>
+      <description>Pulsar的特性包括消息的持久化存储，多租户，多机房互联互备，加密和安全性等。有比较强的健壮性，高可用性和可预测的延迟等。</description>
+    </item>
+    
+  </channel>
+</rss>

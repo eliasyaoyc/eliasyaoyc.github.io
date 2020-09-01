@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KafkaTools · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Kafka">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="KafkaTools" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/kafkatools//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="创建 topic &ndash;replication-factor 副本因子数量 &ndash;partitions 分区数量 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test 查看 topic 的信息 topics-with-overrides 查看与集群配置不一样的 topic under-replicated-partitions 查看所有包含失效副本的分区 topics-with-overrides 没有 leader 副本的分区 bin/kafka-topics.sh --zookeeper localhost:2181/kafka">
+  <meta property="og:description" content="创建 topic &ndash;replication-factor 副本因子数量 &ndash;partitions 分区数量 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test 查看 topic 的信息 topics-with-overrides 查看与集群配置不一样的 topic under-replicated-partitions 查看所有包含失效副本的分区 topics-with-overrides 没有 leader 副本的分区 bin/kafka-topics.sh --zookeeper localhost:2181/kafka">
+  <meta name="twitter:description" content="创建 topic &ndash;replication-factor 副本因子数量 &ndash;partitions 分区数量 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test 查看 topic …">
+  <meta property="og:description" content="创建 topic &ndash;replication-factor 副本因子数量 &ndash;partitions 分区数量 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test 查看 topic 的信息 topics-with-overrides 查看与集群配置不一样的 topic under-replicated-partitions 查看所有包含失效副本的分区 topics-with-overrides 没有 leader 副本的分区 bin/kafka-topics.sh --zookeeper localhost:2181/kafka" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="KafkaTools logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="KafkaTools logo" class="visible-xs visible-sm">
+                    <span class="sr-only">KafkaTools - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="KafkaTools logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="KafkaTools logo" class="visible-xs visible-sm">
+                    <span class="sr-only">KafkaTools - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="KafkaTools logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="KafkaTools logo" class="visible-xs visible-sm">
+                    <span class="sr-only">KafkaTools - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>KafkaTools</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月22日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            800字 | 阅读大约需要2分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/kafka/"><i>#kafka</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <ul>
+<li>
+<p><strong>创建 topic &ndash;replication-factor 副本因子数量  &ndash;partitions 分区数量</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor <span style="color:#ae81ff">1</span> --partitions <span style="color:#ae81ff">1</span> --topic test
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>查看 topic 的信息  topics-with-overrides 查看与集群配置不一样的 topic  under-replicated-partitions 查看所有包含失效副本的分区  topics-with-overrides 没有 leader 副本的分区</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-topics.sh --zookeeper localhost:2181/kafka --describe --topic test
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>开启消费者订阅某 topic 进行消费消息</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>开启生产者向某 topic 发送消息</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>查看所有可用的主题</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-topics.sh --zookeeper localhost:2181/kafka --list
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>创建 topic 指定分区副本 4个分区 2个副本  注意：同一个分区内的副本不能重复</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-topics.sh --zookeeper localhost:2181/kafka --create --topic test --replica-assignment 2:0,0:1,1:2,2:1
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>通过&ndash;config 参数来设置创建主题的相关参数</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kakfa-topics.sh --zookeeper localhost:2181/kafka --create --topic test --replication-factor <span style="color:#ae81ff">1</span> --partitions <span style="color:#ae81ff">1</span> --config cleanup.policy<span style="color:#f92672">=</span>compact --config max.message.bytes<span style="color:#f92672">=</span><span style="color:#ae81ff">10000</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>创建主题加上 if-not-exists 参数避免创建相同 topic 报错， 重复创建不进行处理</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor <span style="color:#ae81ff">1</span> --partitions <span style="color:#ae81ff">1</span> --topic test --if-not-exists
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>看lag，就是未消费的</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kafka-consumer-groups.sh --bootstrap-server 192.168.3.30:9092,192.168.3.31:9092,192.168.3.32:9092 --describe --group dapTest
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>可以跑脚本消费掉消息</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kafka-console-consumer.sh -bootstrap-server 192.168.3.30:9092,192.168.3.31:9092,192.168.3.32:9092 --group TESTZZZ --topic FlinkDemoResult2
+</code></pre></div></li>
+</ul>
+<hr>
+<p><strong>增，删，改使用 topics.sh 已经过时 建议使用 kakfa-configs.sh 脚本</strong></p>
+<ul>
+<li>
+<p><strong>修改partition数（只能增加）</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kafka-topics.sh --alter --zookeeper 192.168.3.30:2181,192.168.3.31:2181,192.168.3.32:2181/kafka --partitions <span style="color:#ae81ff">50</span> --topic TOPIC_DCP_CARDDATA_BKUP_Q
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>修改配置</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-topics.sh --alter --zookeeper localhost:2181/kafka --topic test --config max.message.bytes<span style="color:#f92672">=</span><span style="color:#ae81ff">20000</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>删除配置</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-topics.sh --alter --zookeeper localhost:2181/kafka --topic test --delete-config max.message.bytes
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>使用 config.sh 查看某主题的配置</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-configs.sh --zookeeper localhost:2181/kafka --describe --entity-type topics --entity-name test
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>使用 config.sh 修改某主题的配置</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-configs.sh --zookeeper localhost:2181/kafka --alter --entity-type topics --entity-name test --add-config cleanup.policy<span style="color:#f92672">=</span>compact,max.message.bytes<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>使用 config.sh 删除某主题的配置</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-configs.sh --zookeeper localhost:2181/kafka --alter --entity-type topics --entity-name test --delete-config cleanup.policy
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>kafka-perferred-replica-election.sh 脚本提供了对分区进行重新平衡的功能</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-perferred-replica-election.sh --zookeeper localhost:2181/kafka
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>通过 path-to-json-file 小批量的对部分分区进行优先副本的选举操作</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-perferred-replica-election.sh --zookeeper localhost:2181/kafka --path-to-json-file election.json
+election.json
+<span style="color:#f92672">{</span>
+  <span style="color:#e6db74">&#34;partitions&#34;</span>:<span style="color:#f92672">[</span>
+  <span style="color:#f92672">{</span><span style="color:#e6db74">&#34;partition&#34;</span>:<span style="color:#e6db74">&#34;0&#34;</span>,
+   <span style="color:#e6db74">&#34;topic&#34;</span>:<span style="color:#e6db74">&#34;test-1&#34;</span>
+  <span style="color:#f92672">}</span>,
+  <span style="color:#f92672">{</span><span style="color:#e6db74">&#34;partition&#34;</span>:<span style="color:#e6db74">&#34;1&#34;</span>,
+   <span style="color:#e6db74">&#34;topic&#34;</span>:<span style="color:#e6db74">&#34;test-1&#34;</span>
+   <span style="color:#f92672">}</span>,
+  <span style="color:#f92672">{</span><span style="color:#e6db74">&#34;partition&#34;</span>:<span style="color:#e6db74">&#34;2&#34;</span>,
+   <span style="color:#e6db74">&#34;topic&#34;</span>:<span style="color:#e6db74">&#34;test-1&#34;</span>
+   <span style="color:#f92672">}</span>
+  <span style="color:#f92672">]</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>通过 kafak-reassign-partitions.sh 脚本执行分区重分配的工作，可以对集群扩容，brokers，节点失效的场景下对分区进行迁移</strong></p>
+<p><strong>要下线 brokerId 为1 的 broker 节点</strong></p>
+</li>
+<li>
+<p><strong>(1)创建json文件 reassgin.json</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#f92672">{</span>
+  <span style="color:#e6db74">&#34;topics&#34;</span>:<span style="color:#f92672">[</span>
+  <span style="color:#f92672">{</span><span style="color:#e6db74">&#34;topic&#34;</span>:<span style="color:#e6db74">&#34;topic-reassign&#34;</span><span style="color:#f92672">}</span>
+  <span style="color:#f92672">]</span>,
+  <span style="color:#e6db74">&#34;version&#34;</span>:1
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>(2)通过 json 文件和指定要分配的 broker 节点列表来生成一份候选的重分配方案</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-reassign-partition.sh --zookeeper localhost:2181/kafka --generate --topic-to-move-json-file reassign.json --broker-list 0,2
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>(3)把通过第二步骤生成的 json 内容保存在一个 json 文件 假定为 project.json</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-reassign-partition.sh --zookeeper localhost:2181/kafka -execute --reassginment-json-file project.json
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>查看分区重分配的进度</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-reassign-partition.sh --zookeeper localhost:2181/kafka -verify --reassginment-json-file project.json
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>复制限流 follower.replication.throttled.rate 用于设置 follower 副本复制的速度， leader.replication.throttled.rate 用于设置 leader 副本传输的速度 单位都是 b/s</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">//通过 kafka-config.sh
+bin/kafka-configs.sh --zookeeper localhost:2181/kafka --alter --entity-type topics --entity-name test --add-config follower.replication.throttled.rate<span style="color:#f92672">=</span>1024,leader.replication.throttled.rate<span style="color:#f92672">=</span><span style="color:#ae81ff">1024</span>
+</code></pre></div></li>
+</ul>
+<hr>
+<p><strong>通过 kafka-reassign-partitions.sh 性能测试</strong></p>
+<ul>
+<li>
+<p><strong>producer 测试 records sent 表示发送的消息总数 records/sec 表示以每秒发送的消息数来统计吞吐  MB/sec 表示以每秒发送的消息大小来统计吞吐量</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-producer.perf-test.sh --topic test --num-records <span style="color:#ae81ff">1000000</span> --record-size <span style="color:#ae81ff">1024</span> --throughput -1 --producer-props bootstrap.servers<span style="color:#f92672">=</span>localhost:9092 acks<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> --print-metrics
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>consumer 测试</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-consumer-perf-test.sh --topic test --message <span style="color:#ae81ff">1000000</span> --broker-list localhost:9092
+</code></pre></div></li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>查看日志</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bin/kafka-dump-log.sh --files
+</code></pre></div></li>
+</ul>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate/" data-toggle="tooltip" data-placement="top" title="Kafka 生产者（二）RecordAccumulate">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%89sender-%E7%BA%BF%E7%A8%8B/" data-toggle="tooltip" data-placement="top" title="Kafka 生产者（三）Sender 线程">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/kafka-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%80%E7%BD%91%E7%BB%9C%E5%B1%82/"><i class="fa fa-link"></i>Kafka 服务端（一）网络层</a></li>
+         
+        <li><a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%89sender-%E7%BA%BF%E7%A8%8B/"><i class="fa fa-link"></i>Kafka 生产者（三）Sender 线程</a></li>
+         
+        <li><a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate/"><i class="fa fa-link"></i>Kafka 生产者（二）RecordAccumulate</a></li>
+         
+        <li><a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%80kafkaproducer/"><i class="fa fa-link"></i>Kafka 生产者（一）KafkaProducer</a></li>
+         
+        <li><a href="/blog/kafka-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/"><i class="fa fa-link"></i>Kafka 基础概念</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>synchronized 的实现原理 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Java, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="synchronized 的实现原理" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/synchronized-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成 mointorenter 和 mointerexit 字节码指令，这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。">
+  <meta property="og:description" content="synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成 mointorenter 和 mointerexit 字节码指令，这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。">
+  <meta name="twitter:description" content="synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成 mointorenter 和 mointerexit 字节码指令，这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。">
+  <meta property="og:description" content="synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成 mointorenter 和 mointerexit 字节码指令，这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="synchronized 的实现原理 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="synchronized 的实现原理 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">synchronized 的实现原理 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="synchronized 的实现原理 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="synchronized 的实现原理 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">synchronized 的实现原理 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="synchronized 的实现原理 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="synchronized 的实现原理 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">synchronized 的实现原理 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>synchronized 的实现原理</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月20日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            7400字 | 阅读大约需要15分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b">并发编程</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/%E5%B9%B6%E5%8F%91%E5%85%B3%E9%94%AE%E5%AD%97/"><i>#并发关键字</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="问题">问题</h3>
+<ol>
+<li>synchronized是实现同步加锁的原理？</li>
+<li>synchronized的优化？</li>
+<li>synchronized的特性？</li>
+<li>synchronized是否可重入？</li>
+<li>synchronized是否是公平锁？</li>
+<li>synchronized的优化？</li>
+<li>synchronized锁膨胀过程</li>
+</ol>
+<hr>
+<h3 id="简介">简介</h3>
+<p>synchronized 关键字是 Java里面用来进行同步的。它编译后，会在同步块的前后分别生成<code>mointorenter</code> 和 <code>mointerexit</code> 字节码指令，
+这两个字节码指令都需要一个引用类型的参数来指定要锁定和解锁的对象。</p>
+<hr>
+<h3 id="使用方式">使用方式</h3>
+<p>使用 <code>synchronized</code> 是需要一个<code>引用类型的参数</code>的，而这个引用类型的参数在Java中其实可以分成三大类：<strong>类对象、实例对象、普通引用</strong>，使用方式分别如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SynchronizedTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Object lock <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">();</span>
+
+    <span style="color:#75715e">//锁定的是SynchronizedTest.class 对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sync1</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">//锁定的是SynchronizedTest实例
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sync2</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#f92672">}</span>
+    
+    <span style="color:#75715e">//锁定的是SynchronizedTest.class 对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sync3</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>SynchronizedTest<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">//锁的是指定对象lock
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sync4</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>lock<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">//锁定的是SynchronizedTest实例
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sync5</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>根据上面的代码中可以总结出来：<strong>Java中的每一个对象都可以作为锁，具体表现以下三中：</strong></p>
+<ul>
+<li>对于<code>普通同步</code>方法，锁是当前实例对象。</li>
+<li>对于<code>静态同步</code>方法，锁是当前类的Class对象。</li>
+<li>对于<code>同步方法</code>块，锁是Synchronized括号里配置的对象。</li>
+</ul>
+<p><strong>另外，多个synchronized只有锁的是同一个对象，它们之间的代码才是同步的，这一点在使用synchronized的时候一定要注意。</strong></p>
+<hr>
+<h3 id="实现原理">实现原理</h3>
+<p>在上面说到synchronized它编译后，会在同步块的前后分别生成<code>mointorenter</code> 和 <code>mointerexit</code> 字节码指令，这两个指令隐式的调用了 <code>lock</code> 和 <code>unlock</code> 指令。</p>
+<ul>
+<li><code>lock</code>：锁定，<strong>作用于主内存的变量，它把主内存中的变量标识为一条线程独占状态。</strong></li>
+<li><code>unlock</code>：解锁，<strong>作用于主内存的变量，它把锁定的变量释放出来，释放出来的变量才可以被其它线程锁定。</strong></li>
+</ul>
+<p><strong>下面通过字节码来看一下Synchronized</strong> 的实现：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">synchronized</span> Test <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 同步代码块
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSth1</span><span style="color:#f92672">(){</span>
+       <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>synchronizedTest<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">){</span>
+           System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;HelloWorld&#34;</span><span style="color:#f92672">);</span>
+       <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">// 同步方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSth2</span><span style="color:#f92672">(){</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;HelloWorld&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>使用javap对class文件进行反编译后结果</strong>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSth1</span><span style="color:#f92672">();</span>
+    descriptor<span style="color:#f92672">:</span> <span style="color:#f92672">()</span>V
+    flags<span style="color:#f92672">:</span> ACC_PUBLIC
+    Code<span style="color:#f92672">:</span>
+      stack<span style="color:#f92672">=</span>2<span style="color:#f92672">,</span> locals<span style="color:#f92672">=</span>3<span style="color:#f92672">,</span> args_size<span style="color:#f92672">=</span>1
+         0<span style="color:#f92672">:</span> ldc           <span style="color:#960050;background-color:#1e0010">#</span>2                  <span style="color:#75715e">// class yichen/yao/SynchronizedTest
+</span><span style="color:#75715e"></span>         2<span style="color:#f92672">:</span> dup
+         3<span style="color:#f92672">:</span> astore_1
+         4<span style="color:#f92672">:</span> monitorenter
+         5<span style="color:#f92672">:</span> getstatic     <span style="color:#960050;background-color:#1e0010">#</span>3                  <span style="color:#75715e">// Field java/lang/System.out:Ljava/io/PrintStream;
+</span><span style="color:#75715e"></span>         8<span style="color:#f92672">:</span> ldc           <span style="color:#960050;background-color:#1e0010">#</span>4                  <span style="color:#75715e">// String HelloWorld
+</span><span style="color:#75715e"></span>        10<span style="color:#f92672">:</span> invokevirtual <span style="color:#960050;background-color:#1e0010">#</span>5                  <span style="color:#75715e">// Method java/io/PrintStream.println:(Ljava/lang/String;)V
+</span><span style="color:#75715e"></span>        13<span style="color:#f92672">:</span> aload_1
+        14<span style="color:#f92672">:</span> monitorexit
+        15<span style="color:#f92672">:</span> <span style="color:#66d9ef">goto</span>          23
+        18<span style="color:#f92672">:</span> astore_2
+        19<span style="color:#f92672">:</span> aload_1
+        20<span style="color:#f92672">:</span> monitorexit
+        21<span style="color:#f92672">:</span> aload_2
+        22<span style="color:#f92672">:</span> athrow
+        23<span style="color:#f92672">:</span> <span style="color:#66d9ef">return</span>
+      Exception table<span style="color:#f92672">:</span>
+         from    to  target type
+             5    15    18   any
+            18    21    18   any
+      LineNumberTable<span style="color:#f92672">:</span>
+        line 40<span style="color:#f92672">:</span> 0
+        line 41<span style="color:#f92672">:</span> 5
+        line 42<span style="color:#f92672">:</span> 13
+        line 43<span style="color:#f92672">:</span> 23
+      LocalVariableTable<span style="color:#f92672">:</span>
+        Start  Length  Slot  Name   Signature
+            0      24     0  <span style="color:#66d9ef">this</span>   Lyichen<span style="color:#f92672">/</span>yao<span style="color:#f92672">/</span>SynchronizedTest<span style="color:#f92672">;</span>
+      StackMapTable<span style="color:#f92672">:</span> number_of_entries <span style="color:#f92672">=</span> 2
+        frame_type <span style="color:#f92672">=</span> 255 <span style="color:#75715e">/* full_frame */</span>
+          offset_delta <span style="color:#f92672">=</span> 18
+          locals <span style="color:#f92672">=</span> <span style="color:#f92672">[</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">yichen</span><span style="color:#f92672">/</span>yao<span style="color:#f92672">/</span>SynchronizedTest<span style="color:#f92672">,</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">java</span><span style="color:#f92672">/</span>lang<span style="color:#f92672">/</span>Object <span style="color:#f92672">]</span>
+          stack <span style="color:#f92672">=</span> <span style="color:#f92672">[</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">java</span><span style="color:#f92672">/</span>lang<span style="color:#f92672">/</span>Throwable <span style="color:#f92672">]</span>
+        frame_type <span style="color:#f92672">=</span> 250 <span style="color:#75715e">/* chop */</span>
+          offset_delta <span style="color:#f92672">=</span> 4
+
+ <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSth2</span><span style="color:#f92672">();</span>
+    descriptor<span style="color:#f92672">:</span> <span style="color:#f92672">()</span>V
+    flags<span style="color:#f92672">:</span> ACC_PUBLIC<span style="color:#f92672">,</span> ACC_SYNCHRONIZED
+    Code<span style="color:#f92672">:</span>
+      stack<span style="color:#f92672">=</span>2<span style="color:#f92672">,</span> locals<span style="color:#f92672">=</span>1<span style="color:#f92672">,</span> args_size<span style="color:#f92672">=</span>1
+         0<span style="color:#f92672">:</span> getstatic     <span style="color:#960050;background-color:#1e0010">#</span>3                  <span style="color:#75715e">// Field java/lang/System.out:Ljava/io/PrintStream;
+</span><span style="color:#75715e"></span>         3<span style="color:#f92672">:</span> ldc           <span style="color:#960050;background-color:#1e0010">#</span>4                  <span style="color:#75715e">// String HelloWorld
+</span><span style="color:#75715e"></span>         5<span style="color:#f92672">:</span> invokevirtual <span style="color:#960050;background-color:#1e0010">#</span>5                  <span style="color:#75715e">// Method java/io/PrintStream.println:(Ljava/lang/String;)V
+</span><span style="color:#75715e"></span>         8<span style="color:#f92672">:</span> <span style="color:#66d9ef">return</span>
+      LineNumberTable<span style="color:#f92672">:</span>
+        line 47<span style="color:#f92672">:</span> 0
+        line 48<span style="color:#f92672">:</span> 8
+      LocalVariableTable<span style="color:#f92672">:</span>
+        Start  Length  Slot  Name   Signature
+            0       9     0  <span style="color:#66d9ef">this</span>   Lyichen<span style="color:#f92672">/</span>yao<span style="color:#f92672">/</span>SynchronizedTest<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>从反编译后的结果中可以看到</strong>：</p>
+<ul>
+<li>对于<code>doSth1同步代码块</code>。JVM采用monitorenter、monitorexit两个指令来实现同步。<code>(第4、14、20行)</code></li>
+<li>对于<code>doSth2 同步方法</code>，JVM采用ACC_synchronized标记符来实现同步<code>(flags: ACC_PUBLIC, ACC_SYNCHRONIZED)</code></li>
+</ul>
+<hr>
+<h4 id="同步代码块">同步代码块</h4>
+<p><strong>在执行monitorenter指令的时候，根据JVM 规范有以下要求：</strong></p>
+<p><img src="/img/blog/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/641.webp" alt=""></p>
+<ul>
+<li>把执行<code>monitorenter</code>指令理解为加锁，执行<code>monitorexit</code>理解为释放锁。</li>
+<li>每个对象维护着一个记录着被<strong>锁次数的计数器</strong>。</li>
+<li>未被锁定的对象的该计数器为<code>0</code>，当一个线程获得锁（执行monitorenter）后，该计数器自增变为<code>1</code>，当同一个线程再次获得该对象的锁的时候，计数器再次<code>自增</code>。当同一个线程释放锁（执行monitorexit指令）的时候，计数器再<code>自减</code>。（可重入的性质）</li>
+<li>当计数器为0的时候。锁将被释放，其他线程便可以获得锁。</li>
+</ul>
+<hr>
+<h4 id="同步方法">同步方法</h4>
+<p><strong>JVM采用ACC_synchronized标记符来实现同步。JVM规范介绍：</strong></p>
+<p><img src="/img/blog/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/642.webp" alt=""></p>
+<ul>
+<li>方法级的同步是<code>隐式</code>的。同步方法的常量池中会有一个<code>ACC_synchronized</code>标志。</li>
+<li>当某个线程要访问某个方法的时候，会检查是否有ACC_synchronized，如果有设置，则需要先获得监视器锁（monitor），然后开始执行方法，方法执行之后再释放监视器锁。这时如果其他线程来请求执行方法，会因为无法获得监视器锁而被阻断住。</li>
+<li>如果在方法执行过程中，发生了异常，并且方法内部并没有处理该异常，<strong>那么在异常被抛到方法外面之前监视器锁会被自动释</strong>放。对比 <code>doSth1同步代码块</code>，它在<code>第20行</code>，异常处理那也有一个<code>monitorexit</code>指令。用于在发生错误的时候可以退出同步块</li>
+</ul>
+<hr>
+<h3 id="保证原子性可见性有序性">保证原子性、可见性、有序性</h3>
+<p>Java 的内存模型主要就是用来解决<code>缓存一致性</code>的问题的，而缓存一致性主要包括<strong>原子性、可见性、有序性</strong>。</p>
+<p>synchronized关键字底层是通过monitorenter和monitorexit实现的，而这两个指令又是通过lock和unlock来实现的。</p>
+<p><strong>而lock和unlock在Java内存模型中是必须满足下面四条规则的</strong>：</p>
+<ul>
+<li><code>规则一</code>：一个变量同一时刻只允许一个线程对其进行lock操作，但lock操作可以被同一个线程执行多次，多次执行后，只有执行相同次数的unlock操作，变量才能被解锁。</li>
+<li><code>规则二</code>：如果一个变量没有执行lock操作，将会情况工作内存中此变量的值，在执行引擎使用这个变量前，需要重新load 和 assign 操作初始化变量的值</li>
+<li><code>规则三</code>：如果一个变量没有被lock锁定，则不允许使用unlock操作，也不允许unlock一个其他线程锁定的变量</li>
+<li><code>规则四</code>：对一个变量执行unlock操作之前，必须先把此变量同步回主内存中，即执行store 和write操作。</li>
+</ul>
+<p><strong>原子性：</strong> 通过<code>规则一</code>，我们知道对于lock和unlock之间的代码，<strong>同一时刻只允许一个线程操作</strong>。所以保证了原子性。</p>
+<p><strong>可见性：</strong> 通过<code>规则一、二、四</code>，可以得出，每次lock和unlock时，都会从内存加载变量或把变量刷新回内存，而lock和unlock之间的变量是不会被其他线程修改的(<code>规则一：同一时刻只允许一个线程</code>)。所以保证了可见性</p>
+<p><strong>有序性：</strong> 通过<code>规则一、三</code>，我们知道所有对变量的加锁都要排队进行，且其它线程不允许解锁当前线程锁定的对象，所以，synchronized是具有有序性的。</p>
+<hr>
+<h3 id="锁优化">锁优化</h3>
+<p>synchronized监视器锁在<code>互斥</code>同步上对性能的影响很大。</p>
+<p>Java的线程是映射到操作系统原生线程之上的，如果要阻塞或唤醒一个线程就需要操作系统的帮忙，这就要从<code>用户态转换到内核态</code>，状态转换需要花费很多的处理器时间。</p>
+<p>所以频繁的通过Synchronized实现同步会严重影响到程序效率，这种锁机制也被称为<code>重量级锁</code>，为了减少重量级锁带来的性能开销，JDK对Synchronized进行了种种优化。</p>
+<hr>
+<h4 id="自旋锁和适应自旋锁">自旋锁和适应自旋锁</h4>
+<p><strong>1）自旋锁</strong></p>
+<ul>
+<li>当锁被占用时，当前想要获取锁的线程不会被立即挂起，而是做几个空循环，看持有锁的线程是否会很快释放锁。</li>
+<li>在经过若干次循环后，如果得到锁，就顺利进入临界区；如果还不能获得锁，那就会将线程在操作系统层面挂起。</li>
+</ul>
+<p><strong>2）自旋锁和阻塞最大的区别</strong></p>
+<ul>
+<li>主要区别：是不是放弃处理器的执行时间。</li>
+<li>阻塞放弃了CPU时间，进入了等待区，等待被唤醒。响应慢。自旋锁一直占用CPU时间，时刻检查共享资源是否可以被访问，所以响应速度更快。</li>
+</ul>
+<p><strong>3）缺点</strong></p>
+<ul>
+<li>如果持有锁的线程很快就释放了锁，那么自旋的效率就非常好。但是如果持有锁的线程占用锁时间较长，等待锁的线程自旋一定次数后还是拿不到锁而被阻塞，那么自旋就白白浪费了CPU的资源。</li>
+<li>所以自旋的次数直接决定了自旋锁的性能。<strong>JDK自旋的默认次数为10次，可以通过参数-XX:PreBlockSpin来调整。</strong></li>
+</ul>
+<p><strong>4）自适应自旋锁</strong></p>
+<ul>
+<li>所谓自适应就意味着自旋的次数不再是固定的，它是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。线程如果自旋成功了，那么下次自旋的次数会更加多，因为虚拟机认为既然上次成功了，那么此次自旋也很有可能会再次成功，那么它就会允许自旋等待持续的次数更多。</li>
+<li>如果对于某个锁，很少有自旋能够成功的，那么在以后要或者这个锁的时候自旋的次数会减少甚至省略掉自旋过程，以免浪费处理器资源。</li>
+</ul>
+<hr>
+<h4 id="锁消除">锁消除</h4>
+<p>如果JVM检测到某段代码不可能存在<code>共享数据竞争</code>，JVM会对这段代码的同步锁进行<code>锁消除</code>。</p>
+<p>在动态编译同步块的时候，JIT编译器可以借助一种被称为<code>逃逸分析（Escape Analysis）</code>的技术来判断同步块所使用的锁对象是否只能够被一个线程访问而没有被发布到<code>其他线程</code>。
+如果同步块所使用的锁对象通过这种分析被证实只能够被一个线程访问，那么JIT编译器在编译这个同步块的时候就会<strong>取消对这部分代码的同步</strong>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">vectorTest</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    Vector<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> vector <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Vector<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;();</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+        vector<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>i <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>vector<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">// Vector.add方法
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>E e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        modCount<span style="color:#f92672">++;</span>
+        ensureCapacityHelper<span style="color:#f92672">(</span>elementCount <span style="color:#f92672">+</span> 1<span style="color:#f92672">);</span>
+        elementData<span style="color:#f92672">[</span>elementCount<span style="color:#f92672">++]</span> <span style="color:#f92672">=</span> e<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>在运行这段代码时，JVM可以明显检测到变量vector没有逃逸出方法vectorTest()之外，<strong>所以JVM可以大胆地将vector内部的加锁操作消除。</strong></p>
+<hr>
+<h4 id="锁粗化">锁粗化</h4>
+<p>锁粗化就是将多个<code>连续</code>的加锁、<code>解锁</code>操作<code>连接在</code>一起，扩展成一个范围更大的锁。
+这样做的原因是<strong>如果在一段代码中连续的用同一个监视器锁反复的加锁解锁，甚至加锁操作出现在循环体中的时候，就会导致不必要的性能损耗，这种情况就需要锁粗化。</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">for</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span>0<span style="color:#f92672">;</span>i<span style="color:#f92672">&lt;</span>100000<span style="color:#f92672">;</span>i<span style="color:#f92672">++){</span>
+    <span style="color:#66d9ef">synchronized</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">){</span>
+        <span style="color:#66d9ef">do</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>如上面那串代码，会被粗化成：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">synchronized</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">){</span>
+    <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span>0<span style="color:#f92672">;</span>i<span style="color:#f92672">&lt;</span>100000<span style="color:#f92672">;</span>i<span style="color:#f92672">++){</span>
+        <span style="color:#66d9ef">do</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><hr>
+<h4 id="java对象头">Java对象头</h4>
+<p>对象在内存中存储的布局可以分为三块区域：<code>对象头（Header）</code>、<code>实例数据（Instance Data）</code>和<code>对齐填充（Padding）</code>。</p>
+<p><img src="/img/blog/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/643.png" alt=""></p>
+<p>普通对象的对象头包括两部分：<code>Mark Word</code>和<code>Class Metadata Address （类型指针）</code>，如果是数组对象还包括一个额外的<code>Array length</code>数组长度部分。
+<img src="/img/blog/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_cf7d5ddb-575b-4ef5-b4a9-497ee73083c2.png" alt=""></p>
+<ul>
+<li>
+<p><code>Mark Word</code>：用于存储对象自身的运行时数据，如<strong>哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等，占用内存大小与虚拟机位长一致</strong>。</p>
+</li>
+<li>
+<p><code>Class Metadata Address</code>：类型指针指向对象的类元数据，虚拟机通过这个指针确定该对象是哪个类的实例。</p>
+</li>
+</ul>
+<p><strong>Mark Word</strong></p>
+<p>对象头信息是与对象自身定义的数据无关的额外存储成本，考虑到虚拟机的空间效率，Mark Word被设计成一个非固定的数据结构以便在极小的空间内存储尽量多的信息，它会根据对象的状态复用自己的存储空间。</p>
+<p><strong>对mark word的设计方式上，非常像网络协议报文头：将mark word划分为多个比特位区间，并在不同的对象状态下赋予比特位不同的含义。</strong></p>
+<p>下图描述了在32位虚拟机上，在对象不同状态时mark word各个比特位区间的含义。
+<img src="/img/blog/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/644.png" alt=""></p>
+<hr>
+<h4 id="偏向锁轻量级锁重量级锁">偏向锁、轻量级锁、重量级锁</h4>
+<p>从Java对象头的<code>Mark word</code>中可以看到，synchronized锁一共具有四种状态：<strong>无锁、偏向锁、轻量级锁、重量级锁。</strong></p>
+<p>偏向锁、轻量级锁、重量级锁三种形式，分别对应了锁只被<code>一个线程持有</code>、<code>不同线程交替持有锁</code>、<code>多线程竞争锁</code>三种情况。</p>
+<p><strong>偏向锁</strong></p>
+<ul>
+<li>目的：大多数情况下锁不仅不存在多线程竞争，而且总是由同一个线程多次获取，所以引入偏向锁让线程获得锁的代价更低。</li>
+<li>偏向锁认为环境中不存在竞争情况，锁只被一个线程持有，一旦有不同的线程获取或竞争锁对象，偏向锁就升级为轻量级锁。</li>
+<li>偏向锁在无多线程竞争的情况下可以减少不必须要的轻量级锁执行路径。</li>
+<li>偏向锁在Java 6和Java 7里是默认启用的，但是它在应用程序启动几秒钟之后才激活，如有必要可以使用JVM参数来关闭延迟：<code>-XX:BiasedLockingStartupDelay=0</code>。如果你确定应用程序里所有的锁通常情况下处于<code>竞争状态</code>，可以通过JVM参数关闭偏向锁：<code>-XX:- UseBiasedLocking=false</code>，那么程序默认会进入<code>轻量级锁</code>状态。</li>
+</ul>
+<p><strong>轻量级锁</strong></p>
+<ul>
+<li>目的：在大多数情况下同步块并不会出现竞争情况，大部分情况是不同线程交替持有锁，所以引入轻量级锁可以减少重量级锁对线程的阻塞带来的开销。</li>
+<li>轻量级锁认为环境中线程几乎没有对锁对象的竞争，即使有竞争也只需要稍微等待（<code>自旋</code>）下就可以获取锁，但是自旋次数有限制，如果超过该次数，则会升级为重量级锁。</li>
+</ul>
+<p><strong>重量级锁</strong></p>
+<ul>
+<li>监视器锁Monitor</li>
+</ul>
+<hr>
+<h4 id="锁的膨胀过程">锁的膨胀过程</h4>
+<p>synchronized锁膨胀过程就是<strong>无锁 → 偏向锁 → 轻量级锁 → 重量级锁的一个过程</strong>。这个过程是随着多线程对锁的<code>竞争越来越激烈，锁逐渐升级膨胀</code>的过程。
+<img src="/img/blog/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/201812081005.png" alt=""></p>
+<p><strong>上图展示了synchronized 从无锁膨胀到重量级锁的一个过程：</strong></p>
+<ul>
+<li>
+<p><strong>1)</strong>  一个锁对象刚刚创建的时候，没有任何线程来访问它，此时线程状态为无锁状态。<code>Mark word 锁标记位-01 是否是偏向锁-0</code></p>
+</li>
+<li>
+<p><strong>2)</strong>  当<code>线程1</code>来访问这个对象锁时，它会偏向这个线程1。线程1检查<strong>Mark word（锁标志位-01 是否偏向-0）为无锁状态</strong>。此时，有线程访问锁了，<code>无锁升级为偏向锁</code>，<strong>Mark word（锁标志位-01，是否偏向-1，线程ID-线程1的ID）</strong></p>
+</li>
+<li>
+<p><strong>3)</strong>  当线程1 执行完同步块时，<strong>持有偏向锁的线程不会<code>主动</code>释放偏向锁而是等待其他线程来竞争才会释放锁</strong>。Mark word 不变(锁标志位-01，是否偏向-1，线程ID-线程1的ID)</p>
+</li>
+<li>
+<p><strong>4)</strong>  当线程1再次获取这个<code>对象锁</code>时，检查Mark word（锁标志位-01，是否偏向-1，线程ID-线程1的ID），偏向锁且偏向线程1，可以<code>直接</code>执行同步代码。<strong>这样偏向锁保证了总是同一个线程多次获取锁的情况下，每次只需要检查标志位就行，效率很高。</strong></p>
+</li>
+<li>
+<p><strong>5)</strong>  当线程1执行完同步块之后，<code>线程2</code>获取这个对象锁 检查Mark word（锁标志位-01，是否偏向-1，线程ID-线程1的ID），偏向锁且偏向线程1。<strong>有不同的线程获取锁对象，偏向锁升级为轻量级锁，并由线程2获取该锁。</strong></p>
+</li>
+<li>
+<p><strong>6)</strong>  当线程1<code>正在执行</code>同步块时，也就是正持有偏向锁时，线程2获取来这个对象锁。<strong>检查Mark word（锁标志位-01，是否偏向-1，线程ID-线程1的ID），偏向锁且偏向线程1。</strong></p>
+<ul>
+<li>
+<p>线程1<code>撤销</code>偏向锁 :</p>
+<ol>
+<li>等到全局安全点执行撤销偏向锁，<strong>暂停持有偏向锁的线程1并检查程1的状态；</strong></li>
+<li>如果线程1<strong>不处于活动状态或者已经退出同步代码块</strong>，则将对象锁设置为无锁状态，然后再升级为轻量级锁。由线程2获取轻量级锁。</li>
+<li>如果线程1<strong>还在执行同步代码块</strong>，也就是线程1还需要这个对象锁，则偏向锁膨胀为轻量级锁。</li>
+</ol>
+</li>
+<li>
+<p>线程1<code>膨胀</code>为轻量级锁过程：</p>
+<ol>
+<li>在升级为轻量级锁之前，持有偏向锁的线程（线程1）是<code>暂停</code>的</li>
+<li>线程1栈帧中创建一个名为锁记录的空间（Lock Record）</li>
+<li>锁对象头中的Mark Word拷贝到线程1的锁记录中</li>
+<li>Mark Word的锁标志位变为00，指向锁记录的指针指向<code>线程1</code>的锁记录地址，Mark word（锁标志位-00，其他位-线程1锁记录的指针）</li>
+<li>当原持有偏向锁的线程（线程1）获取轻量级锁后，JVM唤醒线程1，线程1执行同步代码块</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>7)</strong>  线程1持有轻量级锁，线程1执行完同步块代码之后，<code>一直没有线程来竞争对象锁</code>，正常<code>释放</code>轻量级锁。释放轻量级锁操作：<strong>CAS操作将线程1的锁记录（Lock Record）中的Mark Word替换回锁对象头中。</strong></p>
+</li>
+<li>
+<p><strong>8)</strong>  线程1持有轻量级锁，执行同步块代码过程中，<code>线程2来竞争对象锁</code>。 <strong>Mark word（锁标志位-00，其他位-线程1锁记录的指针）</strong></p>
+<ol>
+<li>线程2会先在栈帧中建立<code>锁记录</code>，存储锁对象目前的Mark Word的<code>拷贝</code></li>
+<li>线程2通过CAS操作尝试将锁对象的Mark Word的指针指向线程2的<code>Lock Record</code>，<strong>如果成功，说明线程1刚刚释放锁，线程2竞争到锁，则执行同步代码块。</strong></li>
+<li>因为线程1一直持有锁，大部分情况下CAS是会失败的。CAS失败之后，线程2尝试使用<strong>自旋的方式来等待持有轻量级锁的线程释放锁。</strong></li>
+<li>线程2不会一直自旋下去，如果自旋了<code>一定次数</code>后还是失败，线程2会被阻塞，等待释放锁后唤醒。此时轻量级锁就会膨胀为<code>重量级锁</code>。Mark word（锁标志位-10，其他位-重量级锁monitor的指针）</li>
+<li>线程1执行完同步块代码之后，执行释放锁操作，<strong>CAS 操作将线程1的锁记录（Lock Record）中的Mark Word 替换回锁对象对象头中，因为对象头中已经不是原来的轻量级锁的指针了，而是重量级锁的指针，所以CAS操作会失败。</strong></li>
+<li>释放轻量级锁CAS操作替换失败之后，需要在释放锁的同时需要唤醒被挂起的线程2。线程2被唤醒，获取重量级锁monitor</li>
+</ol>
+</li>
+</ul>
+<hr>
+<p>锁膨胀的执行图：</p>
+<p><img src="/img/blog/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/2bcc8161c52eb100d2c7c4c96c70d3c5823.jpg" alt=""></p>
+<hr>
+<h3 id="公平锁-vs-非公平锁">公平锁 VS 非公平锁</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">fair</span><span style="color:#f92672">(</span>String n<span style="color:#f92672">)</span>  <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>SynchronizedTest<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">){</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>n<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>1000<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(()-&gt;</span>fair<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;线程1&#34;</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(()-&gt;</span>fair<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;线程2&#34;</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(()-&gt;</span>fair<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;线程3&#34;</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(()-&gt;</span>fair<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;线程4&#34;</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#75715e">//打印结果
+</span><span style="color:#75715e"></span>线程1
+线程4
+线程3
+线程2
+</code></pre></div><p><strong>由上面代码可以知道，只要有线程先获得锁，那就执行，所以synchronized是一个非公平锁</strong></p>
+<hr>
+<h3 id="总结">总结</h3>
+<ul>
+<li>
+<p><strong>synchronized的实现原理：每一个Java对象都会关联一个Monitor，通过Monitor对线程的操作实现synchronized对象锁。</strong></p>
+</li>
+<li>
+<p><strong>monitorenter和monitorexit字节码指令更底层是使用Java内存模型的lock和unlock指令</strong></p>
+</li>
+<li>
+<p><strong>synchronized可以保证原子性、可见性、有序性。</strong></p>
+</li>
+<li>
+<p><strong>synchronized 是可重入锁、非公平锁</strong></p>
+</li>
+<li>
+<p><strong>自旋锁：当锁被占用时，当前想要获取锁的线程不会被立即挂起，而是做几个空循环，看持有锁的线程是否会很快释放锁。如果此时锁释放，当前线程就可以获得锁。<code>(CAS)</code>JDK自旋的默认次数为10次，可以通过参数-XX:PreBlockSpin来调整。</strong></p>
+</li>
+<li>
+<p><strong>自适应自旋锁：对比自旋锁，自旋次数不固定，JVM 由前一次在同一锁上的自旋时间及是否成功来判断，如果上次成功了，那么会增加自旋次数，如果失败，那么自旋次数减少甚至忽略自旋</strong></p>
+</li>
+<li>
+<p><strong>锁消除：如果JVM检测到某段代码不可能存在共享数据竞争，会对这段代码的同步锁进行锁消除。</strong></p>
+</li>
+<li>
+<p><strong>锁粗化：将多个连续的加锁、解锁操作连接在一起，扩展成一个范围更大的锁。</strong></p>
+</li>
+<li>
+<p><strong>synchronized有三种状态：偏向锁、轻量级锁、重量级锁，分别对应了锁只被一个线程持有、不同线程交替持有锁、多线程竞争锁三种情况。</strong></p>
+</li>
+<li>
+<p><strong>synchronized锁膨胀过程就是无锁 → 偏向锁 → 轻量级锁 → 重量级锁的一个过程。这个过程是随着多线程对锁的竞争越来越激烈，锁逐渐升级膨胀的过程。</strong></p>
+</li>
+</ul>
+<hr>
+<h3 id="参考">参考</h3>
+<p>《Java 并发编程实战》</p>
+<p>《Java 并发编程的艺术》</p>
+<p><a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html">The Java® Virtual Machine Specification -&gt; Threads and Locks</a></p>
+<p><a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html#jvms-6.5.monitorenter">1. The Java® Virtual Machine Specification</a></p>
+<p><a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html#jvms-2.11.10">2. The Java® Virtual Machine Specification</a></p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzAxMjEwMzQ5MA==&amp;mid=2448888833&amp;idx=2&amp;sn=1874f88dd96ee2102148f372ca5a544a&amp;scene=21#wechat_redirect">synchronized原理</a></p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzAxMjEwMzQ5MA==&amp;mid=2448888881&amp;idx=1&amp;sn=75a4b57b369ff3c79ac372a6ba891101&amp;scene=21#wechat_redirect">synchronized锁优化</a></p>
+<p><a href="http://cmsblogs.com/?p=5812">synchronized 的锁膨胀过程</a></p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=Mzg2ODA0ODM0Nw==&amp;mid=2247483919&amp;idx=1&amp;sn=e46cdc70c1f6bb08761a7dc2b4b5b2db&amp;scene=21#wechat_redirect">死磕 java同步系列之synchronized解析</a></p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/volatile-%E8%A7%A3%E6%9E%90/" data-toggle="tooltip" data-placement="top" title="volatile 解析">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/http-%E6%8B%BE%E9%81%97tcp%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B/" data-toggle="tooltip" data-placement="top" title="HTTP 拾遗——TCP建立连接为什么需要三次握手">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/volatile-%E8%A7%A3%E6%9E%90/"><i class="fa fa-link"></i>volatile 解析</a></li>
+         
+        <li><a href="/blog/hashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>HashMap 源码分析</a></li>
+         
+        <li><a href="/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/"><i class="fa fa-link"></i>深入理解 String</a></li>
+         
+        <li><a href="/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/"><i class="fa fa-link"></i>Java内存模型详解</a></li>
+         
+        <li><a href="/blog/linkedhashmap-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>LinkedHashMap 源码分析</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

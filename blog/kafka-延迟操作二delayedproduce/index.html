@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kafka 延迟操作（二）DelayedProduce · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Kafka">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Kafka 延迟操作（二）DelayedProduce" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%BA%8Cdelayedproduce//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="Kafka Producer ack 设置为 all，需要所有的ISR 都接收到这条消息后才会返回。这里就用到了延迟操作。">
+  <meta property="og:description" content="Kafka Producer ack 设置为 all，需要所有的ISR 都接收到这条消息后才会返回。这里就用到了延迟操作。">
+  <meta name="twitter:description" content="Kafka Producer ack 设置为 all，需要所有的ISR 都接收到这条消息后才会返回。这里就用到了延迟操作。">
+  <meta property="og:description" content="Kafka Producer ack 设置为 all，需要所有的ISR 都接收到这条消息后才会返回。这里就用到了延迟操作。" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 延迟操作（二）DelayedProduce logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 延迟操作（二）DelayedProduce logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 延迟操作（二）DelayedProduce - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 延迟操作（二）DelayedProduce logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 延迟操作（二）DelayedProduce logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 延迟操作（二）DelayedProduce - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 延迟操作（二）DelayedProduce logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 延迟操作（二）DelayedProduce logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 延迟操作（二）DelayedProduce - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Kafka 延迟操作（二）DelayedProduce</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年5月7日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            2100字 | 阅读大约需要5分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/kafka/"><i>#kafka</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="概述">概述</h3>
+<p>Kafka Producer 的<code>ack</code> 设置为 <code>all</code>，需要所有的 <code>ISR</code> 都接收到这条消息后才会返回。这里就用到了延迟操作。</p>
+<p><strong>具体流程图如下</strong>：</p>
+<p><img src="http://img.sirann.cn//siran/20200507215825.png" alt=""></p>
+<ul>
+<li>① 生产者发送 <code>ProducerRequest</code> 向某些指定分区追加消息。</li>
+<li>② <code>ProducerRequest</code> 经过网络层和 Api 层(<code>KafkaApis</code>)的处理达到 <code>ReplicaManager</code>，它会将消息交给日志存储系统进行追加 <code>Log</code>，同时还会检查 <code>delayedFetchPurgatory</code> 中相关 key 对应的 <code>DelayedFetch</code>，满足条件则将其执行完成。</li>
+<li>③ 日志存储子系统返回追加消息的结果。</li>
+<li>④ <code>ReplicaManager</code> 为 <code>ProducerRequest</code> 创建 <code>DelayedProduce</code> 对象，并交由 <code>delayedProducePurgatory</code> 管理。</li>
+<li>⑤ <code>delayedProducePurgatory</code> 使用 <code>SystemTimer</code> 管理 <code>DelayedProduce</code> 是否超时。</li>
+<li>⑥ <code>ISR</code> 集合中的 <code>Follower</code> 副本发送 <code>FetchRequest</code> 请求与 <code>Leader</code> 副本同步消息。同时，也会检查 <code>DelayedProduce</code> 是否符合执行条件。</li>
+<li>⑦ <code>DelayedProduce</code> 执行时会调用回调函数产生 <code>ProducerResponse</code>，并将其添加到 <code>RequestChannels</code> 中。</li>
+<li>⑧ 由网络层将 <code>ProducerResponse</code> 返回给客户端。</li>
+</ul>
+<hr>
+<h3 id="delayedproduce-源码分析">DelayedProduce 源码分析</h3>
+<h4 id="replicamanagerappendrecords-方法">ReplicaManager.appendRecords 方法</h4>
+<p>对应上面的第 <code>②</code> 步，<code>Replica</code> 也是 <code>Kafka</code> 中非常重要的一部分，后面会进行分析，这里主要关注 <code>DelayedProduce</code>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">def <span style="color:#a6e22e">appendRecords</span><span style="color:#f92672">(</span>timeout<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                    requiredAcks<span style="color:#f92672">:</span> Short<span style="color:#f92672">,</span>
+                    internalTopicsAllowed<span style="color:#f92672">:</span> Boolean<span style="color:#f92672">,</span>
+                    origin<span style="color:#f92672">:</span> AppendOrigin<span style="color:#f92672">,</span>
+                    entriesPerPartition<span style="color:#f92672">:</span> Map<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> MemoryRecords<span style="color:#f92672">],</span><span style="color:#75715e">//需要添加的条目，key是key-partition，value 是memoryRecords
+</span><span style="color:#75715e"></span>                    responseCallback<span style="color:#f92672">:</span> Map<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> PartitionResponse<span style="color:#f92672">]</span> <span style="color:#f92672">=&gt;</span> Unit<span style="color:#f92672">,</span>
+                    delayedProduceLock<span style="color:#f92672">:</span> Option<span style="color:#f92672">[</span>Lock<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> None<span style="color:#f92672">,</span>
+                    recordConversionStatsCallback<span style="color:#f92672">:</span> Map<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> RecordConversionStats<span style="color:#f92672">]</span> <span style="color:#f92672">=&gt;</span> Unit <span style="color:#f92672">=</span> _ <span style="color:#f92672">=&gt;</span> <span style="color:#f92672">()):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isValidRequiredAcks<span style="color:#f92672">(</span>requiredAcks<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+      val sTime <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span>
+      <span style="color:#75715e">//重点方法：添加到本地log中
+</span><span style="color:#75715e"></span>      val localProduceResults <span style="color:#f92672">=</span> appendToLocalLog<span style="color:#f92672">(</span>internalTopicsAllowed <span style="color:#f92672">=</span> internalTopicsAllowed<span style="color:#f92672">,</span>
+        origin<span style="color:#f92672">,</span> entriesPerPartition<span style="color:#f92672">,</span> requiredAcks<span style="color:#f92672">)</span>
+      debug<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Produce to local log in %d ms&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span> <span style="color:#f92672">-</span> sTime<span style="color:#f92672">))</span>
+
+      val produceStatus <span style="color:#f92672">=</span> localProduceResults<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> result<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+        topicPartition <span style="color:#f92672">-&gt;</span>
+                ProducePartitionStatus<span style="color:#f92672">(</span>
+                  result<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lastOffset</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">,</span> <span style="color:#75715e">// required offset
+</span><span style="color:#75715e"></span>                  <span style="color:#66d9ef">new</span> PartitionResponse<span style="color:#f92672">(</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">,</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">.</span><span style="color:#a6e22e">firstOffset</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getOrElse</span><span style="color:#f92672">(-</span>1<span style="color:#f92672">),</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">.</span><span style="color:#a6e22e">logAppendTime</span><span style="color:#f92672">,</span>
+                    result<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">.</span><span style="color:#a6e22e">logStartOffset</span><span style="color:#f92672">,</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">.</span><span style="color:#a6e22e">recordErrors</span><span style="color:#f92672">.</span><span style="color:#a6e22e">asJava</span><span style="color:#f92672">,</span> result<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">.</span><span style="color:#a6e22e">errorMessage</span><span style="color:#f92672">))</span> <span style="color:#75715e">// response status
+</span><span style="color:#75715e"></span>      <span style="color:#f92672">}</span>
+
+      recordConversionStatsCallback<span style="color:#f92672">(</span>localProduceResults<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>k<span style="color:#f92672">,</span> v<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> k <span style="color:#f92672">-&gt;</span> v<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">.</span><span style="color:#a6e22e">recordConversionStats</span> <span style="color:#f92672">})</span>
+
+      <span style="color:#75715e">//ack 设置的如果是 -1 0 那么放入延迟队列。
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>delayedProduceRequestRequired<span style="color:#f92672">(</span>requiredAcks<span style="color:#f92672">,</span> entriesPerPartition<span style="color:#f92672">,</span> localProduceResults<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// create delayed produce operation
+</span><span style="color:#75715e"></span>        val produceMetadata <span style="color:#f92672">=</span> ProduceMetadata<span style="color:#f92672">(</span>requiredAcks<span style="color:#f92672">,</span> produceStatus<span style="color:#f92672">)</span>
+        <span style="color:#75715e">//① 封装成 delayProduce
+</span><span style="color:#75715e"></span>        val delayedProduce <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DelayedProduce<span style="color:#f92672">(</span>timeout<span style="color:#f92672">,</span> produceMetadata<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> responseCallback<span style="color:#f92672">,</span> delayedProduceLock<span style="color:#f92672">)</span>
+
+        <span style="color:#75715e">// create a list of (topic, partition) pairs to use as keys for this delayed produce operation
+</span><span style="color:#75715e"></span>        val producerRequestKeys <span style="color:#f92672">=</span> entriesPerPartition<span style="color:#f92672">.</span><span style="color:#a6e22e">keys</span><span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>TopicPartitionOperationKey<span style="color:#f92672">(</span>_<span style="color:#f92672">)).</span><span style="color:#a6e22e">toSeq</span>
+
+        <span style="color:#75715e">// try to complete the request immediately, otherwise put it into the purgatory
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// this is because while the delayed produce operation is being created, new
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// requests may arrive and hence make this operation completable.
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//② 尝试完成 DelayedProduce，否则将 DelayedProduce 添加到 delayedProducePurgatory 进行管理
+</span><span style="color:#75715e"></span>        delayedProducePurgatory<span style="color:#f92672">.</span><span style="color:#a6e22e">tryCompleteElseWatch</span><span style="color:#f92672">(</span>delayedProduce<span style="color:#f92672">,</span> producerRequestKeys<span style="color:#f92672">)</span>
+
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// we can respond immediately
+</span><span style="color:#75715e"></span>        val produceResponseStatus <span style="color:#f92672">=</span> produceStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>k<span style="color:#f92672">,</span> status<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> k <span style="color:#f92672">-&gt;</span> status<span style="color:#f92672">.</span><span style="color:#a6e22e">responseStatus</span> <span style="color:#f92672">}</span>
+        responseCallback<span style="color:#f92672">(</span>produceResponseStatus<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">// If required.acks is outside accepted range, something is wrong with the client
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// Just return an error and don&#39;t handle the request at all
+</span><span style="color:#75715e"></span>      val responseStatus <span style="color:#f92672">=</span> entriesPerPartition<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> _<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+        topicPartition <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">new</span> PartitionResponse<span style="color:#f92672">(</span>Errors<span style="color:#f92672">.</span><span style="color:#a6e22e">INVALID_REQUIRED_ACKS</span><span style="color:#f92672">,</span>
+          LogAppendInfo<span style="color:#f92672">.</span><span style="color:#a6e22e">UnknownLogAppendInfo</span><span style="color:#f92672">.</span><span style="color:#a6e22e">firstOffset</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getOrElse</span><span style="color:#f92672">(-</span>1<span style="color:#f92672">),</span> RecordBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_TIMESTAMP</span><span style="color:#f92672">,</span> LogAppendInfo<span style="color:#f92672">.</span><span style="color:#a6e22e">UnknownLogAppendInfo</span><span style="color:#f92672">.</span><span style="color:#a6e22e">logStartOffset</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+      responseCallback<span style="color:#f92672">(</span>responseStatus<span style="color:#f92672">)</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 封装成 <code>delayProduce</code></li>
+<li>② 尝试完成 <code>DelayedProduce</code>，否则将 <code>DelayedProduce</code> 添加到 <code>delayedProducePurgatory</code> 进行管理</li>
+</ul>
+<p><strong>下面开始分析 DelayedProduce</strong></p>
+<hr>
+<h4 id="delayedproduce-属性">DelayedProduce 属性</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DelayedProduce</span><span style="color:#f92672">(</span>delayMs<span style="color:#f92672">:</span> Long<span style="color:#f92672">,</span>
+                     produceMetadata<span style="color:#f92672">:</span> ProduceMetadata<span style="color:#f92672">,</span>
+                     replicaManager<span style="color:#f92672">:</span> ReplicaManager<span style="color:#f92672">,</span>
+                     responseCallback<span style="color:#f92672">:</span> Map<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> PartitionResponse<span style="color:#f92672">]</span> <span style="color:#f92672">=&gt;</span> Unit<span style="color:#f92672">,</span>
+                     lockOpt<span style="color:#f92672">:</span> Option<span style="color:#f92672">[</span>Lock<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> None<span style="color:#f92672">)</span>
+  <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">DelayedOperation</span><span style="color:#f92672">(</span>delayMs<span style="color:#f92672">,</span> lockOpt<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  <span style="color:#f92672">}</span>      
+</code></pre></div><ul>
+<li><code>delayMs</code>：DelayedProduce 操作的延迟时长</li>
+<li><code>produceMetadata</code>：ProduceMetadata 对象，记录了所有相关分区追加消息后的返回结果，主要判断 DelayedProduce 操作是否满足返回要求</li>
+<li><code>replicaManager</code>：和 LogManager 一样 用来管理 replica</li>
+<li><code>responseCallback</code>：回调，任务满足条件或到期执行时，在 <code>onComplete</code> 方法中调用回调函数。</li>
+</ul>
+<hr>
+<h4 id="trycomplete-方法">tryComplete 方法</h4>
+<p>作为 DelayedOperation 的实现类，DelayedProduce 的 tryComplete 方法的实现：</p>
+<ol>
+<li>该分区出现了 Leader 副本的迁移，该分区的 Leader 副本不再位于此节点上，此时会更新对应 ProducePartitionStatus 中记录的错误码</li>
+<li>正常情况下,ISR 集合中所有副本都完成乐同步后，该分区的 Leader 副本的 HW 位置已经大于对应的 ProduceStatus.requiredOffset，此时会清空初始化中设置的超时错误码。</li>
+<li>如果出现异常，则更新分区对应的 ProducePartitionStatus 中记录的错误码</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">override def <span style="color:#a6e22e">tryComplete</span><span style="color:#f92672">():</span> Boolean <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// check for each partition if it still has pending acks
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// ① 遍历 produceMetadata 中的所有分区状态。
+</span><span style="color:#75715e"></span>    produceMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">produceStatus</span><span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> status<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+      trace<span style="color:#f92672">(</span>s<span style="color:#e6db74">&#34;Checking produce satisfaction for $topicPartition, current status $status&#34;</span><span style="color:#f92672">)</span>
+      <span style="color:#75715e">// skip those partitions that have already been satisfied
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// ② 检查此分区是否已经满足 DelayedProduce 执行条件
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>status<span style="color:#f92672">.</span><span style="color:#a6e22e">acksPending</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 获取 partition 对象
+</span><span style="color:#75715e"></span>        val <span style="color:#f92672">(</span>hasEnough<span style="color:#f92672">,</span> error<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> replicaManager<span style="color:#f92672">.</span><span style="color:#a6e22e">getPartitionOrError</span><span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> expectLeader <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> match <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">case</span> Left<span style="color:#f92672">(</span>err<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+            <span style="color:#75715e">// Case A
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">,</span> err<span style="color:#f92672">)</span>
+
+          <span style="color:#75715e">//③ 检查此分区的 HW 位置是否大于 requiredOffset。
+</span><span style="color:#75715e"></span>          <span style="color:#66d9ef">case</span> Right<span style="color:#f92672">(</span>partition<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+            partition<span style="color:#f92672">.</span><span style="color:#a6e22e">checkEnoughReplicasReachOffset</span><span style="color:#f92672">(</span>status<span style="color:#f92672">.</span><span style="color:#a6e22e">requiredOffset</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">// Case B.1 || B.2
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// 出现异常 
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>error <span style="color:#f92672">!=</span> Errors<span style="color:#f92672">.</span><span style="color:#a6e22e">NONE</span> <span style="color:#f92672">||</span> hasEnough<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          status<span style="color:#f92672">.</span><span style="color:#a6e22e">acksPending</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>
+          status<span style="color:#f92672">.</span><span style="color:#a6e22e">responseStatus</span><span style="color:#f92672">.</span><span style="color:#a6e22e">error</span> <span style="color:#f92672">=</span> error
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// check if every partition has satisfied at least one of case A or B
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//④ 检查全部的分区是否都已经符合 DelayedProduce 的执行条件
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>produceMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">produceStatus</span><span style="color:#f92672">.</span><span style="color:#a6e22e">values</span><span style="color:#f92672">.</span><span style="color:#a6e22e">exists</span><span style="color:#f92672">(</span>_<span style="color:#f92672">.</span><span style="color:#a6e22e">acksPending</span><span style="color:#f92672">))</span>
+      forceComplete<span style="color:#f92672">()</span>
+    <span style="color:#66d9ef">else</span>
+      <span style="color:#66d9ef">false</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 遍历 <code>produceMetadata</code> 中的所有分区状态。</li>
+<li>② 检查此分区是否已经满足 <code>DelayedProduce</code> 执行条件</li>
+<li>③ 检查此分区的 <code>HW</code> 位置是否大于 <code>requiredOffset。</code></li>
+<li>④ 检查全部的分区是否都已经符合 <code>DelayedProduce</code> 的执行条件</li>
+</ul>
+<hr>
+<h4 id="oncomplete-方法">onComplete 方法</h4>
+<p>完成方式</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> override def <span style="color:#a6e22e">onComplete</span><span style="color:#f92672">():</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 根据 ProduceMetadata 记录的相关信息，为每个 Partition 产生响应状态
+</span><span style="color:#75715e"></span>    val responseStatus <span style="color:#f92672">=</span> produceMetadata<span style="color:#f92672">.</span><span style="color:#a6e22e">produceStatus</span><span style="color:#f92672">.</span><span style="color:#a6e22e">map</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>k<span style="color:#f92672">,</span> status<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> k <span style="color:#f92672">-&gt;</span> status<span style="color:#f92672">.</span><span style="color:#a6e22e">responseStatus</span> <span style="color:#f92672">}</span>
+    <span style="color:#75715e">// 调用 responseCallback 回调函数
+</span><span style="color:#75715e"></span>    responseCallback<span style="color:#f92672">(</span>responseStatus<span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><p>这里调用的回调函数，在KafkaApis 类中。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//kafka.server.KafkaApis
+</span><span style="color:#75715e"></span>def <span style="color:#a6e22e">sendResponseCallback</span><span style="color:#f92672">(</span>responseStatus<span style="color:#f92672">:</span> Map<span style="color:#f92672">[</span>TopicPartition<span style="color:#f92672">,</span> PartitionResponse<span style="color:#f92672">]):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      <span style="color:#75715e">//生成响应状态集合，其中包括通过授权验证并处理完成的状态以及未通过授权验证的状态。
+</span><span style="color:#75715e"></span>      val mergedResponseStatus <span style="color:#f92672">=</span> responseStatus <span style="color:#f92672">++</span> unauthorizedTopicResponses <span style="color:#f92672">++</span> nonExistingTopicResponses <span style="color:#f92672">++</span> invalidRequestResponses
+      <span style="color:#75715e">//标识处理 producerRequest 的过程中出现的异常。
+</span><span style="color:#75715e"></span>      var errorInResponse <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>
+
+      mergedResponseStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> status<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>status<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span> <span style="color:#f92672">!=</span> Errors<span style="color:#f92672">.</span><span style="color:#a6e22e">NONE</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          errorInResponse <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>
+          <span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Produce request with correlation id %d from client %s on partition %s failed due to %s&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">format</span><span style="color:#f92672">(</span>
+            request<span style="color:#f92672">.</span><span style="color:#a6e22e">header</span><span style="color:#f92672">.</span><span style="color:#a6e22e">correlationId</span><span style="color:#f92672">,</span>
+            request<span style="color:#f92672">.</span><span style="color:#a6e22e">header</span><span style="color:#f92672">.</span><span style="color:#a6e22e">clientId</span><span style="color:#f92672">,</span>
+            topicPartition<span style="color:#f92672">,</span>
+            status<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">.</span><span style="color:#a6e22e">exceptionName</span><span style="color:#f92672">))</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+
+      <span style="color:#75715e">// When this callback is triggered, the remote API call has completed
+</span><span style="color:#75715e"></span>      request<span style="color:#f92672">.</span><span style="color:#a6e22e">apiRemoteCompleteTimeNanos</span> <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoseconds</span>
+
+      <span style="color:#75715e">// Record both bandwidth and request quota-specific values and throttle by muting the channel if any of the quotas
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// have been violated. If both quotas have been violated, use the max throttle time between the two quotas. Note
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// that the request quota is not enforced if acks == 0.
+</span><span style="color:#75715e"></span>      val bandwidthThrottleTimeMs <span style="color:#f92672">=</span> quotas<span style="color:#f92672">.</span><span style="color:#a6e22e">produce</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maybeRecordAndGetThrottleTimeMs</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> numBytesAppended<span style="color:#f92672">,</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span><span style="color:#f92672">)</span>
+      val requestThrottleTimeMs <span style="color:#f92672">=</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>produceRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">acks</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> 0 <span style="color:#66d9ef">else</span> quotas<span style="color:#f92672">.</span><span style="color:#a6e22e">request</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maybeRecordAndGetThrottleTimeMs</span><span style="color:#f92672">(</span>request<span style="color:#f92672">)</span>
+      val maxThrottleTimeMs <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span>bandwidthThrottleTimeMs<span style="color:#f92672">,</span> requestThrottleTimeMs<span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>maxThrottleTimeMs <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>bandwidthThrottleTimeMs <span style="color:#f92672">&gt;</span> requestThrottleTimeMs<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          quotas<span style="color:#f92672">.</span><span style="color:#a6e22e">produce</span><span style="color:#f92672">.</span><span style="color:#a6e22e">throttle</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> bandwidthThrottleTimeMs<span style="color:#f92672">,</span> sendResponse<span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+          quotas<span style="color:#f92672">.</span><span style="color:#a6e22e">request</span><span style="color:#f92672">.</span><span style="color:#a6e22e">throttle</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> requestThrottleTimeMs<span style="color:#f92672">,</span> sendResponse<span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span>
+
+      <span style="color:#75715e">// Send the response immediately. In case of throttling, the channel has already been muted.
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>produceRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">acks</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// no operation needed if producer request.required.acks = 0; however, if there is any error in handling
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// the request, since no response is expected by the producer, the server will close socket server so that
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// the producer client will know that some error has happened and will refresh its metadata
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>errorInResponse<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          val exceptionsSummary <span style="color:#f92672">=</span> mergedResponseStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>topicPartition<span style="color:#f92672">,</span> status<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+            topicPartition <span style="color:#f92672">-&gt;</span> status<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">.</span><span style="color:#a6e22e">exceptionName</span>
+          <span style="color:#f92672">}.</span><span style="color:#a6e22e">mkString</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;, &#34;</span><span style="color:#f92672">)</span>
+          info<span style="color:#f92672">(</span>
+            s<span style="color:#e6db74">&#34;Closing connection due to error during produce request with correlation id ${request.header.correlationId} &#34;</span> <span style="color:#f92672">+</span>
+              s<span style="color:#e6db74">&#34;from client id ${request.header.clientId} with ack=0\n&#34;</span> <span style="color:#f92672">+</span>
+              s<span style="color:#e6db74">&#34;Topic and partition to exceptions: $exceptionsSummary&#34;</span>
+          <span style="color:#f92672">)</span>
+          closeConnection<span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> ProduceResponse<span style="color:#f92672">(</span>mergedResponseStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">asJava</span><span style="color:#f92672">).</span><span style="color:#a6e22e">errorCounts</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+          <span style="color:#75715e">// Note that although request throttling is exempt for acks == 0, the channel may be throttled due to
+</span><span style="color:#75715e"></span>          <span style="color:#75715e">// bandwidth quota violation.
+</span><span style="color:#75715e"></span>          sendNoOpResponseExemptThrottle<span style="color:#f92672">(</span>request<span style="color:#f92672">)</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        sendResponse<span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> Some<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ProduceResponse<span style="color:#f92672">(</span>mergedResponseStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">asJava</span><span style="color:#f92672">,</span> maxThrottleTimeMs<span style="color:#f92672">)),</span> None<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    def <span style="color:#a6e22e">processingStatsCallback</span><span style="color:#f92672">(</span>processingStats<span style="color:#f92672">:</span> FetchResponseStats<span style="color:#f92672">):</span> Unit <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      processingStats<span style="color:#f92672">.</span><span style="color:#a6e22e">foreach</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span>tp<span style="color:#f92672">,</span> info<span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span>
+        updateRecordConversionStats<span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> tp<span style="color:#f92672">,</span> info<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>authorizedRequestInfo<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">)</span>
+      sendResponseCallback<span style="color:#f92672">(</span>Map<span style="color:#f92672">.</span><span style="color:#a6e22e">empty</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+      val internalTopicsAllowed <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">header</span><span style="color:#f92672">.</span><span style="color:#a6e22e">clientId</span> <span style="color:#f92672">==</span> AdminUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">AdminClientId</span>
+
+      <span style="color:#75715e">// call the replica manager to append messages to the replicas
+</span><span style="color:#75715e"></span>      replicaManager<span style="color:#f92672">.</span><span style="color:#a6e22e">appendRecords</span><span style="color:#f92672">(</span>
+        timeout <span style="color:#f92672">=</span> produceRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">timeout</span><span style="color:#f92672">.</span><span style="color:#a6e22e">toLong</span><span style="color:#f92672">,</span>
+        requiredAcks <span style="color:#f92672">=</span> produceRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">acks</span><span style="color:#f92672">,</span>
+        internalTopicsAllowed <span style="color:#f92672">=</span> internalTopicsAllowed<span style="color:#f92672">,</span>
+        origin <span style="color:#f92672">=</span> AppendOrigin<span style="color:#f92672">.</span><span style="color:#a6e22e">Client</span><span style="color:#f92672">,</span>
+        entriesPerPartition <span style="color:#f92672">=</span> authorizedRequestInfo<span style="color:#f92672">,</span>
+        responseCallback <span style="color:#f92672">=</span> sendResponseCallback<span style="color:#f92672">,</span>
+        recordConversionStatsCallback <span style="color:#f92672">=</span> processingStatsCallback<span style="color:#f92672">)</span>
+
+      <span style="color:#75715e">// if the request is put into the purgatory, it will have a held reference and hence cannot be garbage collected;
+</span><span style="color:#75715e"></span>      <span style="color:#75715e">// hence we clear its data here in order to let GC reclaim its memory since it is already appended to log
+</span><span style="color:#75715e"></span>      produceRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">clearPartitionRecords</span><span style="color:#f92672">()</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div>
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%B8%80delayedoperationpurgatory/" data-toggle="tooltip" data-placement="top" title="Kafka 延迟操作（一）DelayedOperationPurgatory">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/" data-toggle="tooltip" data-placement="top" title="Kafka 时间轮 Java 版本实现">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/kafka-%E5%BB%B6%E8%BF%9F%E6%93%8D%E4%BD%9C%E4%B8%80delayedoperationpurgatory/"><i class="fa fa-link"></i>Kafka 延迟操作（一）DelayedOperationPurgatory</a></li>
+         
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E5%9B%9Blogmanager/"><i class="fa fa-link"></i>Kafka 日志模块（四）LogManager</a></li>
+         
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%89%E7%B4%A2%E5%BC%95/"><i class="fa fa-link"></i>Kafka 日志模块（三）索引</a></li>
+         
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%BA%8Clogsegment/"><i class="fa fa-link"></i>Kafka 日志模块（二）LogSegment</a></li>
+         
+        <li><a href="/blog/kafka-%E6%97%A5%E5%BF%97%E6%A8%A1%E5%9D%97%E4%B8%80log/"><i class="fa fa-link"></i>Kafka 日志模块（一）Log</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

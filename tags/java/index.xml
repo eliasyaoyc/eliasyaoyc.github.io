@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java on 拳拳到肉</title>
+    <link>/tags/java/</link>
+    <description>Recent content in Java on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Thu, 09 Apr 2020 16:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/java/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java8—新特性汇总.md</title>
+      <link>/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/</link>
+      <pubDate>Thu, 09 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java8%E6%96%B0%E7%89%B9%E6%80%A7%E6%B1%87%E6%80%BB/</guid>
+      <description>书籍《Java实战》一些操作的汇总</description>
+    </item>
+    
+    <item>
+      <title>Java8—日期时间API</title>
+      <link>/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/</link>
+      <pubDate>Thu, 09 Apr 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java8%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4api/</guid>
+      <description>书籍《Java实战》一些操作的汇总</description>
+    </item>
+    
+    <item>
+      <title>深入理解 String</title>
+      <link>/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/</link>
+      <pubDate>Thu, 19 Mar 2020 09:37:42 +0800</pubDate>
+      
+      <guid>/blog/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-string/</guid>
+      <description>由于String 使用过于频繁，Java为了避免在一个系统中产生大量的String对象引入了字符串常量池</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kafka 生产者（二）RecordAccumulate · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="Kafka">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Kafka 生产者（二）RecordAccumulate" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%BA%8Crecordaccumulate//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="1.概述 在 Kafka 生产者（一）KafkaProducer 中分析了图中红色区域，也就是说每次调用 send 方法发送消息，都会经过Interceptors、 Serializer">
+  <meta property="og:description" content="1.概述 在 Kafka 生产者（一）KafkaProducer 中分析了图中红色区域，也就是说每次调用 send 方法发送消息，都会经过Interceptors、 Serializer">
+  <meta name="twitter:description" content="1.概述 在 Kafka 生产者（一）KafkaProducer 中分析了图中红色区域，也就是说每次调用 send 方法发送消息，都会经过Interceptors、 Serializer">
+  <meta property="og:description" content="1.概述 在 Kafka 生产者（一）KafkaProducer 中分析了图中红色区域，也就是说每次调用 send 方法发送消息，都会经过Interceptors、 Serializer" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（二）RecordAccumulate logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（二）RecordAccumulate logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 生产者（二）RecordAccumulate - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（二）RecordAccumulate logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（二）RecordAccumulate logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 生产者（二）RecordAccumulate - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（二）RecordAccumulate logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Kafka 生产者（二）RecordAccumulate logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Kafka 生产者（二）RecordAccumulate - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Kafka 生产者（二）RecordAccumulate</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月21日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            9300字 | 阅读大约需要19分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97">消息队列</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/kafka/"><i>#kafka</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="1概述">1.概述</h3>
+<p>在 <a href="http://www.sirann.cn/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%80kafkaproducer/">Kafka 生产者（一）KafkaProducer</a> 中分析了图中红色区域，也就是说每次调用 <code>send</code> 方法发送消息，都会经过<code>Interceptors</code>、 <code>Serializer</code> 、 <code>Partitionor</code> 。我们可以自定义拦截器、序列化器、分区器，实现我们自己的功能，比如消息路由、消息审计、消息轨迹等。</p>
+<p>如下图：
+<img src="http://img.sirann.cn//siran/WeChatf790fc6c2628d49b12ab7140e7a134aa.png" alt="">
+这次分析的重点是 <code>RecordAccumulator</code> ，消息缓存器。Kafka 通过把消息放入缓存器，形成一个一个 <code>ProducerBatch</code> 进行批量的发送消息，这样的话可以有效的减少IO的开销。</p>
+<hr>
+<h3 id="2源码分析">2.源码分析</h3>
+<h4 id="21-recordaccumulator">2.1 RecordAccumulator</h4>
+<p>在前面的 <code>1.1 Kafka Producer 整体流程图</code> 中阐述了主线程调用<code>KafkaProducer.send（ ）</code>方法并没有直接发送给Kafka Server，而是存入 <code>RecordAccumulator</code> 中，当达到一定条件之后，会唤醒 <code>Sender 线程</code>来获取消息并发送。</p>
+<p>那么在 <code>RecordAccumulator</code> 中必然是有一个 <code>main 线程</code>不断的往其加数据，还有一个<code>Sender 线程</code>不断的取数据，所以要保证 RecordAccumulator <code>线程安全</code>，可以看到使用了 <strong>原子类、并发集合、volatile 、锁来保证</strong>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RecordAccumulator</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//① 标记位，producer 是否 close，通过valatile 保证可见性
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">boolean</span> closed<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//② 当前调用flush 方法的线程。KafkaProducer 可以调用flush 方法立即发送消息，会立马唤醒Sender线程
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> AtomicInteger flushesInProgress<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//③ 当前正在往 RecordAccumulator 中添加数据的线程数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> AtomicInteger appendsInProgress<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//④ 指定每个Batch 的大小
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> batchSize<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑤ 压缩的类型
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> CompressionType compression<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑥ 默认0，可以通过 linger.ms 进行设置
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> lingerMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑦ 当发送消息失败时，重试的间隔时间，默认100，可以通过`retry.backoff.ms`配置
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> retryBackoffMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑧ 延迟时间，默认120秒，可以通过 `delivery.timeout.ms` 进行配置
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> deliveryTimeoutMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑨ ByteBuffer 对象池
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> BufferPool free<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Time time<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// version 号
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ApiVersions apiVersions<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑩ Topic-Partition 与 ProducerBatch 的映射关系 ,CopyOnWriteMap 线程安全
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ConcurrentMap<span style="color:#f92672">&lt;</span>TopicPartition<span style="color:#f92672">,</span> Deque<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;&gt;</span> batches<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑪ 未发送完成的ProducerBatch 集合
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> IncompleteBatches incomplete<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Map<span style="color:#f92672">&lt;</span>TopicPartition<span style="color:#f92672">,</span> Long<span style="color:#f92672">&gt;</span> muted<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑫ 在使用 drain 方法批量导出 RecordBatch 时，为了防止饥饿，用此字段记录上次发送停止的位置，下次继续从此位置开始发送
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> drainIndex<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> TransactionManager transactionManager<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> nextBatchExpiryTimeMs <span style="color:#f92672">=</span> Long<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">;</span> <span style="color:#75715e">// the earliest time (absolute) a batch will expire.  
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① <code>close</code> ：标记位，producer 是否 close，通过valatile 保证可见性</li>
+<li>② <code>flushesInProgress</code> ：当前调用flush 方法的线程。KafkaProducer 可以调用flush 方法立即发送消息，会立马唤醒Sender线程
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">flush</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+      log<span style="color:#f92672">.</span><span style="color:#a6e22e">trace</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Flushing accumulated records in producer.&#34;</span><span style="color:#f92672">);</span>
+      <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">beginFlush</span><span style="color:#f92672">();</span>
+      <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sender</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wakeup</span><span style="color:#f92672">();</span>
+      <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">accumulator</span><span style="color:#f92672">.</span><span style="color:#a6e22e">awaitFlushCompletion</span><span style="color:#f92672">();</span>
+      <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> InterruptException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Flush interrupted.&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
+      <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>③ <code>appendsInProgress</code> ：当前正在往 RecordAccumulator 中添加数据的线程数，自增</li>
+<li>④ <code>batchSize</code> ：指定每个 ProducerBatch 的大小，默认16kb，可以通过 <code>batch.size</code> 进行设置</li>
+<li>⑤ <code>compression</code> ：压缩的类型，默认为none，可以配置为gzip、snappy、lz4、zstd</li>
+<li>⑥ <code>lingerMs</code> ：用来指定生产者发送 ProducerBatch 之前等待更多消息加入ProducerBatch的时间，默认0，可以通过 <code>linger.ms</code> 进行设置。生产者客户端会在 ProducerBatch 被填满或等待时间超过linger.ms 值时发送出去。增大这个参数的值会增加消息的延迟，但是同时能提升一定的吞吐量</li>
+<li>⑦ <code>retryBackoffMs</code>：当发送消息失败时，重试的间隔时间，默认100，可以通过<code>retry.backoff.ms</code>配置</li>
+<li>⑧ <code>deliveryTimeoutMs</code>： 延迟时间，默认120秒，可以通过 <code>delivery.timeout.ms</code> 进行配置</li>
+<li>⑨ <code>free</code> ：ByteBuffer 对象复用池，在下面的 <code>2.3</code> 中 进行分析</li>
+<li>⑩ <code>batches</code> Topic-Partition 与 ProducerBatch 的映射关系 ,CopyOnWriteMap 线程安全</li>
+<li>⑪ <code>incomplete</code> 未发送完成的ProducerBatch 集合</li>
+<li>⑫ <code>drainIndex</code>：在使用 drain 方法批量导出 RecordBatch 时，为了防止饥饿，用此字段记录上次发送停止的位置，下次继续从此位置开始发送</li>
+</ul>
+<p><strong>2.1.1 append 方法</strong>
+KafkaProdcer 追加到消息到 RecordAccumulator 中</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> RecordAppendResult <span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>TopicPartition tp<span style="color:#f92672">,</span>
+                                     <span style="color:#66d9ef">long</span> timestamp<span style="color:#f92672">,</span>
+                                     <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> key<span style="color:#f92672">,</span>
+                                     <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> value<span style="color:#f92672">,</span>
+                                     Header<span style="color:#f92672">[]</span> headers<span style="color:#f92672">,</span>
+                                     Callback callback<span style="color:#f92672">,</span>
+                                     <span style="color:#66d9ef">long</span> maxTimeToBlock<span style="color:#f92672">,</span>
+                                     <span style="color:#66d9ef">boolean</span> abortOnNewBatch<span style="color:#f92672">,</span>
+                                     <span style="color:#66d9ef">long</span> nowMs<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//① 当前正在往 RecordAccumulator 中添加数据的线程数，cas 自增1
+</span><span style="color:#75715e"></span>        appendsInProgress<span style="color:#f92672">.</span><span style="color:#a6e22e">incrementAndGet</span><span style="color:#f92672">();</span>
+        ByteBuffer buffer <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>headers <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> headers <span style="color:#f92672">=</span> Record<span style="color:#f92672">.</span><span style="color:#a6e22e">EMPTY_HEADERS</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//② 通过 topic-partition 去 batches 中获取是否有正在使用的，有的话直接获取，没有的创建一个新的， Deque 是一个ArrayList。
+</span><span style="color:#75715e"></span>            Deque<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> dq <span style="color:#f92672">=</span> getOrCreateDeque<span style="color:#f92672">(</span>tp<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 通过synchronized 来保证线程安全
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>dq<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>closed<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> KafkaException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Producer closed while send in progress&#34;</span><span style="color:#f92672">);</span>
+                <span style="color:#75715e">//③ 尝试向 Deque 中最后一个ProducerBatch 追加 record，
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//   如果这个ProducerBatch 已经满了那么返回null
+</span><span style="color:#75715e"></span>                RecordAppendResult appendResult <span style="color:#f92672">=</span> tryAppend<span style="color:#f92672">(</span>timestamp<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> headers<span style="color:#f92672">,</span> callback<span style="color:#f92672">,</span> dq<span style="color:#f92672">,</span> nowMs<span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>appendResult <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                    <span style="color:#75715e">//④ 追加成功 直接返回
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">return</span> appendResult<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+
+            <span style="color:#75715e">//--------------------------到这里就是在 第③步 中追加失败了---------------------------
+</span><span style="color:#75715e"></span>
+            <span style="color:#75715e">// we don&#39;t have an in-progress record batch try to allocate a new batch
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//判断是否要丢弃这个batch ，是的话直接返回
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>abortOnNewBatch<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// Return a result that will cause another call to append.
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RecordAppendResult<span style="color:#f92672">(</span><span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//⑤ 开始创建 batch
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">byte</span> maxUsableMagic <span style="color:#f92672">=</span> apiVersions<span style="color:#f92672">.</span><span style="color:#a6e22e">maxUsableProduceMagic</span><span style="color:#f92672">();</span>
+            <span style="color:#75715e">//⑥ 计算这个batch 需要多少空间
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">int</span> size <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">batchSize</span><span style="color:#f92672">,</span> AbstractRecords<span style="color:#f92672">.</span><span style="color:#a6e22e">estimateSizeInBytesUpperBound</span><span style="color:#f92672">(</span>maxUsableMagic<span style="color:#f92672">,</span> compression<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> headers<span style="color:#f92672">));</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">trace</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Allocating a new {} byte message buffer for topic {} partition {}&#34;</span><span style="color:#f92672">,</span> size<span style="color:#f92672">,</span> tp<span style="color:#f92672">.</span><span style="color:#a6e22e">topic</span><span style="color:#f92672">(),</span> tp<span style="color:#f92672">.</span><span style="color:#a6e22e">partition</span><span style="color:#f92672">());</span>
+            <span style="color:#75715e">//⑦ 创建空间
+</span><span style="color:#75715e"></span>            buffer <span style="color:#f92672">=</span> free<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span>size<span style="color:#f92672">,</span> maxTimeToBlock<span style="color:#f92672">);</span>
+
+            <span style="color:#75715e">// Update the current time in case the buffer allocation blocked above.
+</span><span style="color:#75715e"></span>            nowMs <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">milliseconds</span><span style="color:#f92672">();</span>
+            <span style="color:#75715e">//加锁
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>dq<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// Need to check if producer is closed again after grabbing the dequeue lock.
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>closed<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> KafkaException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Producer closed while send in progress&#34;</span><span style="color:#f92672">);</span>
+
+                <span style="color:#75715e">//⑧ 再次尝试追加记录
+</span><span style="color:#75715e"></span>                RecordAppendResult appendResult <span style="color:#f92672">=</span> tryAppend<span style="color:#f92672">(</span>timestamp<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> headers<span style="color:#f92672">,</span> callback<span style="color:#f92672">,</span> dq<span style="color:#f92672">,</span> nowMs<span style="color:#f92672">);</span>
+                <span style="color:#75715e">//追加成功直接返回
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>appendResult <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// Somebody else found us a batch, return the one we waited for! Hopefully this doesn&#39;t happen often...
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">return</span> appendResult<span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                
+                <span style="color:#75715e">//⑨ 在新创建的ProducerBatch 中追加 Record ，并将其添加到 dp 集合中，和incomplete 集合中，详情见 `2.4` 小节
+</span><span style="color:#75715e"></span>                MemoryRecordsBuilder recordsBuilder <span style="color:#f92672">=</span> recordsBuilder<span style="color:#f92672">(</span>buffer<span style="color:#f92672">,</span> maxUsableMagic<span style="color:#f92672">);</span>
+                ProducerBatch batch <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ProducerBatch<span style="color:#f92672">(</span>tp<span style="color:#f92672">,</span> recordsBuilder<span style="color:#f92672">,</span> nowMs<span style="color:#f92672">);</span>
+                FutureRecordMetadata future <span style="color:#f92672">=</span> Objects<span style="color:#f92672">.</span><span style="color:#a6e22e">requireNonNull</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">tryAppend</span><span style="color:#f92672">(</span>timestamp<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> headers<span style="color:#f92672">,</span>
+                        callback<span style="color:#f92672">,</span> nowMs<span style="color:#f92672">));</span>
+
+                dq<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">);</span>
+                incomplete<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">);</span>
+
+                <span style="color:#75715e">// Don&#39;t deallocate this buffer in the finally block as it&#39;s being used in the record batch
+</span><span style="color:#75715e"></span>                buffer <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RecordAppendResult<span style="color:#f92672">(</span>future<span style="color:#f92672">,</span> dq<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 1 <span style="color:#f92672">||</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">isFull</span><span style="color:#f92672">(),</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>buffer <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                <span style="color:#75715e">//⑩ 释放内存
+</span><span style="color:#75715e"></span>                free<span style="color:#f92672">.</span><span style="color:#a6e22e">deallocate</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// appendsInProgress - 1
+</span><span style="color:#75715e"></span>            appendsInProgress<span style="color:#f92672">.</span><span style="color:#a6e22e">decrementAndGet</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① <code>incrementAndGet()</code> ：当前正在往 RecordAccumulator 中添加数据的线程数，cas 自增1</li>
+<li>② <code>getOrCreateDeque(tp)</code>：通过 topic-partition 去 batches 中获取是否有正在使用的，有的话直接获取，没有的创建一个新的， Deque 是一个 <code>ArrayList。通过</code> <code>synchronized</code> 来保证线程安全</li>
+<li>③ <code>tryAppend( )</code>：尝试向 Deque 中最后一个ProducerBatch 追加 record，如果这个ProducerBatch 已经满了那么返回null，详情见 <code>2.2</code> 小节</li>
+<li>④ 如果追加成功直接返回</li>
+<li>⑤ 追加不成功，开始创建 batch，再次尝试</li>
+<li>⑥ 计算这个 batch 需要多少空间</li>
+<li>⑦ <code>allocate</code>：使用BufferPool 创建空间，详情见 <code>2.3</code> 小节</li>
+<li>⑧ <code>tryAppend( )</code>：再次尝试追加记录</li>
+<li>⑨ 在新创建的ProducerBatch 中追加 Record ，并将其添加到 dp 集合中，和incomplete 集合中，详情见 <code>2.4</code> 小节</li>
+<li>⑩ <code>deallocate(buffer)</code> ：释放内存</li>
+</ul>
+<p><strong>RecordAccumulate 的组成图：</strong></p>
+<p><img src="http://img.sirann.cn//siran/20200421143129.png" alt=""></p>
+<p>对应上面的参数 <code>⑩ ：ConcurrentMap&lt;TopicPartition, Deque&lt;ProducerBatch&gt;&gt; batches</code></p>
+<ul>
+<li>每一条由 <code>KafkaProducer#send</code> 发送到 RecordAccumulate 中的消息，都会被加入到 ProducerBatch中，即ProducerBatch 是消息的集合，可以对其进行压缩。</li>
+<li><code>Deque&lt;ProducerBatch&gt;&gt;</code> 又是Batch的集合，通过 <code>Topic-Partition</code> 进行分类</li>
+</ul>
+<p>因为ProducerBatch 是非线程安全的，所以往ProducerBatch 追加消息的时候需要加锁。而这边又使用了多个 synchronized 块而不是一个完整的 synchronized 块</p>
+<blockquote>
+<p>这样做的原因是在<code>第 ⑦ 步</code>中通过BufferPool 申请空间的时候，会造成堵塞，会降低性能，所以就减少了锁的持有时间，做一定的优化。</p>
+<p>第二次加锁重试的原因是：为了防止多个线程并发的向 BufferPool 申请空间后，造成内部碎片。</p>
+<p>如下图中：线程1 发现 Deque 尾部的ProducerBatch 不够用创建了一个新的添加到Deque尾部，线程2也是，这样就导致ProducerBatch3 不可用了，这就出现了内存碎片。</p>
+<p><img src="http://img.sirann.cn//siran/20200421145833.png" alt=""></p>
+<p>然后在第二个synchronized 块中，再一次尝试追加record，发现已经创建了新的了，就会唤醒Sender 线程，发送消息然后释放内存。</p>
+</blockquote>
+<p>在RecordAccumulator 中还有两个比较重要的方法 <code>ready</code> 和 <code>drain</code></p>
+<p><strong>2.1.2 ready 方法</strong>
+在 RecordAccumulator 中追加消息如果所在 Deque 队列的最后一个 ProducerBatch 满了或者
+创建了一个新的ProducerBatch那么就会唤醒Sender线程。那么Sender 线程就会调用 <code>ready</code> 方法获取RecordAccumulator 符合发送的节点集合。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> ReadyCheckResult <span style="color:#a6e22e">ready</span><span style="color:#f92672">(</span>Cluster cluster<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> nowMs<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//① 通过Set 来保存满足发送要求的节点，最后包装到ReadyCheckResult中返回
+</span><span style="color:#75715e"></span>        Set<span style="color:#f92672">&lt;</span>Node<span style="color:#f92672">&gt;</span> readyNodes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashSet<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">// 记录下一次调用ready方法的时间间隔
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">long</span> nextReadyCheckDelayMs <span style="color:#f92672">=</span> Long<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//② 根据元数据中找不到Leader 节点的分区
+</span><span style="color:#75715e"></span>        Set<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> unknownLeaderTopics <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashSet<span style="color:#f92672">&lt;&gt;();</span>
+
+        <span style="color:#75715e">//条件4：是有有其他线程在等待BufferPool释放空间
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">boolean</span> exhausted <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">free</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queued</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//③ 从batches 中获取 tp 对应的Deque&lt;ProducerBatch&gt;列表，判断是否有满足的Batch可以发送
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Map<span style="color:#f92672">.</span><span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>TopicPartition<span style="color:#f92672">,</span> Deque<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;&gt;</span> entry <span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">batches</span><span style="color:#f92672">.</span><span style="color:#a6e22e">entrySet</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            Deque<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> deque <span style="color:#f92672">=</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getValue</span><span style="color:#f92672">();</span>
+            <span style="color:#75715e">//④加锁保证线程安全
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>deque<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//⑤ 从Deque头部获取 ProducerBatch 并且去元数据中查找Leader节点
+</span><span style="color:#75715e"></span>                ProducerBatch batch <span style="color:#f92672">=</span> deque<span style="color:#f92672">.</span><span style="color:#a6e22e">peekFirst</span><span style="color:#f92672">();</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>batch <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    TopicPartition part <span style="color:#f92672">=</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getKey</span><span style="color:#f92672">();</span>
+                    Node leader <span style="color:#f92672">=</span> cluster<span style="color:#f92672">.</span><span style="color:#a6e22e">leaderFor</span><span style="color:#f92672">(</span>part<span style="color:#f92672">);</span>
+                    <span style="color:#75715e">//找不到放入 unknownLeaderTopics 队列，之后会出发元数据更新，因为Kafka 是主读主写的模式。找不到Leader节点肯定无法发送的。
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>leader <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        unknownLeaderTopics<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>part<span style="color:#f92672">.</span><span style="color:#a6e22e">topic</span><span style="color:#f92672">());</span>
+                        <span style="color:#75715e">//能找到 Leader 节点 并且 不在 readyNodes 集合中，则需判断是否满足以下要求：
+</span><span style="color:#75715e"></span>                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>readyNodes<span style="color:#f92672">.</span><span style="color:#a6e22e">contains</span><span style="color:#f92672">(</span>leader<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>isMuted<span style="color:#f92672">(</span>part<span style="color:#f92672">,</span> nowMs<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                        <span style="color:#66d9ef">long</span> waitedTimeMs <span style="color:#f92672">=</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">waitedTimeMs</span><span style="color:#f92672">(</span>nowMs<span style="color:#f92672">);</span>
+                        <span style="color:#75715e">// 条件1：这个条件涉及到两个参数 retry.backoff.ms 重试的间隔时间以及 linger.ms
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">// 如果当前尝试次数&gt;0说明之前发送失败了，所以根据 retry.backoff.ms 重试间隔时间 判断是否需要堵塞等待
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">// 如果需要，timeToWaitMs 为true 需要堵塞，不会添加到 readyNodes 集合中
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">// 如果不需要，那么要根据 linger.ms 判断是否需要等待，这个参数的意思就是，当Sender 线程准备来获取可发送的ProducerBatch的时候，是否需要等待默认为0 ，如果增加这个值，那么会给消息带来一定的延迟，但是会增加吞吐量
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">boolean</span> backingOff <span style="color:#f92672">=</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">attempts</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0 <span style="color:#f92672">&amp;&amp;</span> waitedTimeMs <span style="color:#f92672">&lt;</span> retryBackoffMs<span style="color:#f92672">;</span>
+                        <span style="color:#66d9ef">long</span> timeToWaitMs <span style="color:#f92672">=</span> backingOff <span style="color:#f92672">?</span> retryBackoffMs <span style="color:#f92672">:</span> lingerMs<span style="color:#f92672">;</span>
+                        <span style="color:#75715e">//条件2：是否第一个ProducerBatch 满了或者有多个ProducerBatch
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">boolean</span> full <span style="color:#f92672">=</span> deque<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 1 <span style="color:#f92672">||</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">isFull</span><span style="color:#f92672">();</span>
+                        <span style="color:#75715e">//条件3：是否超时
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">boolean</span> expired <span style="color:#f92672">=</span> waitedTimeMs <span style="color:#f92672">&gt;=</span> timeToWaitMs<span style="color:#f92672">;</span>
+                        <span style="color:#75715e">//条件5： close ：Sender 准备关闭
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//条件6： flushInProgress 是否有线程正在等待flush 操作完成
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">boolean</span> sendable <span style="color:#f92672">=</span> full <span style="color:#f92672">||</span> expired <span style="color:#f92672">||</span> exhausted <span style="color:#f92672">||</span> closed <span style="color:#f92672">||</span> flushInProgress<span style="color:#f92672">();</span>
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>sendable <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>backingOff<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            readyNodes<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>leader<span style="color:#f92672">);</span>
+                        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                            <span style="color:#66d9ef">long</span> timeLeftMs <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span>timeToWaitMs <span style="color:#f92672">-</span> waitedTimeMs<span style="color:#f92672">,</span> 0<span style="color:#f92672">);</span>
+                            nextReadyCheckDelayMs <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>timeLeftMs<span style="color:#f92672">,</span> nextReadyCheckDelayMs<span style="color:#f92672">);</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ReadyCheckResult<span style="color:#f92672">(</span>readyNodes<span style="color:#f92672">,</span> nextReadyCheckDelayMs<span style="color:#f92672">,</span> unknownLeaderTopics<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① <code>readyNodes</code>：通过Set 来保存满足发送要求的节点，最后包装到ReadyCheckResult中返回</li>
+<li>② <code>unknownLeaderTopics</code></li>
+<li>③ 从 <code>batches</code> 中获取 tp 对应的<code>Deque&lt;ProducerBatch&gt;</code>列表，判断是否有满足的Batch可以发送</li>
+<li>④ 加锁保证线程安全</li>
+<li>⑤ 从Deque头部获取 ProducerBatch 并且去元数据中查找Leader节点
+<ul>
+<li>找不到放入 <code>unknownLeaderTopics</code> 队列，之后会出发元数据更新，因为Kafka 是主读主写的模式。找不到Leader节点肯定无法发送的。</li>
+</ul>
+</li>
+<li>⑥ 能找到 Leader 节点 并且 不在 readyNodes 集合中，则需判断是否满足以下要求：
+<ul>
+<li><code>条件1 backingOff</code>：这个条件涉及到两个参数 <code>retry.backoff.ms</code> 重试的间隔时间以及 <code>linger.ms</code>如果当前尝试次数&gt;0说明之前发送失败了，所以根据 retry.backoff.ms 重试间隔时间 判断是否需要堵塞等待，如果需要，timeToWaitMs 为true 需要堵塞，不会添加到 readyNodes 集合中，如果不需要，那么要根据 linger.ms 判断是否需要等待，这个参数的意思就是，当Sender 线程准备来获取可发送的ProducerBatch的时候，是否需要等待默认为0 ，如果增加这个值，那么会给消息带来一定的延迟，但是会增加吞吐量</li>
+<li><code>条件2 full</code>：是否第一个ProducerBatch 满了或者有多个ProducerBatch</li>
+<li><code>条件3 expired</code>：是否超时</li>
+<li><code>条件4 exhausted</code>：是有有其他线程在等待BufferPool释放空间</li>
+<li><code>条件5 close </code>：Sender 准备关闭</li>
+<li><code>条件6 flushInProgress()</code> ：是否有线程正在等待flush 操作完成</li>
+</ul>
+</li>
+</ul>
+<p><strong>2.1.3 drain 方法</strong>
+通过上面的 <code>ready( )</code> 方法后，Sender 线程就获得了可发送的 ProducerBatch 集合了，但是在 IO 层，生产者不管数据属于哪个TopicPartition 的，它只关心我需要发往哪个Node，所以Sender 线程会调用 drain 方法通过获得的 <code>Set&lt;Node&gt; nodes</code> 集合。重新映射成一个Map， <code>key</code> 是要发往的 <code>NodeId，</code> <code>value</code> 是 <code>ProducerBatch</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//① 其中这个maxSize 对应的是 max.request.size 生产者发送消息最大值，默认 1MB ，可以通过 
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;&gt;</span> <span style="color:#a6e22e">drain</span><span style="color:#f92672">(</span>Cluster cluster<span style="color:#f92672">,</span> Set<span style="color:#f92672">&lt;</span>Node<span style="color:#f92672">&gt;</span> nodes<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> maxSize<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> now<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>nodes<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span>
+            <span style="color:#66d9ef">return</span> Collections<span style="color:#f92672">.</span><span style="color:#a6e22e">emptyMap</span><span style="color:#f92672">();</span>
+
+        Map<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;&gt;</span> batches <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Node node <span style="color:#f92672">:</span> nodes<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//调用 drainBatchesForOneNode 方法
+</span><span style="color:#75715e"></span>            List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> ready <span style="color:#f92672">=</span> drainBatchesForOneNode<span style="color:#f92672">(</span>cluster<span style="color:#f92672">,</span> node<span style="color:#f92672">,</span> maxSize<span style="color:#f92672">,</span> now<span style="color:#f92672">);</span>
+            batches<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>node<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">(),</span> ready<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> batches<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+
+<span style="color:#66d9ef">private</span> List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">drainBatchesForOneNode</span><span style="color:#f92672">(</span>Cluster cluster<span style="color:#f92672">,</span> Node node<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> maxSize<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> now<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">int</span> size <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+        <span style="color:#75715e">//② 获取分区的详细信息
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>PartitionInfo<span style="color:#f92672">&gt;</span> parts <span style="color:#f92672">=</span> cluster<span style="color:#f92672">.</span><span style="color:#a6e22e">partitionsForNode</span><span style="color:#f92672">(</span>node<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">());</span>
+        List<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> ready <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">//③ 从上一次drain的位置开始 取模 算法这次的开始位置
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> start <span style="color:#f92672">=</span> drainIndex <span style="color:#f92672">=</span> drainIndex <span style="color:#f92672">%</span> parts<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//④ 获取这个位置的详细信息
+</span><span style="color:#75715e"></span>            PartitionInfo part <span style="color:#f92672">=</span> parts<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>drainIndex<span style="color:#f92672">);</span>
+            <span style="color:#75715e">//⑤ 通过这个 PartitionInfo 封装成新的 topic-partition映射关系
+</span><span style="color:#75715e"></span>            TopicPartition tp <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TopicPartition<span style="color:#f92672">(</span>part<span style="color:#f92672">.</span><span style="color:#a6e22e">topic</span><span style="color:#f92672">(),</span> part<span style="color:#f92672">.</span><span style="color:#a6e22e">partition</span><span style="color:#f92672">());</span>
+            <span style="color:#75715e">//⑥ 更新drainIndex
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">drainIndex</span> <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">drainIndex</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">%</span> parts<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">();</span>
+
+            <span style="color:#75715e">// Only proceed if the partition has no in-flight batches.
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isMuted<span style="color:#f92672">(</span>tp<span style="color:#f92672">,</span> now<span style="color:#f92672">))</span>
+                <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>
+            Deque<span style="color:#f92672">&lt;</span>ProducerBatch<span style="color:#f92672">&gt;</span> deque <span style="color:#f92672">=</span> getDeque<span style="color:#f92672">(</span>tp<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>deque <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>
+
+            <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>deque<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// invariant: !isMuted(tp,now) &amp;&amp; deque != null
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//⑦ 获取ProducerBatch
+</span><span style="color:#75715e"></span>                ProducerBatch first <span style="color:#f92672">=</span> deque<span style="color:#f92672">.</span><span style="color:#a6e22e">peekFirst</span><span style="color:#f92672">();</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>first <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>
+
+                <span style="color:#75715e">// first != null
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//⑧ 这个判断在ready方法中的条件一分析过。
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">boolean</span> backoff <span style="color:#f92672">=</span> first<span style="color:#f92672">.</span><span style="color:#a6e22e">attempts</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0 <span style="color:#f92672">&amp;&amp;</span> first<span style="color:#f92672">.</span><span style="color:#a6e22e">waitedTimeMs</span><span style="color:#f92672">(</span>now<span style="color:#f92672">)</span> <span style="color:#f92672">&lt;</span> retryBackoffMs<span style="color:#f92672">;</span>
+                <span style="color:#75715e">// Only drain the batch if it is not during backoff period.
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>backoff<span style="color:#f92672">)</span>
+                    <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>
+
+                <span style="color:#75715e">//⑨ 判断是否超过 maxSize(在①中有解释这个参数的含义)，满了就直接结束循环
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>size <span style="color:#f92672">+</span> first<span style="color:#f92672">.</span><span style="color:#a6e22e">estimatedSizeInBytes</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> maxSize <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>ready<span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">//⑩ 调用 shouldStopDrainBatchesForPartition 方法判断是否要停止 跟事务有关系，不是本次的重点
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>shouldStopDrainBatchesForPartition<span style="color:#f92672">(</span>first<span style="color:#f92672">,</span> tp<span style="color:#f92672">))</span>
+                        <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+
+                    <span style="color:#66d9ef">boolean</span> isTransactional <span style="color:#f92672">=</span> transactionManager <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">isTransactional</span><span style="color:#f92672">();</span>
+                    ProducerIdAndEpoch producerIdAndEpoch <span style="color:#f92672">=</span>
+                        transactionManager <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">producerIdAndEpoch</span><span style="color:#f92672">()</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                    ProducerBatch batch <span style="color:#f92672">=</span> deque<span style="color:#f92672">.</span><span style="color:#a6e22e">pollFirst</span><span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>producerIdAndEpoch <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">hasSequence</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                        batch<span style="color:#f92672">.</span><span style="color:#a6e22e">setProducerState</span><span style="color:#f92672">(</span>producerIdAndEpoch<span style="color:#f92672">,</span> transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">sequenceNumber</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">),</span> isTransactional<span style="color:#f92672">);</span>
+                        transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">incrementSequenceNumber</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">.</span><span style="color:#a6e22e">topicPartition</span><span style="color:#f92672">,</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">recordCount</span><span style="color:#f92672">);</span>
+                        log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Assigned producerId {} and producerEpoch {} to batch with base sequence &#34;</span> <span style="color:#f92672">+</span>
+                                <span style="color:#e6db74">&#34;{} being sent to partition {}&#34;</span><span style="color:#f92672">,</span> producerIdAndEpoch<span style="color:#f92672">.</span><span style="color:#a6e22e">producerId</span><span style="color:#f92672">,</span>
+                            producerIdAndEpoch<span style="color:#f92672">.</span><span style="color:#a6e22e">epoch</span><span style="color:#f92672">,</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">baseSequence</span><span style="color:#f92672">(),</span> tp<span style="color:#f92672">);</span>
+
+                        transactionManager<span style="color:#f92672">.</span><span style="color:#a6e22e">addInFlightBatch</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#75715e">//⑪ 调用 batch.close 方法关闭底层输出流，将MemoryRecords 设置为只读
+</span><span style="color:#75715e"></span>                    batch<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                    <span style="color:#75715e">//⑫ 将 batch的字节流添加到 size中
+</span><span style="color:#75715e"></span>                    size <span style="color:#f92672">+=</span> batch<span style="color:#f92672">.</span><span style="color:#a6e22e">records</span><span style="color:#f92672">().</span><span style="color:#a6e22e">sizeInBytes</span><span style="color:#f92672">();</span>
+                    <span style="color:#75715e">//⑬ 添加到ready集合中发送。
+</span><span style="color:#75715e"></span>                    ready<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>batch<span style="color:#f92672">);</span>
+                    <span style="color:#75715e">//⑭ 调用 ProducerBatch.drain 更新 drainedMs 字段
+</span><span style="color:#75715e"></span>                    batch<span style="color:#f92672">.</span><span style="color:#a6e22e">drained</span><span style="color:#f92672">(</span>now<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>start <span style="color:#f92672">!=</span> drainIndex<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> ready<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>    
+</code></pre></div><ul>
+<li>① <code>maxSize 参数</code> ：对应的是 <code>max.request.size</code> 生产者发送消息最大值，默认 1MB ，可以通过</li>
+<li>② 获取分区的详细信息</li>
+<li>③ 从上一次drain的位置开始 取模 算法这次的开始位置</li>
+<li>④ <code>PartitionInfo</code>：获取这个位置的详细信息
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PartitionInfo</span> <span style="color:#f92672">{</span>
+  <span style="color:#75715e">//topic
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String topic<span style="color:#f92672">;</span>
+  <span style="color:#75715e">//分区
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> partition<span style="color:#f92672">;</span>
+  <span style="color:#75715e">//leader 节点
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Node leader<span style="color:#f92672">;</span>
+  <span style="color:#75715e">//topic对应的replica 集合
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Node<span style="color:#f92672">[]</span> replicas<span style="color:#f92672">;</span>
+  <span style="color:#75715e">//ISR可用Node 集合
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Node<span style="color:#f92672">[]</span> inSyncReplicas<span style="color:#f92672">;</span>
+  <span style="color:#75715e">//OSR不可用Node 集合
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Node<span style="color:#f92672">[]</span> offlineReplicas<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span> 
+</code></pre></div></li>
+<li>⑤ 通过这个 PartitionInfo 封装成新的 <code>topic-partition</code> 映射关系</li>
+<li>⑥ 更新 <code>drainIndex</code></li>
+<li>⑦ 获取 <code>ProducerBatch</code></li>
+<li>⑧ 这个判断在 <code>ready( )</code> 方法中的 <code>条件一</code> 分析过。</li>
+<li>⑨ 判断是否超过 <code>maxSize(在①中有解释这个参数的含义)</code>，满了就直接结束循环</li>
+<li>⑩ 调用 <code>shouldStopDrainBatchesForPartition</code> 方法判断是否要停止，跟事务有关系，不是本次的重点</li>
+<li>⑪ 调用 <code>batch#close</code> 方法关闭底层输出流，将 MemoryRecords 设置为只读</li>
+<li>⑫ 将 batch 的字节流添加到 size中</li>
+<li>⑬ 添加到ready集合中发送。</li>
+<li>⑭ 调用 <code>ProducerBatch#drain</code> 方法，更新 drainedMs 字段</li>
+</ul>
+<h4 id="22-producerbatch">2.2 ProducerBatch</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ProducerBatch</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//追加记录最后的状态：Aborted、Failed、Successed
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">enum</span> FinalState <span style="color:#f92672">{</span> ABORTED<span style="color:#f92672">,</span> FAILED<span style="color:#f92672">,</span> SUCCEEDED <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> createdMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//① topic 与 partition 的映射关系
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">final</span> TopicPartition topicPartition<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//② 标识ProducerBatch 的状态的future， 没有实现Future 接口，而是使用了 CountDownLatch 来实现类似Future 的功能
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">final</span> ProduceRequestResult produceFuture<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//③ Thunk 对象集合 ，ProducerBatch 的内部类
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> List<span style="color:#f92672">&lt;</span>Thunk<span style="color:#f92672">&gt;</span> thunks <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+    <span style="color:#75715e">//④ MemoryRecords 对象 通过 builder 模式构建
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> MemoryRecordsBuilder recordsBuilder<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑤ 尝试发送当前ProducerBatch的次数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> AtomicInteger attempts <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AtomicInteger<span style="color:#f92672">(</span>0<span style="color:#f92672">);</span>
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">boolean</span> isSplitBatch<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//状态
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> AtomicReference<span style="color:#f92672">&lt;</span>FinalState<span style="color:#f92672">&gt;</span> finalState <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AtomicReference<span style="color:#f92672">&lt;&gt;(</span><span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+    <span style="color:#75715e">//⑥ 记录了当前保存的Record 个数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> recordCount<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑦ 最大record的字节数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> maxRecordSize<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑧ 最后一次尝试发送ProducerBatch的时间
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> lastAttemptMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑨ 最后一次追加record的时间
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> lastAppendTime<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑩ 在使用 drain 方法批量导出 RecordBatch 的时间
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> drainedMs<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑪是否正在重试
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> retry<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> reopened<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① <code>topicPartition</code> ：topic 与 partition 的映射关系</li>
+<li>② <code>produceFuture</code> ：标识ProducerBatch 的状态的future， 没有实现Future 接口，而是使用了</li>
+<li>③ <code>thunks</code> ： Thunk 对象集合 ，ProducerBatch 的内部类，这个thunk里面包装了每个消息的回调。</li>
+<li>④ <code>recordsBuilder</code>：MemoryRecords 对象 通过 builder 模式构建</li>
+<li>⑤ <code>attempts</code>：尝试发送当前ProducerBatch的次数</li>
+<li>⑥ <code>recordCount</code>：记录了当前保存的Record 个数</li>
+<li>⑦ <code>maxRecordSize</code>：最大record的字节数</li>
+<li>⑧ <code>lastAttemptMs</code>：最后一次尝试发送ProducerBatch的时间</li>
+<li>⑨ <code>lastAppendTime</code>：最后一次追加record的时间</li>
+<li>⑩ <code>drainedMs</code> ：在使用 drain 方法批量导出 RecordBatch 的时间</li>
+<li>⑪ <code>retry</code> : 是否正在重试</li>
+</ul>
+<p><strong>2.2.1 tryAppend 方法</strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> FutureRecordMetadata <span style="color:#a6e22e">tryAppend</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> timestamp<span style="color:#f92672">,</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> key<span style="color:#f92672">,</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> value<span style="color:#f92672">,</span> Header<span style="color:#f92672">[]</span> headers<span style="color:#f92672">,</span> Callback callback<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> now<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//① 估算一下剩余的值是否足够，不够不直接return
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>recordsBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">hasRoomFor</span><span style="color:#f92672">(</span>timestamp<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> headers<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//② 向MemoryRecords 中添加数据
+</span><span style="color:#75715e"></span>            Long checksum <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">recordsBuilder</span><span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span>timestamp<span style="color:#f92672">,</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> headers<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maxRecordSize</span> <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">maxRecordSize</span><span style="color:#f92672">,</span> AbstractRecords<span style="color:#f92672">.</span><span style="color:#a6e22e">estimateSizeInBytesUpperBound</span><span style="color:#f92672">(</span>magic<span style="color:#f92672">(),</span>
+                    recordsBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">compressionType</span><span style="color:#f92672">(),</span> key<span style="color:#f92672">,</span> value<span style="color:#f92672">,</span> headers<span style="color:#f92672">));</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lastAppendTime</span> <span style="color:#f92672">=</span> now<span style="color:#f92672">;</span>
+            <span style="color:#75715e">//创建FutureRecordMetadata对象
+</span><span style="color:#75715e"></span>            FutureRecordMetadata future <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FutureRecordMetadata<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">produceFuture</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">recordCount</span><span style="color:#f92672">,</span>
+                                                                   timestamp<span style="color:#f92672">,</span> checksum<span style="color:#f92672">,</span>
+                                                                   key <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> <span style="color:#f92672">-</span>1 <span style="color:#f92672">:</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">,</span>
+                                                                   value <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> <span style="color:#f92672">-</span>1 <span style="color:#f92672">:</span> value<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">,</span>
+                                                                   Time<span style="color:#f92672">.</span><span style="color:#a6e22e">SYSTEM</span><span style="color:#f92672">);</span>
+            <span style="color:#75715e">//③ 每一次调用send 方法，都会有一个CallBack 对象，用于该条消息的回调，thunk就是封装这个消息的回调，thunks就是消息回调对象的集合
+</span><span style="color:#75715e"></span>            thunks<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Thunk<span style="color:#f92672">(</span>callback<span style="color:#f92672">,</span> future<span style="color:#f92672">));</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">recordCount</span><span style="color:#f92672">++;</span>
+            <span style="color:#66d9ef">return</span> future<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 估算一下剩余的值是否足够，不够不直接return，详情见 <code>2.4</code> 小节</li>
+<li>② 向MemoryRecords 中添加数据，详情见 <code>2.4</code> 小节</li>
+<li>③ 每一次调用send 方法，都会有一个CallBack 对象，用于该条消息的回调，thunk就是封装这个消息的回调，thunks就是消息回调对象的集合，通过Sender 线程进行回调。</li>
+</ul>
+<hr>
+<h4 id="23-bufferpool">2.3 BufferPool</h4>
+<p>在 <code>2.1.1</code> 小节中的 <code>第⑦步</code>，<code>第⑩步</code> 类似这样的创建和释放 ByteBuffer 是比较耗费资源的，所以通过BufferPool 实现 <code>ByteBuffer</code> 对象池，这种技术在 <code>Netty</code> 中也有体现。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BufferPool</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String WAIT_TIME_SENSOR_NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;bufferpool-wait-time&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">//①
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> totalMemory<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//②
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> poolableSize<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//③ ReentrantLock 锁，因为会有多线程并发的分配和回收，所以要用锁进行控制
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ReentrantLock lock<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//④ 是 ArrayDeque&lt;ByteBuffer&gt; 队列，也就是说对象池是通过队列来实现的
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Deque<span style="color:#f92672">&lt;</span>ByteBuffer<span style="color:#f92672">&gt;</span> free<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑤ 条件队列：记录因申请不到足够空间而堵塞的线程，此队列中实际记录的是堵塞线程对应的Condition对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Deque<span style="color:#f92672">&lt;</span>Condition<span style="color:#f92672">&gt;</span> waiters<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//⑥
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> nonPooledAvailableMemory<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Metrics metrics<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Time time<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Sensor waitTime<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> closed<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>    
+</code></pre></div><ul>
+<li>① <code>totalMemory</code>：总大小，默认32MB， 可以通过<code>buffer.memory</code> 进行配置</li>
+<li>② <code>poolableSize</code>：每个ByteBuffer 的大小，也就是ProducerBatch 默认16kb，可以通过 <code>batch.size</code> 进行设置</li>
+<li>③ <code>lock</code>：ReentrantLock 锁，因为会有多线程并发的分配和回收，所以要用锁进行控制</li>
+<li>④ <code>free</code>：是 ArrayDeque<!-- raw HTML omitted --> 队列，也就是说对象池是通过队列来实现的</li>
+<li>⑤ <code>waiters</code>：条件队列：记录因申请不到足够空间而堵塞的线程，此队列中实际记录的是堵塞线程对应的Condition对象</li>
+<li>⑥ <code>nonPooledAvailableMemory</code>：可用的空间大小，totalMemory - free队列中全部的ByteBuffer大小</li>
+</ul>
+<p><code>注意</code>：通过 poolableSize 字段可以知道，BufferPool 只能对指定大小的ByteBuffer 进行复用，可以通过增大 <code>batch.size</code> 属性增加这个的复用对象的大小</p>
+<p><strong>2.3.1 allocate 方法</strong>
+申请ByteBuffer 也就是申请ProducerBatch，如果没有足够的内存分配会把当前线程塞入 <code>waiters</code> 条件队列堵塞，等待有线程释放了内存，然后唤醒。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> ByteBuffer <span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> size<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> maxTimeToBlockMs<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>size <span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">totalMemory</span><span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Attempt to allocate &#34;</span> <span style="color:#f92672">+</span> size
+                                               <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; bytes, but there is a hard limit of &#34;</span>
+                                               <span style="color:#f92672">+</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">totalMemory</span>
+                                               <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; on memory allocations.&#34;</span><span style="color:#f92672">);</span>
+
+        ByteBuffer buffer <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//① 加锁同步
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">();</span>
+
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">closed</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> KafkaException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Producer closed while allocating memory&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// check if we have a free buffer of the right size pooled
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//② 申请分配的是否是 poolableSize 指定大小的，并且 如果 free 中有空闲的ByteBuffer 直接获取返回
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>size <span style="color:#f92672">==</span> poolableSize <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">free</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">free</span><span style="color:#f92672">.</span><span style="color:#a6e22e">pollFirst</span><span style="color:#f92672">();</span>
+
+            <span style="color:#75715e">// now check if the request is immediately satisfiable with the
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// memory on hand or if we need to block
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//③ 不满足② 计算当前 free 队列中的空间
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">int</span> freeListSize <span style="color:#f92672">=</span> freeSize<span style="color:#f92672">()</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">poolableSize</span><span style="color:#f92672">;</span>
+
+            <span style="color:#75715e">//④ 未分配的可用空间 &gt; 所要分配的大小，也就是说有空间能进行分配，那么会进行分配
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nonPooledAvailableMemory</span> <span style="color:#f92672">+</span> freeListSize <span style="color:#f92672">&gt;=</span> size<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// we have enough unallocated or pooled memory to immediately
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// satisfy the request, but need to allocate the buffer
+</span><span style="color:#75715e"></span>                freeUp<span style="color:#f92672">(</span>size<span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nonPooledAvailableMemory</span> <span style="color:#f92672">-=</span> size<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// we are out of memory and will have to block
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//⑤ 不够则加入条件队列进行堵塞
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">int</span> accumulated <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                Condition moreMemory <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">.</span><span style="color:#a6e22e">newCondition</span><span style="color:#f92672">();</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">long</span> remainingTimeToBlockNs <span style="color:#f92672">=</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">.</span><span style="color:#a6e22e">toNanos</span><span style="color:#f92672">(</span>maxTimeToBlockMs<span style="color:#f92672">);</span>
+                    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">waiters</span><span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span>moreMemory<span style="color:#f92672">);</span>
+                    <span style="color:#75715e">// loop over and over until we have a buffer or have reserved
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// enough memory to allocate one
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>accumulated <span style="color:#f92672">&lt;</span> size<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#66d9ef">long</span> startWaitNs <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoseconds</span><span style="color:#f92672">();</span>
+                        <span style="color:#66d9ef">long</span> timeNs<span style="color:#f92672">;</span>
+                        <span style="color:#66d9ef">boolean</span> waitingTimeElapsed<span style="color:#f92672">;</span>
+                        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">//⑥ 堵塞 超时时间为 remainingTimeToBlockNs
+</span><span style="color:#75715e"></span>                            waitingTimeElapsed <span style="color:#f92672">=</span> <span style="color:#f92672">!</span>moreMemory<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">(</span>remainingTimeToBlockNs<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">NANOSECONDS</span><span style="color:#f92672">);</span>
+                        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                            <span style="color:#66d9ef">long</span> endWaitNs <span style="color:#f92672">=</span> time<span style="color:#f92672">.</span><span style="color:#a6e22e">nanoseconds</span><span style="color:#f92672">();</span>
+                            timeNs <span style="color:#f92672">=</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span>0L<span style="color:#f92672">,</span> endWaitNs <span style="color:#f92672">-</span> startWaitNs<span style="color:#f92672">);</span>
+                            recordWaitTime<span style="color:#f92672">(</span>timeNs<span style="color:#f92672">);</span>
+                        <span style="color:#f92672">}</span>
+
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">closed</span><span style="color:#f92672">)</span>
+                            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> KafkaException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Producer closed while allocating memory&#34;</span><span style="color:#f92672">);</span>
+
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>waitingTimeElapsed<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> TimeoutException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Failed to allocate memory within the configured max blocking time &#34;</span> <span style="color:#f92672">+</span> maxTimeToBlockMs <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; ms.&#34;</span><span style="color:#f92672">);</span>
+                        <span style="color:#f92672">}</span>
+
+                        remainingTimeToBlockNs <span style="color:#f92672">-=</span> timeNs<span style="color:#f92672">;</span>
+
+                        <span style="color:#75715e">// check if we can satisfy this request from the free list,
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">// otherwise allocate memory
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">//⑦ 有足够的空间分配了，则退出循环
+</span><span style="color:#75715e"></span>                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>accumulated <span style="color:#f92672">==</span> 0 <span style="color:#f92672">&amp;&amp;</span> size <span style="color:#f92672">==</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">poolableSize</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">free</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">// just grab a buffer from the free list
+</span><span style="color:#75715e"></span>                            buffer <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">free</span><span style="color:#f92672">.</span><span style="color:#a6e22e">pollFirst</span><span style="color:#f92672">();</span>
+                            accumulated <span style="color:#f92672">=</span> size<span style="color:#f92672">;</span>
+                        <span style="color:#75715e">//⑧ 否则先分配一部分，继续等待其他线程释放空间。
+</span><span style="color:#75715e"></span>                        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">// we&#39;ll need to allocate memory, but we may only get
+</span><span style="color:#75715e"></span>                            <span style="color:#75715e">// part of what we need on this iteration
+</span><span style="color:#75715e"></span>                            freeUp<span style="color:#f92672">(</span>size <span style="color:#f92672">-</span> accumulated<span style="color:#f92672">);</span>
+                            <span style="color:#66d9ef">int</span> got <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>size <span style="color:#f92672">-</span> accumulated<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nonPooledAvailableMemory</span><span style="color:#f92672">);</span>
+                            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nonPooledAvailableMemory</span> <span style="color:#f92672">-=</span> got<span style="color:#f92672">;</span>
+                            accumulated <span style="color:#f92672">+=</span> got<span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#75715e">// Don&#39;t reclaim memory on throwable since nothing was thrown
+</span><span style="color:#75715e"></span>                    accumulated <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// When this loop was not able to successfully terminate don&#39;t loose available memory
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nonPooledAvailableMemory</span> <span style="color:#f92672">+=</span> accumulated<span style="color:#f92672">;</span>
+                    <span style="color:#75715e">//⑨ 已经分配了空间 从条件队列中删除
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">waiters</span><span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span>moreMemory<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// signal any additional waiters if there is more memory left
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// over for them
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//⑩ 如果还有空间的 唤醒下一个线程
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nonPooledAvailableMemory</span> <span style="color:#f92672">==</span> 0 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">free</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">waiters</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isEmpty</span><span style="color:#f92672">())</span>
+                    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">waiters</span><span style="color:#f92672">.</span><span style="color:#a6e22e">peekFirst</span><span style="color:#f92672">().</span><span style="color:#a6e22e">signal</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// Another finally... otherwise find bugs complains
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//⑪ 释放锁，整个过程都是同步的。
+</span><span style="color:#75715e"></span>                lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>buffer <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">return</span> safeAllocateByteBuffer<span style="color:#f92672">(</span>size<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">else</span>
+            <span style="color:#66d9ef">return</span> buffer<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① <code>lock( )</code> ：加锁同步</li>
+<li>② 申请分配的是否是 <code>poolableSize</code> 指定大小的，并且 如果 free 中有空闲的 ByteBuffer 直接获取返回</li>
+<li>③ 不满足 <code>②</code> 计算当前 free 队列中的空间</li>
+<li>④ 未分配的可用空间 &gt; 所要分配的大小，也就是说有空间能进行分配，那么会进行分配</li>
+<li>⑤ 不够则加入条件队列进行堵塞</li>
+<li>⑥ 堵塞 超时时间为 <code>remainingTimeToBlockNs</code></li>
+<li>⑦ 有足够的空间分配了，则退出循环</li>
+<li>⑧ 否则先分配一部分，继续等待其他线程释放空间。</li>
+<li>⑨ 已经分配了空间 从条件队列中删除</li>
+<li>⑩ <code>signal( )</code>：如果还有空间的 唤醒下一个线程</li>
+<li>⑪ <code>unlock( )</code>：释放锁，整个过程都是同步的。</li>
+</ul>
+<p><strong>2.3.2 deallocate 方法</strong>
+相对的就是释放。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">deallocate</span><span style="color:#f92672">(</span>ByteBuffer buffer<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> size<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//① 加锁
+</span><span style="color:#75715e"></span>        lock<span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//② 释放是的 poolableSize 大小的，直接加入 free 队列中
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>size <span style="color:#f92672">==</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">poolableSize</span> <span style="color:#f92672">&amp;&amp;</span> size <span style="color:#f92672">==</span> buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">capacity</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">();</span>
+                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">free</span><span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//③ 不是的 poolableSize 大小的，不会进行复用，往 nonPooledAvailableMemory 添加
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nonPooledAvailableMemory</span> <span style="color:#f92672">+=</span> size<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//④ 线程间的通讯，唤醒条件队列中因空间不足而堵塞的线程
+</span><span style="color:#75715e"></span>            Condition moreMem <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">waiters</span><span style="color:#f92672">.</span><span style="color:#a6e22e">peekFirst</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>moreMem <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+                moreMem<span style="color:#f92672">.</span><span style="color:#a6e22e">signal</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+            lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>① 加锁</li>
+<li>② 释放是的 poolableSize 大小的，直接加入 free 队列中</li>
+<li>③ 不是的 poolableSize 大小的，不会进行复用，往 nonPooledAvailableMemory 添加</li>
+<li>④ 线程间的通讯，唤醒条件队列中因空间不足而堵塞的线程</li>
+</ul>
+<h4 id="24-memoryrecords">2.4 MemoryRecords</h4>
+<p>来开始填 <code>2.1.1append</code> 方法中第 <code>③</code> <code>⑧</code> <code>⑨</code> 步留下的坑，可以看到调用的是ProducerBatch 类中的 <code>tryAppend</code> 方法具体看 <code>2.2.1</code>中的第 <code>②</code> 步，而ProducerBatch 又是调用的 <code>MemoryReocrdsBuilder</code> 类中的 append 方法，而 MemoryReocrdsBuilder 类实际是操作 <code>MemoryRecords</code>，而MemoryRecords 底层又是使用的 <code>BufferPool</code> 创建的 ByteBuffer ，整体流程就串起来了。</p>
+<p><strong>整个tryAppend( )方法流程如下：</strong></p>
+<p><img src="http://img.sirann.cn//siran/20200421222840.png" alt=""></p>
+<ul>
+<li>① <code>KafkaProducer#send</code>：发送一条消息 假设发往Topic 是2 Partition是1，会先调用 <code>RecordAccumulator#tryAppend</code> 缓存起来 对应 <code>2.1.1</code></li>
+<li>② <code>RecordAccumulator</code> ：去获取是否是有对应的Deque，有直接获取，没有创建。</li>
+<li>③ <code>ProducerBatch#append</code> ：通过 MemoryReocrdsBuilder，往ByteBuffer 中添加记录</li>
+<li>④ <code>BufferPool</code>： 如果<code>第③步</code>添加成功直接返回，但是如果失败，则会 allocate 空间继续走<code>第③步</code></li>
+</ul>
+<p>所以呢这个 <code>MemoryReocrdsBuilder</code> 实际就是对 MemoryRecords 的包装进而操控 BufferPool 创建出来的 <code>ByteBuffer</code> 往里追加 record。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MemoryRecords</span> <span style="color:#66d9ef">extends</span> AbstractRecords <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//① java nio ByteBuffer
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ByteBuffer buffer<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//② 私有构造器
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">MemoryRecords</span><span style="color:#f92672">(</span>ByteBuffer buffer<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Objects<span style="color:#f92672">.</span><span style="color:#a6e22e">requireNonNull</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;buffer should not be null&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">buffer</span> <span style="color:#f92672">=</span> buffer<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">//③ MemoryRecordsBuilder builder 模式
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> MemoryRecordsBuilder <span style="color:#a6e22e">builder</span><span style="color:#f92672">(</span>ByteBuffer buffer<span style="color:#f92672">,</span>
+                                               <span style="color:#66d9ef">byte</span> magic<span style="color:#f92672">,</span>
+                                               CompressionType compressionType<span style="color:#f92672">,</span>
+                                               TimestampType timestampType<span style="color:#f92672">,</span>
+                                               <span style="color:#66d9ef">long</span> baseOffset<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">long</span> logAppendTime <span style="color:#f92672">=</span> RecordBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_TIMESTAMP</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>timestampType <span style="color:#f92672">==</span> TimestampType<span style="color:#f92672">.</span><span style="color:#a6e22e">LOG_APPEND_TIME</span><span style="color:#f92672">)</span>
+            logAppendTime <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">currentTimeMillis</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> builder<span style="color:#f92672">(</span>buffer<span style="color:#f92672">,</span> magic<span style="color:#f92672">,</span> compressionType<span style="color:#f92672">,</span> timestampType<span style="color:#f92672">,</span> baseOffset<span style="color:#f92672">,</span> logAppendTime<span style="color:#f92672">,</span>
+                RecordBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_PRODUCER_ID</span><span style="color:#f92672">,</span> RecordBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_PRODUCER_EPOCH</span><span style="color:#f92672">,</span> RecordBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_SEQUENCE</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span>
+                RecordBatch<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_PARTITION_LEADER_EPOCH</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>   
+</code></pre></div><ul>
+<li>① 可以看到MemoryRecords 就是对Java中的ByteBuffer 进行操作。</li>
+<li>② 私有构造器不允许外部使用</li>
+<li>③ 通过builder 模式创建 <code>MemoryRecordsBuilder</code>，通过 MemoryRecordsBuilder 对MemoryRecords 进行操作。</li>
+</ul>
+<p><strong>MemoryRecordsBuilder</strong>
+在MemoryRecordsBuilder 中两个输出类型的字段 <code>bufferStream</code> 和 <code>appendStream</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MemoryRecordsBuilder</span> <span style="color:#66d9ef">implements</span> AutoCloseable <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//① 对ByteBuffer的封装
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ByteBufferOutputStream bufferStream<span style="color:#f92672">;</span>
+    <span style="color:#75715e">//② 对bufferStream 的包装带有压缩功能
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> DataOutputStream appendStream<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> MemoryRecords builtRecords<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>    
+</code></pre></div><ul>
+<li>① <code>bufferStream</code> ： 继承java.io.OutputStream，当写入数据超出ByteBuffer 的时候自动扩容。</li>
+<li>② <code>appendStream</code> ： 通过 timestampType 字段选择的压缩算法，对 bufferStream的包装。</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">appendStream</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DataOutputStream<span style="color:#f92672">(</span>compressionType<span style="color:#f92672">.</span><span style="color:#a6e22e">wrapForOutput</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">bufferStream</span><span style="color:#f92672">,</span> magic<span style="color:#f92672">));</span>
+</code></pre></div><p><strong>Kafka 四种压缩算法性能结论：</strong>
+ZStandard有着最高的压缩比，相同的消息量占用最少的磁盘容量，因此带宽的占用也是比较少的，但是在TPS方面的表现并不抢眼，因此对于那些在乎磁盘和带宽资源的用户而言，配置ZStandard算法似乎是个不错的选择，但如果追求应用TPS，就目前的Kafka而言LZ4依然是最好的选择。
+<a href="https://www.cnblogs.com/huxi2b/p/10330607.html">参考自：Kafka 2.1.0压缩算法性能测试</a></p>
+<p>大致流程就分析完了，接下来会分析Sender线程是如何来RecordAccumulator中获取消息并且发送。</p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%80kafkaproducer/" data-toggle="tooltip" data-placement="top" title="Kafka 生产者（一）KafkaProducer">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/kafkatools/" data-toggle="tooltip" data-placement="top" title="KafkaTools">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/kafka-%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%80kafkaproducer/"><i class="fa fa-link"></i>Kafka 生产者（一）KafkaProducer</a></li>
+         
+        <li><a href="/blog/kafka-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/"><i class="fa fa-link"></i>Kafka 基础概念</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gateway（一）初始化 · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="spring, Jdk源码, 基础">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="Gateway（一）初始化" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/gateway%E4%B8%80%E5%88%9D%E5%A7%8B%E5%8C%96//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="1.简述 由于加入了公司的微服务组，最近在做一些网关方面的工作，由于公司使用了Gateway 作为网关的技术选型，所以只有自己充分了解才能在之后">
+  <meta property="og:description" content="1.简述 由于加入了公司的微服务组，最近在做一些网关方面的工作，由于公司使用了Gateway 作为网关的技术选型，所以只有自己充分了解才能在之后">
+  <meta name="twitter:description" content="1.简述 由于加入了公司的微服务组，最近在做一些网关方面的工作，由于公司使用了Gateway 作为网关的技术选型，所以只有自己充分了解才能在之后">
+  <meta property="og:description" content="1.简述 由于加入了公司的微服务组，最近在做一些网关方面的工作，由于公司使用了Gateway 作为网关的技术选型，所以只有自己充分了解才能在之后" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Gateway（一）初始化 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Gateway（一）初始化 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Gateway（一）初始化 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Gateway（一）初始化 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Gateway（一）初始化 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Gateway（一）初始化 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Gateway（一）初始化 logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="Gateway（一）初始化 logo" class="visible-xs visible-sm">
+                    <span class="sr-only">Gateway（一）初始化 - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Gateway（一）初始化</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年4月18日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            3300字 | 阅读大约需要7分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/gateway">gateway</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/gateway/"><i>#gateway</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="1简述">1.简述</h3>
+<p>由于加入了公司的微服务组，最近在做一些网关方面的工作，由于公司使用了Gateway 作为网关的技术选型，所以只有自己充分了解才能在之后的开发上得心应手。</p>
+<p>由于 Gateway 使用了 Reactor 来构建<code>非堵塞</code>的编程模型。自己对这一块不是很熟悉所以对自己也是一个挑战，尝试分析若有不妥之处，望见谅。</p>
+<p>下面是基于 <code>spring-cloud-gateway-2.1.x</code> 进行分析</p>
+<hr>
+<h3 id="2gateway-工作机制">2.Gateway 工作机制</h3>
+<p>Spring cloud gateway 的工作机制如下图所示：</p>
+<p><img src="/img/blog/spring/spring_cloud_gateway_diagram.png" alt=""></p>
+<p>流程大致如下：</p>
+<ol>
+<li>客户端发送请求 (Gateway Client)</li>
+<li>Gateway 接收到请求后，跟路由的Predicate 进行匹配。(Gateway Handler Mapping)</li>
+<li>如果匹配成功，发送到下游的 Filiter Chain (Gateway Web Handler)</li>
+<li>请求经过 Filter 过滤器链，执行 &ldquo;pre&rdquo; 处理逻辑，如修改请求头信息等。(Filter Chain)</li>
+<li>请求被转发至下游服务并返回响应(Proxied Service)</li>
+<li>响应会在经过 Filter Chain，执行 &ldquo;post&rdquo; 处理逻辑。(Filter Chain)</li>
+<li>向客户端响应应答。</li>
+</ol>
+<p><code>注意：如果在路由里没有定义端口，那么就会根据HTTP / HTTPS  默认获得 80 / 443 端口</code></p>
+<hr>
+<h3 id="3核心组件">3.核心组件</h3>
+<p>通过上面的工作机制可以知道，核心组件有以下几个：</p>
+<ul>
+<li>
+<p><code>Route</code>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span>
+<span style="color:#a6e22e">Route</span> <span style="color:#66d9ef">implements</span> Ordered <span style="color:#f92672">{</span>
+  
+  <span style="color:#75715e">//id，标识符，区别于其他 Route。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String id<span style="color:#f92672">;</span>
+  
+  <span style="color:#75715e">//destination uri，路由指向的目的地 uri，即客户端请求最终被转发的目的地。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> URI uri<span style="color:#f92672">;</span>
+  
+  <span style="color:#75715e">//order，用于多个 Route 之间的排序，数值越小排序越靠前，匹配优先级越高。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> order<span style="color:#f92672">;</span>
+  
+  <span style="color:#75715e">//predicate，谓语，表示匹配该 Route 的前置条件，即满足相应的条件才会被路由到目的地 uri。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> AsyncPredicate<span style="color:#f92672">&lt;</span>ServerWebExchange<span style="color:#f92672">&gt;</span> predicate<span style="color:#f92672">;</span>
+  
+  <span style="color:#75715e">//gateway filters，过滤器用于处理切面逻辑，如路由转发前修改请求头等。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> List<span style="color:#f92672">&lt;</span>GatewayFilter<span style="color:#f92672">&gt;</span> gatewayFilters<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>	
+</code></pre></div><p>可以看到，Route 和 Predicate 、Filter 是一种包含关系，即一个Route 下面可以有多个Predicate 和Filter ，Route会通过Order 进行排序，每个Route都是唯一的 通过Id 标识。</p>
+</li>
+<li>
+<p><code>Predicate</code>：</p>
+<p>在 Gateway 工作机制中，讲过当客户端发送请求过来的时候，首先会通过Predicate 进行匹配，匹配到才会进行下面的操作。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">AsyncPredicate</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">extends</span> Function<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">,</span> Publisher<span style="color:#f92672">&lt;</span>Boolean<span style="color:#f92672">&gt;&gt;</span> <span style="color:#f92672">{</span>
+  
+  <span style="color:#75715e">//① and ，与操作，即两个 Predicate 组成一个，需要同时满足。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">default</span> AsyncPredicate<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">and</span><span style="color:#f92672">(</span>AsyncPredicate<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> T<span style="color:#f92672">&gt;</span> other<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> AndAsyncPredicate<span style="color:#f92672">&lt;&gt;(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> other<span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+  
+  <span style="color:#75715e">//② negate，取反操作，即对 Predicate 匹配结果取反。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">default</span> AsyncPredicate<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">negate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> NegateAsyncPredicate<span style="color:#f92672">&lt;&gt;(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+  
+  <span style="color:#75715e">//③ or，或操作，即两个 Predicate 组成一个，只需满足其一。
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">default</span> AsyncPredicate<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">or</span><span style="color:#f92672">(</span>AsyncPredicate<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> T<span style="color:#f92672">&gt;</span> other<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> OrAsyncPredicate<span style="color:#f92672">&lt;&gt;(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> other<span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>①  and 默认方法（Java8 新特性）</code>：与操作，即两个 Predicate 组成一个，需要同时满足。</p>
+</li>
+<li>
+<p><code>②  negate</code> ：取反操作，即对 Predicate 匹配结果取反。</p>
+</li>
+<li>
+<p><code>③  or</code> ：或操作，即两个 Predicate 组成一个，只需满足其一。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>Filter</code>：</p>
+<p>通过Predicate 匹配成功后，就会经过过滤链，进行 &ldquo;pre&rdquo; 处理。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">GatewayFilter</span> <span style="color:#66d9ef">extends</span> ShortcutConfigurable <span style="color:#f92672">{</span>
+  
+  <span style="color:#75715e">/**
+</span><span style="color:#75715e">   * Name key.
+</span><span style="color:#75715e">   */</span>
+  String NAME_KEY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">;</span>
+  
+  <span style="color:#75715e">/**
+</span><span style="color:#75715e">   * Value key.
+</span><span style="color:#75715e">   */</span>
+  String VALUE_KEY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;value&#34;</span><span style="color:#f92672">;</span>
+  
+  Mono<span style="color:#f92672">&lt;</span>Void<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>ServerWebExchange exchange<span style="color:#f92672">,</span> GatewayFilterChain chain<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>到这里，Gateway 的核心组件就介绍完了。以官网的例子，来方便理解</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">spring:
+  cloud<span style="color:#f92672">:</span>
+    gateway<span style="color:#f92672">:</span>
+      routes<span style="color:#f92672">:</span>  <span style="color:#75715e">//① 配置route，可以有多个
+</span><span style="color:#75715e"></span>      <span style="color:#f92672">-</span> id<span style="color:#f92672">:</span> after_route <span style="color:#75715e">//② route id，用于表示route
+</span><span style="color:#75715e"></span>        uri<span style="color:#f92672">:</span> https<span style="color:#f92672">:</span><span style="color:#75715e">//example.org   //③ 此路由转发的目的地url
+</span><span style="color:#75715e"></span>        predicates<span style="color:#f92672">:</span>  <span style="color:#75715e">//④ 谓语，客户端传过来的请求满足此才能使用该路由
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">-</span> Cookie<span style="color:#f92672">=</span>mycookie<span style="color:#f92672">,</span>mycookievalue
+        filters<span style="color:#f92672">:</span> <span style="color:#75715e">//⑤ filter
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">-</span> AddRequestHeader<span style="color:#f92672">=</span>X<span style="color:#f92672">-</span>Request<span style="color:#f92672">-</span>Foo<span style="color:#f92672">,</span> Bar
+</code></pre></div><ul>
+<li>① 配置route，可以有多个</li>
+<li>② route id，用于表示route</li>
+<li>③ 此路由转发的目的地url</li>
+<li>④ 谓语，客户端传过来的请求满足此才能使用该路由</li>
+<li>⑤ filter</li>
+</ul>
+<p>跟上面的核心组件以及gateway流程结合起来看，应该能有一个很好的认识。接下来我们从Gateway启动初始化一步一步的进行分析</p>
+</li>
+</ul>
+<hr>
+<h4 id="4gateway-初始化">4.Gateway 初始化</h4>
+<p>由于Gateway是基于Springboot 构建的，所以会用到Springboot的自动装配。</p>
+<p>直接拿官方的例子来看一下Gateway 初始化加载了哪些组件。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//org.springframework.cloud.gateway.sample.GatewaySampleApplication
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@SpringBootConfiguration</span> 
+<span style="color:#a6e22e">@EnableAutoConfiguration</span> <span style="color:#75715e">//自动装配
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Import</span><span style="color:#f92672">(</span>AdditionalRoutes<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GatewaySampleApplication</span> <span style="color:#f92672">{</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		SpringApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>GatewaySampleApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>一个标准的Springboot 启动方式，因为Gateway 是通过Springboot构建的。</p>
+<p>直接看来一下Gateway 自动装配加载了些什么。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#960050;background-color:#1e0010">#</span> Auto Configure
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">boot</span><span style="color:#f92672">.</span><span style="color:#a6e22e">autoconfigure</span><span style="color:#f92672">.</span><span style="color:#a6e22e">EnableAutoConfiguration</span><span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayClassPathWarningAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span> <span style="color:#75715e">//重点关注
+</span><span style="color:#75715e"></span>org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayLoadBalancerClientAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayNoLoadBalancerClientAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayMetricsAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayRedisAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">discovery</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayDiscoveryClientAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">SimpleUrlHandlerMappingGlobalCorsAutoConfiguration</span><span style="color:#f92672">,</span><span style="color:#960050;background-color:#1e0010">\</span>
+org<span style="color:#f92672">.</span><span style="color:#a6e22e">springframework</span><span style="color:#f92672">.</span><span style="color:#a6e22e">cloud</span><span style="color:#f92672">.</span><span style="color:#a6e22e">gateway</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GatewayReactiveLoadBalancerClientAutoConfiguration</span>
+
+</code></pre></div><ul>
+<li><code>GatewayClassPathWarningAutoConfiguration</code>：由于Gateway是基于webflux的，这里判断导入的包是否是webflux</li>
+<li><code>GatewayRedisAutoConfiguration</code>：用于Redis限流</li>
+<li><code>GatewayLoadBalancerClientAutoConfiguration</code>：用于负载均衡</li>
+<li><code>GatewayAutoConfiguration</code>：核心配置类</li>
+</ul>
+<hr>
+<h4 id="5gatewayautoconfiguration">5.GatewayAutoConfiguration</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#75715e">//通过 spring.cloud.gateway.enabled 配置网关的开启与关闭。 默认是 打开的
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@ConditionalOnProperty</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spring.cloud.gateway.enabled&#34;</span><span style="color:#f92672">,</span> matchIfMissing <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@EnableConfigurationProperties</span>
+<span style="color:#a6e22e">@AutoConfigureBefore</span><span style="color:#f92672">({</span> HttpHandlerAutoConfiguration<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span>
+		WebFluxAutoConfiguration<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span> <span style="color:#f92672">})</span>
+<span style="color:#a6e22e">@AutoConfigureAfter</span><span style="color:#f92672">({</span> GatewayLoadBalancerClientAutoConfiguration<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span>
+		GatewayClassPathWarningAutoConfiguration<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span> <span style="color:#f92672">})</span>
+<span style="color:#a6e22e">@ConditionalOnClass</span><span style="color:#f92672">(</span>DispatcherHandler<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GatewayAutoConfiguration</span> <span style="color:#f92672">{</span>
+
+  <span style="color:#75715e">//用于构建Route的 Builder
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#66d9ef">public</span> RouteLocatorBuilder <span style="color:#a6e22e">routeLocatorBuilder</span><span style="color:#f92672">(</span>
+			ConfigurableApplicationContext context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RouteLocatorBuilder<span style="color:#f92672">(</span>context<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">//RouteDefinitionLocator 的实现类，用于从配置文件(Properties,yml) 获取Route配置
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#a6e22e">@ConditionalOnMissingBean</span>
+	<span style="color:#66d9ef">public</span> PropertiesRouteDefinitionLocator <span style="color:#a6e22e">propertiesRouteDefinitionLocator</span><span style="color:#f92672">(</span>
+			GatewayProperties properties<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#75715e">//RouteDefinitionLocator 的实现类，RouteDefinition 信息来自 GatewayProperties。
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> PropertiesRouteDefinitionLocator<span style="color:#f92672">(</span>properties<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">//RouteDefinitionLocator 的实现类，基于内存的存储器( 例如，内存 / Redis / MySQL 等 )读取、保存、删除路由配置。
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#a6e22e">@ConditionalOnMissingBean</span><span style="color:#f92672">(</span>RouteDefinitionRepository<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+	<span style="color:#66d9ef">public</span> InMemoryRouteDefinitionRepository <span style="color:#a6e22e">inMemoryRouteDefinitionRepository</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> InMemoryRouteDefinitionRepository<span style="color:#f92672">();</span>
+	<span style="color:#f92672">}</span>
+
+	<span style="color:#75715e">/*
+</span><span style="color:#75715e">	声明 beanrouteDefinitionLocator，使用 CompositeRouteDefinitionLocator 实现，它组合了多个 RouteDefinitionLocator 实例。
+</span><span style="color:#75715e">	这给用户（开发者）提供了可扩展的余地，用户可以根据需要扩展自己的 RouteDefinitionLocator，比如 RouteDefinition 可源自数据库。
+</span><span style="color:#75715e">	 */</span>
+	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#a6e22e">@Primary</span>
+	<span style="color:#66d9ef">public</span> RouteDefinitionLocator <span style="color:#a6e22e">routeDefinitionLocator</span><span style="color:#f92672">(</span>
+			List<span style="color:#f92672">&lt;</span>RouteDefinitionLocator<span style="color:#f92672">&gt;</span> routeDefinitionLocators<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> CompositeRouteDefinitionLocator<span style="color:#f92672">(</span>
+				Flux<span style="color:#f92672">.</span><span style="color:#a6e22e">fromIterable</span><span style="color:#f92672">(</span>routeDefinitionLocators<span style="color:#f92672">));</span>
+	<span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">//基于 RouteDefinitionLocator 的 RouteLocator 实现类。RouteDefinitionRouteLocator 从 RouteDefinitionLocator 获取 RouteDefinition ，转换成 Route
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#66d9ef">public</span> RouteLocator <span style="color:#a6e22e">routeDefinitionRouteLocator</span><span style="color:#f92672">(</span>GatewayProperties properties<span style="color:#f92672">,</span>
+			List<span style="color:#f92672">&lt;</span>GatewayFilterFactory<span style="color:#f92672">&gt;</span> gatewayFilters<span style="color:#f92672">,</span>
+			List<span style="color:#f92672">&lt;</span>RoutePredicateFactory<span style="color:#f92672">&gt;</span> predicates<span style="color:#f92672">,</span>
+			RouteDefinitionLocator routeDefinitionLocator<span style="color:#f92672">,</span>
+			<span style="color:#a6e22e">@Qualifier</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;webFluxConversionService&#34;</span><span style="color:#f92672">)</span> ConversionService conversionService<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RouteDefinitionRouteLocator<span style="color:#f92672">(</span>routeDefinitionLocator<span style="color:#f92672">,</span> predicates<span style="color:#f92672">,</span>
+				gatewayFilters<span style="color:#f92672">,</span> properties<span style="color:#f92672">,</span> conversionService<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">//监听route的更新
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#66d9ef">public</span> RouteRefreshListener <span style="color:#a6e22e">routeRefreshListener</span><span style="color:#f92672">(</span>
+			ApplicationEventPublisher publisher<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RouteRefreshListener<span style="color:#f92672">(</span>publisher<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+
+  <span style="color:#75715e">//FilteringWebHandler 通过创建请求对应的 Route 对应的 GatewayFilterChain 进行处理。
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#66d9ef">public</span> FilteringWebHandler <span style="color:#a6e22e">filteringWebHandler</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>GlobalFilter<span style="color:#f92672">&gt;</span> globalFilters<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> FilteringWebHandler<span style="color:#f92672">(</span>globalFilters<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+
+  
+  <span style="color:#75715e">//用于查找匹配到 Route ，并进行处理
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#66d9ef">public</span> RoutePredicateHandlerMapping <span style="color:#a6e22e">routePredicateHandlerMapping</span><span style="color:#f92672">(</span>
+			FilteringWebHandler webHandler<span style="color:#f92672">,</span> RouteLocator routeLocator<span style="color:#f92672">,</span>
+			GlobalCorsProperties globalCorsProperties<span style="color:#f92672">,</span> Environment environment<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RoutePredicateHandlerMapping<span style="color:#f92672">(</span>webHandler<span style="color:#f92672">,</span> routeLocator<span style="color:#f92672">,</span>
+				globalCorsProperties<span style="color:#f92672">,</span> environment<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+
+	<span style="color:#75715e">//是 Spring cloud gateway 模块提供的外部化配置类。
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#66d9ef">public</span> GatewayProperties <span style="color:#a6e22e">gatewayProperties</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> GatewayProperties<span style="color:#f92672">();</span>
+	<span style="color:#f92672">}</span>
+  
+  <span style="color:#75715e">//...省略一些内置的Filter 和 Predicate
+</span><span style="color:#75715e"></span>
+	<span style="color:#75715e">//初始化 NettyConfiguration  Netty配置类
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Configuration</span>
+	<span style="color:#a6e22e">@ConditionalOnClass</span><span style="color:#f92672">(</span>HttpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+	<span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NettyConfiguration</span> <span style="color:#f92672">{</span>
+
+		<span style="color:#a6e22e">@Bean</span>
+		<span style="color:#a6e22e">@ConditionalOnProperty</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spring.cloud.gateway.httpserver.wiretap&#34;</span><span style="color:#f92672">)</span>
+		<span style="color:#66d9ef">public</span> NettyWebServerFactoryCustomizer <span style="color:#a6e22e">nettyServerWiretapCustomizer</span><span style="color:#f92672">(</span>
+				Environment environment<span style="color:#f92672">,</span> ServerProperties serverProperties<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+			<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> NettyWebServerFactoryCustomizer<span style="color:#f92672">(</span>environment<span style="color:#f92672">,</span> serverProperties<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+				<span style="color:#a6e22e">@Override</span>
+				<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">customize</span><span style="color:#f92672">(</span>NettyReactiveWebServerFactory factory<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+					factory<span style="color:#f92672">.</span><span style="color:#a6e22e">addServerCustomizers</span><span style="color:#f92672">(</span>httpServer <span style="color:#f92672">-&gt;</span> httpServer<span style="color:#f92672">.</span><span style="color:#a6e22e">wiretap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">));</span>
+					<span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">customize</span><span style="color:#f92672">(</span>factory<span style="color:#f92672">);</span>
+				<span style="color:#f92672">}</span>
+			<span style="color:#f92672">};</span>
+		<span style="color:#f92672">}</span>
+
+		<span style="color:#75715e">//创建一个类型为 reactor.ipc.netty.http.client.HttpClient 的 Bean 对象。该 HttpClient 使用 Netty 实现的 Client 。
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">@Bean</span>
+		<span style="color:#a6e22e">@ConditionalOnMissingBean</span>
+		<span style="color:#66d9ef">public</span> HttpClient <span style="color:#a6e22e">gatewayHttpClient</span><span style="color:#f92672">(</span>HttpClientProperties properties<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+
+			<span style="color:#75715e">// configure pool resources
+</span><span style="color:#75715e"></span>			HttpClientProperties<span style="color:#f92672">.</span><span style="color:#a6e22e">Pool</span> pool <span style="color:#f92672">=</span> properties<span style="color:#f92672">.</span><span style="color:#a6e22e">getPool</span><span style="color:#f92672">();</span>
+
+			ConnectionProvider connectionProvider<span style="color:#f92672">;</span>
+			<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>pool<span style="color:#f92672">.</span><span style="color:#a6e22e">getType</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> DISABLED<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+				connectionProvider <span style="color:#f92672">=</span> ConnectionProvider<span style="color:#f92672">.</span><span style="color:#a6e22e">newConnection</span><span style="color:#f92672">();</span>
+			<span style="color:#f92672">}</span>
+			<span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>pool<span style="color:#f92672">.</span><span style="color:#a6e22e">getType</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> FIXED<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+				connectionProvider <span style="color:#f92672">=</span> ConnectionProvider<span style="color:#f92672">.</span><span style="color:#a6e22e">fixed</span><span style="color:#f92672">(</span>pool<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">(),</span>
+						pool<span style="color:#f92672">.</span><span style="color:#a6e22e">getMaxConnections</span><span style="color:#f92672">(),</span> pool<span style="color:#f92672">.</span><span style="color:#a6e22e">getAcquireTimeout</span><span style="color:#f92672">());</span>
+			<span style="color:#f92672">}</span>
+			<span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+				connectionProvider <span style="color:#f92672">=</span> ConnectionProvider<span style="color:#f92672">.</span><span style="color:#a6e22e">elastic</span><span style="color:#f92672">(</span>pool<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+			<span style="color:#f92672">}</span>
+
+			HttpClient httpClient <span style="color:#f92672">=</span> HttpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span>connectionProvider<span style="color:#f92672">)</span>
+					<span style="color:#f92672">.</span><span style="color:#a6e22e">tcpConfiguration</span><span style="color:#f92672">(</span>tcpClient <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+
+						<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>properties<span style="color:#f92672">.</span><span style="color:#a6e22e">getConnectTimeout</span><span style="color:#f92672">()</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+							tcpClient <span style="color:#f92672">=</span> tcpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">option</span><span style="color:#f92672">(</span>
+									ChannelOption<span style="color:#f92672">.</span><span style="color:#a6e22e">CONNECT_TIMEOUT_MILLIS</span><span style="color:#f92672">,</span>
+									properties<span style="color:#f92672">.</span><span style="color:#a6e22e">getConnectTimeout</span><span style="color:#f92672">());</span>
+						<span style="color:#f92672">}</span>
+
+						<span style="color:#75715e">// configure proxy if proxy host is set.
+</span><span style="color:#75715e"></span>						HttpClientProperties<span style="color:#f92672">.</span><span style="color:#a6e22e">Proxy</span> proxy <span style="color:#f92672">=</span> properties<span style="color:#f92672">.</span><span style="color:#a6e22e">getProxy</span><span style="color:#f92672">();</span>
+
+						<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>StringUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">hasText</span><span style="color:#f92672">(</span>proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">getHost</span><span style="color:#f92672">()))</span> <span style="color:#f92672">{</span>
+
+							tcpClient <span style="color:#f92672">=</span> tcpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">proxy</span><span style="color:#f92672">(</span>proxySpec <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+								ProxyProvider<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span> builder <span style="color:#f92672">=</span> proxySpec
+										<span style="color:#f92672">.</span><span style="color:#a6e22e">type</span><span style="color:#f92672">(</span>ProxyProvider<span style="color:#f92672">.</span><span style="color:#a6e22e">Proxy</span><span style="color:#f92672">.</span><span style="color:#a6e22e">HTTP</span><span style="color:#f92672">)</span>
+										<span style="color:#f92672">.</span><span style="color:#a6e22e">host</span><span style="color:#f92672">(</span>proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">getHost</span><span style="color:#f92672">());</span>
+
+								PropertyMapper map <span style="color:#f92672">=</span> PropertyMapper<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+
+								map<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span>proxy<span style="color:#f92672">::</span>getPort<span style="color:#f92672">).</span><span style="color:#a6e22e">whenNonNull</span><span style="color:#f92672">().</span><span style="color:#a6e22e">to</span><span style="color:#f92672">(</span>builder<span style="color:#f92672">::</span>port<span style="color:#f92672">);</span>
+								map<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span>proxy<span style="color:#f92672">::</span>getUsername<span style="color:#f92672">).</span><span style="color:#a6e22e">whenHasText</span><span style="color:#f92672">()</span>
+										<span style="color:#f92672">.</span><span style="color:#a6e22e">to</span><span style="color:#f92672">(</span>builder<span style="color:#f92672">::</span>username<span style="color:#f92672">);</span>
+								map<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span>proxy<span style="color:#f92672">::</span>getPassword<span style="color:#f92672">).</span><span style="color:#a6e22e">whenHasText</span><span style="color:#f92672">()</span>
+										<span style="color:#f92672">.</span><span style="color:#a6e22e">to</span><span style="color:#f92672">(</span>password <span style="color:#f92672">-&gt;</span> builder<span style="color:#f92672">.</span><span style="color:#a6e22e">password</span><span style="color:#f92672">(</span>s <span style="color:#f92672">-&gt;</span> password<span style="color:#f92672">));</span>
+								map<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span>proxy<span style="color:#f92672">::</span>getNonProxyHostsPattern<span style="color:#f92672">).</span><span style="color:#a6e22e">whenHasText</span><span style="color:#f92672">()</span>
+										<span style="color:#f92672">.</span><span style="color:#a6e22e">to</span><span style="color:#f92672">(</span>builder<span style="color:#f92672">::</span>nonProxyHosts<span style="color:#f92672">);</span>
+							<span style="color:#f92672">});</span>
+						<span style="color:#f92672">}</span>
+						<span style="color:#66d9ef">return</span> tcpClient<span style="color:#f92672">;</span>
+					<span style="color:#f92672">});</span>
+
+			HttpClientProperties<span style="color:#f92672">.</span><span style="color:#a6e22e">Ssl</span> ssl <span style="color:#f92672">=</span> properties<span style="color:#f92672">.</span><span style="color:#a6e22e">getSsl</span><span style="color:#f92672">();</span>
+			<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ssl<span style="color:#f92672">.</span><span style="color:#a6e22e">getTrustedX509CertificatesForTrustManager</span><span style="color:#f92672">().</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> 0
+					<span style="color:#f92672">||</span> ssl<span style="color:#f92672">.</span><span style="color:#a6e22e">isUseInsecureTrustManager</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+				httpClient <span style="color:#f92672">=</span> httpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">secure</span><span style="color:#f92672">(</span>sslContextSpec <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+					<span style="color:#75715e">// configure ssl
+</span><span style="color:#75715e"></span>					SslContextBuilder sslContextBuilder <span style="color:#f92672">=</span> SslContextBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">forClient</span><span style="color:#f92672">();</span>
+
+					X509Certificate<span style="color:#f92672">[]</span> trustedX509Certificates <span style="color:#f92672">=</span> ssl
+							<span style="color:#f92672">.</span><span style="color:#a6e22e">getTrustedX509CertificatesForTrustManager</span><span style="color:#f92672">();</span>
+					<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>trustedX509Certificates<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+						sslContextBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">trustManager</span><span style="color:#f92672">(</span>trustedX509Certificates<span style="color:#f92672">);</span>
+					<span style="color:#f92672">}</span>
+					<span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ssl<span style="color:#f92672">.</span><span style="color:#a6e22e">isUseInsecureTrustManager</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+						sslContextBuilder
+								<span style="color:#f92672">.</span><span style="color:#a6e22e">trustManager</span><span style="color:#f92672">(</span>InsecureTrustManagerFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">INSTANCE</span><span style="color:#f92672">);</span>
+					<span style="color:#f92672">}</span>
+
+					sslContextSpec<span style="color:#f92672">.</span><span style="color:#a6e22e">sslContext</span><span style="color:#f92672">(</span>sslContextBuilder<span style="color:#f92672">)</span>
+							<span style="color:#f92672">.</span><span style="color:#a6e22e">defaultConfiguration</span><span style="color:#f92672">(</span>ssl<span style="color:#f92672">.</span><span style="color:#a6e22e">getDefaultConfigurationType</span><span style="color:#f92672">())</span>
+							<span style="color:#f92672">.</span><span style="color:#a6e22e">handshakeTimeout</span><span style="color:#f92672">(</span>ssl<span style="color:#f92672">.</span><span style="color:#a6e22e">getHandshakeTimeout</span><span style="color:#f92672">())</span>
+							<span style="color:#f92672">.</span><span style="color:#a6e22e">closeNotifyFlushTimeout</span><span style="color:#f92672">(</span>ssl<span style="color:#f92672">.</span><span style="color:#a6e22e">getCloseNotifyFlushTimeout</span><span style="color:#f92672">())</span>
+							<span style="color:#f92672">.</span><span style="color:#a6e22e">closeNotifyReadTimeout</span><span style="color:#f92672">(</span>ssl<span style="color:#f92672">.</span><span style="color:#a6e22e">getCloseNotifyReadTimeout</span><span style="color:#f92672">());</span>
+				<span style="color:#f92672">});</span>
+			<span style="color:#f92672">}</span>
+
+			<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>properties<span style="color:#f92672">.</span><span style="color:#a6e22e">isWiretap</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+				httpClient <span style="color:#f92672">=</span> httpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">wiretap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+			<span style="color:#f92672">}</span>
+
+			<span style="color:#66d9ef">return</span> httpClient<span style="color:#f92672">;</span>
+		<span style="color:#f92672">}</span>
+    
+    <span style="color:#75715e">//...省略一些内置的Filter 和 Predicate
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span>
+</code></pre></div><ul>
+<li>
+<p><code>NettyConfiguration</code>：Netty 配置类</p>
+</li>
+<li>
+<p><code>GlobalFilter</code>：Filter的父接口，称为全局过滤器，初始化的一些Filter都是它的实现</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Bean</span>
+<span style="color:#66d9ef">public</span> RouteToRequestUrlFilter <span style="color:#a6e22e">routeToRequestUrlFilter</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RouteToRequestUrlFilter<span style="color:#f92672">();</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RouteToRequestUrlFilter</span> <span style="color:#66d9ef">implements</span> GlobalFilter<span style="color:#f92672">,</span> Ordered <span style="color:#f92672">{</span>
+    
+<span style="color:#f92672">}</span>
+</code></pre></div><p>还有很多，由于篇幅问题不一一举例，可自行查看。</p>
+</li>
+<li>
+<p><code>FilteringWebHandler</code>：在Gateway工作机制中提到过，一个请求过来，Gateway Handler Mapping 会跟Predicate 进行匹配，匹配成功后就是调用 FilteringWebHandler 来调用Filter Chain队请求进行处理。</p>
+</li>
+<li>
+<p><code>GatewayProperties</code>：用于加载配置文件配置的 RouteDefinition / FilterDefinition /PredicateDefinition</p>
+</li>
+<li>
+<p><code>RoutePredicateFactory</code>：Predicate 的父类</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Bean</span>
+<span style="color:#66d9ef">public</span> BeforeRoutePredicateFactory <span style="color:#a6e22e">beforeRoutePredicateFactory</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> BeforeRoutePredicateFactory<span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BeforeRoutePredicateFactory</span>
+      <span style="color:#66d9ef">extends</span> AbstractRoutePredicateFactory<span style="color:#f92672">&lt;</span>BeforeRoutePredicateFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">Config</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AbstractRoutePredicateFactory</span><span style="color:#f92672">&lt;</span>C<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">extends</span> AbstractConfigurable<span style="color:#f92672">&lt;</span>C<span style="color:#f92672">&gt;</span>
+      <span style="color:#66d9ef">implements</span> RoutePredicateFactory<span style="color:#f92672">&lt;</span>C<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>还有很多，由于篇幅问题不一一举例，可自行查看。</p>
+</li>
+<li>
+<p><code>RouteDefinitionLocator</code>：加载外置配置的父类。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//RouteDefinitionLocator 的实现类，RouteDefinition 信息来自 GatewayProperties。
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Bean</span>
+<span style="color:#a6e22e">@ConditionalOnMissingBean</span>
+<span style="color:#66d9ef">public</span> PropertiesRouteDefinitionLocator <span style="color:#a6e22e">propertiesRouteDefinitionLocator</span><span style="color:#f92672">(</span>
+          GatewayProperties properties<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> PropertiesRouteDefinitionLocator<span style="color:#f92672">(</span>properties<span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+  
+<span style="color:#75715e">//RouteDefinitionLocator 的实现类，基于内存的存储器( 例如，内存 / Redis / MySQL 等 )读取、保存、删除路由配置
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Bean</span>
+<span style="color:#a6e22e">@ConditionalOnMissingBean</span><span style="color:#f92672">(</span>RouteDefinitionRepository<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> InMemoryRouteDefinitionRepository <span style="color:#a6e22e">inMemoryRouteDefinitionRepository</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> InMemoryRouteDefinitionRepository<span style="color:#f92672">();</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><p>还有很多，由于篇幅问题不一一举例，可自行查看。</p>
+</li>
+<li>
+<p><code>RouteLocator</code>：加载编码配置</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Bean</span>
+<span style="color:#66d9ef">public</span> RouteLocator <span style="color:#a6e22e">customRouteLocator</span><span style="color:#f92672">(</span>RouteLocatorBuilder builder<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+   builder<span style="color:#f92672">.</span><span style="color:#a6e22e">routes</span><span style="color:#f92672">()</span>
+              <span style="color:#f92672">.</span><span style="color:#a6e22e">route</span><span style="color:#f92672">(</span>r <span style="color:#f92672">-&gt;</span> r<span style="color:#f92672">.</span><span style="color:#a6e22e">cookie</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mycookie&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;mycookievalue&#34;</span><span style="color:#f92672">)</span>
+                      <span style="color:#f92672">.</span><span style="color:#a6e22e">filters</span><span style="color:#f92672">(</span>f <span style="color:#f92672">-&gt;</span> f<span style="color:#f92672">.</span><span style="color:#a6e22e">addRequestHeader</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;X-Request-Foo&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;Bar&#34;</span><span style="color:#f92672">))</span>
+                      <span style="color:#f92672">.</span><span style="color:#a6e22e">uri</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;https://example.org&#34;</span><span style="color:#f92672">)</span>
+              <span style="color:#f92672">)</span>
+              <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div></li>
+<li>
+<p><code>RoutePredicateHandlerMapping</code>：在Gateway工作机制中提到过，一个请求过来，Gateway HandlerMapping 会跟Predicate 进行匹配</p>
+</li>
+<li>
+<p><code>GatewayWebfluxEndpoint</code>：提供管理网关的 HTTP API</p>
+</li>
+</ul>
+<hr>
+<p>到这里Gateway初始化的所有组件全部分析完毕，接下来会对所有的组件一一进行分析。在看一下这张图。会发现就是把这里的HanlderMapping、WebHandler 、Filter进行加载。</p>
+<p><img src="/img/blog/spring/spring_cloud_gateway_diagram.png" alt=""></p>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/spring-boot-%E6%B3%A8%E8%A7%A3-configurationproperties/" data-toggle="tooltip" data-placement="top" title="Spring Boot 注解 @ConfigurationProperties">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/gateway%E4%BA%8Croute/" data-toggle="tooltip" data-placement="top" title="Gateway（二）Route">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/spring-boot-%E6%B3%A8%E8%A7%A3-configurationproperties/"><i class="fa fa-link"></i>Spring Boot 注解 @ConfigurationProperties</a></li>
+         
+        <li><a href="/blog/spring-boot-additionallocation%E5%8F%82%E6%95%B0/"><i class="fa fa-link"></i>Spring Boot additional—location 参数</a></li>
+         
+        <li><a href="/blog/longadder-%E8%AF%A6%E8%A7%A3/"><i class="fa fa-link"></i>LongAdder 详解</a></li>
+         
+        <li><a href="/blog/condition-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>Condition 源码分析</a></li>
+         
+        <li><a href="/blog/priorityqueue-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"><i class="fa fa-link"></i>PriorityQueue 源码分析</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

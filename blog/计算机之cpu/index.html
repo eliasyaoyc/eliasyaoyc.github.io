@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>计算机之CPU · 技术分享</title>
+  <meta name="author" content="Siran Yao(姚毅晨)" />
+
+  
+  <meta name="keywords" content="计算机">
+  
+
+  <meta name="generator" content="Hugo 0.65.2" />
+
+  
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  
+  <link href="/css/animate.css" rel="stylesheet">
+
+  
+  
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+  
+
+  
+  <link href="/css/custom.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css" />
+
+  
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+  <link rel="shortcut icon" href="/img/1587537069710-removebg-preview.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/img/1587537069710-removebg-preview.png" />
+
+  
+  <link href="/css/owl.carousel.css" rel="stylesheet">
+  <link href="/css/owl.theme.css" rel="stylesheet">
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="拳拳到肉">
+
+  
+  <link rel="stylesheet" href="/css/prism.css" />
+
+  
+  <meta property="og:title" content="计算机之CPU" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8Bcpu//" />
+  <meta property="og:image" content="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" />
+  <meta property="og:image:alt" content="ServiceMesher Logo" />
+
+  
+  <meta name="description" content="CPU 的全称是 Central Processing Unit ，它是你的电脑中最硬件的组件">
+  <meta property="og:description" content="CPU 的全称是 Central Processing Unit ，它是你的电脑中最硬件的组件">
+  <meta name="twitter:description" content="CPU 的全称是 Central Processing Unit ，它是你的电脑中最硬件的组件">
+  <meta property="og:description" content="CPU 的全称是 Central Processing Unit ，它是你的电脑中最硬件的组件" />
+
+  
+  <meta name="referrer" content="never">
+
+  
+  
+  <script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?154337f0d95f0b110f98c1d5d7038895";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+
+
+  
+  
+
+</head>
+
+
+  <body>
+
+
+
+    <div id="all">
+
+        <header>
+
+          <div class="navbar-affixed-top" data-spy="affix" data-offset-top="200">
+
+    <div class="navbar navbar-default yamm" role="navigation" id="navbar">
+
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之CPU logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之CPU logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之CPU - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                      <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之CPU logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之CPU logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之CPU - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <a class="navbar-brand home" href="/">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之CPU logo" class="hidden-xs hidden-sm">
+                    <img src="/img/6a04b428gy1fzy78qjmomg206o06ojsg.gif" alt="计算机之CPU logo" class="visible-xs visible-sm">
+                    <span class="sr-only">计算机之CPU - 跳到主页</span>
+                </a>
+                <div class="navbar-buttons">
+                    <button type="button" class="navbar-toggle btn-template-main" data-toggle="collapse" data-target="#navigation">
+                        <span class="sr-only">切换导航</span>
+                        <i class="fa fa-align-justify"></i>
+                    </button>
+                </div>
+            </div>
+            
+
+            <div class="navbar-collapse collapse" id="navigation">
+                <ul class="nav navbar-nav navbar-right">
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/">主页</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/blog/">博客</a>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">文档 <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      
+                        <li><a href="https://www.elastic.co/">Elastic 官网</a></li>
+                      
+                        <li><a href="http://pulsar.apache.org/en/">Pulsar官网</a></li>
+                      
+                    </ul>
+                    
+                  </li>
+                  
+                  <li class="dropdown">
+                    
+                    <a href="/contact/">联系我</a>
+                    
+                  </li>
+                  
+                  
+                    <li>
+                        <a href="#modalSearch" data-toggle="modal" data-target="#modalSearch" style="outline: none;">
+                        <span class="hidden-sm hidden-md hidden-lg">搜索</span> <span id="searchGlyph" class="glyphicon glyphicon-search"></span>
+                    </a>
+                    </li>
+                  
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+
+<div id="modalSearch" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">博客搜索</h4>
+      </div>
+      <div class="modal-body">
+          
+<div class="aa-input-container" id="aa-input-container">
+    <input type="search" id="aa-search-input" class="aa-input-search" placeholder="输入文章标题或摘要" name="search" autocomplete="off" autofocus="autofocus"/>
+    <svg class="aa-input-icon" viewBox="654 -372 1664 1664">
+        <path d="M1806,332c0-123.3-43.8-228.8-131.5-316.5C1586.8-72.2,1481.3-116,1358-116s-228.8,43.8-316.5,131.5  C953.8,103.2,910,208.7,910,332s43.8,228.8,131.5,316.5C1129.2,736.2,1234.7,780,1358,780s228.8-43.8,316.5-131.5  C1762.2,560.8,1806,455.3,1806,332z M2318,1164c0,34.7-12.7,64.7-38,90s-55.3,38-90,38c-36,0-66-12.7-90-38l-343-342  c-119.3,82.7-252.3,124-399,124c-95.3,0-186.5-18.5-273.5-55.5s-162-87-225-150s-113-138-150-225S654,427.3,654,332  s18.5-186.5,55.5-273.5s87-162,150-225s138-113,225-150S1262.7-372,1358-372s186.5,18.5,273.5,55.5s162,87,225,150s113,138,150,225  S2062,236.7,2062,332c0,146.7-41.3,279.7-124,399l343,343C2305.7,1098.7,2318,1128.7,2318,1164z" />
+    </svg>
+</div>
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+<script>
+var client = algoliasearch("X4YB3WOBNV", "d2134c5a8d250e6d3246594240c45201");
+var index = client.initIndex("servicemesher");
+
+autocomplete('#aa-search-input',
+{ hint: false}, {
+    source: autocomplete.sources.hits(index, {hitsPerPage: 5}),
+    
+    displayKey: 'name',
+    
+    templates: {
+        
+        suggestion: function(suggestion) {
+            baseURL=""
+            baseURL=baseURL.substring(0,baseURL.length-1)
+            return '<span>' + '<a href="' + baseURL + suggestion.url+ '">' +
+                suggestion._highlightResult.title.value + '</a></span>'+
+                '<span>'+suggestion._highlightResult.summary.value+'</span>';
+        }
+    }
+});
+</script>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+        </header>
+
+        <div id="heading-breadcrumbs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>计算机之CPU</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div id="content">
+            <div class="container">
+
+                <div class="row">
+
+                    
+
+                    <div class="col-md-9" id="blog-post">
+                        <div class="well">
+                            <div class="author-category">
+                            <i class="fa fa-calendar-o">
+                            2020年3月14日
+                            </i>
+                            |
+                            
+                            作者 Siran
+                            
+                            
+                            
+                            |
+                            5100字 | 阅读大约需要11分钟
+                            </div>
+                            
+                            
+                            <div class="author-category">
+                            
+                            
+                            归档于 <a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba">计算机</a>
+                            
+                            |
+                            
+                            
+                            
+                            标签
+                            
+                            <a style="text-transform:capitalize" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/"><i>#计算机</i></a>
+                            
+                            </div>
+                            
+                            
+                        </div>
+                        <div id="post-content">
+                          <h3 id="cpu是什么">CPU是什么</h3>
+<p>CPU 的全称是 <code>Central Processing Unit</code>，它是你的电脑中最<code>硬核</code>的组件，这种说法一点不为过。CPU 是能够让你的计算机叫<code>计算机</code>的核心组件，但是它却不能代表你的电脑，CPU 与计算机的关系就相当于大脑和人的关系。它是一种小型的计算机芯片，它嵌入在台式机、笔记本电脑或者平板电脑的主板上。
+通过在单个计算机芯片上放置数十亿个微型晶体管来构建 CPU。 这些晶体管使它能够执行运行存储在系统内存中的程序所需的计算，也就是说 CPU 决定了你电脑的计算能力。</p>
+<hr>
+<h3 id="cpu-实际做什么">CPU 实际做什么</h3>
+<p>CPU 的核心是从程序或应用程序获取指令并执行计算。此过程可以分为三个关键阶段：<strong>提取，解码和执行</strong>。CPU从系统的 RAM 中提取指令，然后解码该指令的实际内容，然后再由 CPU 的相关部分执行该指令。</p>
+<blockquote>
+<p>RAM : 随机存取存储器（英语：Random Access Memory，缩写：<strong>RAM</strong>），也叫主存，是与 CPU 直接交换数据的内部存储器。它可以随时读写（刷新时除外），而且速度很快，通常作为操作系统或其他正在运行中的程序的<strong>临时数据存储介质</strong></p>
+</blockquote>
+<hr>
+<h3 id="cpu-的内部结构">CPU 的内部结构</h3>
+<p>说了这么多 CPU 的重要性，那么 CPU 的内部结构是什么呢？又是由什么组成的呢？下图展示了一般程序的运行流程（以 C 语言为例），可以说了解程序的运行流程是掌握程序运行机制的基础和前提。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/640.webp" alt="">
+在这个流程中，CPU 负责的就是解释和运行最终转换成机器语言的内容。</p>
+<p>CPU 主要由两部分构成：<code>控制单元</code> 和 <code>算术逻辑单元（ALU）</code></p>
+<ul>
+<li><strong>控制单元：从内存中提取指令并解码执行</strong></li>
+<li><strong>算数逻辑单元（ALU）：处理算数和逻辑运算</strong></li>
+</ul>
+<p>CPU 是计算机的心脏和大脑，它和内存都是由许多晶体管组成的电子部件。它接收数据输入，执行指令并处理信息。它与输入/输出（I / O）设备进行通信，这些设备向 CPU 发送数据和从 CPU 接收数据。</p>
+<p>从功能来看，CPU 的内部由<strong>寄存器、控制器、运算器和时钟</strong>四部分组成，各部分之间通过电信号连通。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/641.webp" alt=""></p>
+<ul>
+<li><code>寄存器</code>是中央处理器内的组成部分。它们可以用来暂存指令、数据和地址。可以将其看作是内存的一种。根据种类的不同，一个 CPU 内部会有 20 - 100个寄存器。</li>
+<li><code>控制器</code>负责把内存上的指令、数据读入寄存器，并根据指令的结果控制计算机</li>
+<li><code>运算器</code>负责运算从内存中读入寄存器的数据</li>
+<li><code>时钟</code> 负责发出 CPU 开始计时的时钟信号
+接下来简单解释一下内存，为什么说 CPU 需要讲一下内存呢，因为内存是与 CPU 进行沟通的桥梁。计算机所有程序的运行都是在内存中运行的，内存又被称为<code>主存</code>，其作用是存放 CPU 中的运算数据，以及与硬盘等外部存储设备交换的数据。只要计算机在运行中，CPU 就会把需要运算的数据调到主存中进行运算，当运算完成后CPU再将结果传送出来，主存的运行也决定了计算机的稳定运行。</li>
+</ul>
+<p>主存通过控制芯片与 CPU 进行相连，由可读写的元素构成，每个字节（1 byte = 8 bits）都带有一个地址编号，<strong>注意是一个字节，而不是一个位</strong>。CPU 通过地址从主存中读取数据和指令，也可以根据地址写入数据。注意一点：当计算机关机时，内存中的指令和数据也会被清除。</p>
+<hr>
+<h3 id="cpu-是寄存器的集合体">CPU 是寄存器的集合体</h3>
+<p>在 CPU 的四个结构中，我们程序员只需要了解<code>寄存器</code>就可以了，其余三个不用过多关注，为什么这么说？因为程序是把寄存器作为对象来描述的。</p>
+<p>说到寄存器，就不得不说到汇编语言，我大学是学信息管理与信息系统的，我就没有学过汇编这门课（就算有这门课也不会好好学hhhh），出来混总是要还的，要想作为一个硬核程序员，不能不了解这些概念。说到汇编语言，就不得不说到高级语言，说到高级语言就不得不牵扯出<code>语言</code>这个概念。</p>
+<hr>
+<h4 id="计算机语言">计算机语言</h4>
+<p>我们生而为人最明显的一个特征是我们能通过讲话来实现彼此的交流，但是计算机听不懂你说的话，你要想和他交流必须按照计算机指令来交换，这就涉及到语言的问题，计算机是由二进制构成的，它只能听的懂二进制也就是<code>机器语言</code>，但是普通人是无法看懂机器语言的，这个时候就需要一种电脑既能识别，人又能理解的语言，最先出现的就是<code>汇编语言</code>。但是汇编语言晦涩难懂，所以又出现了像是 C，C++，Java 的这种高级语言。</p>
+<p>所以计算机语言一般分为两种：低级语言（机器语言，汇编语言）和高级语言。使用高级语言编写的程序，经过编译转换成机器语言后才能运行，而汇编语言经过汇编器才能转换为机器语言。</p>
+<hr>
+<h4 id="汇编语言">汇编语言</h4>
+<p>首先来看一段用汇编语言表示的代码清单</p>
+<blockquote>
+<p>mov eax, dword ptr [ebp-8]   /* 把数值从内存复制到 eax */</p>
+<p>add eax, dword ptr [ebp-0Ch] /* 把 eax 的数值和内存的数值相加 */</p>
+<p>mov dword ptr [ebp-4], eax /* 把 eax 的数值（上一步的结果）存储在内存中*/</p>
+</blockquote>
+<p>这是采用汇编语言（assembly）编写程序的一部分。汇编语言采用 <code>助记符(memonic)</code> 来编写程序，每一个原本是电信号的机器语言指令会有一个与其对应的助记符，例如 <code>mov,add</code> 分别是数据的存储（move）和相加（addition）的简写。汇编语言和机器语言是一一对应的。这一点和高级语言有很大的不同，通常我们将汇编语言编写的程序转换为机器语言的过程称为 <code>汇编</code>；反之，机器语言转化为汇编语言的过程称为 <code>反汇编</code>。</p>
+<p>汇编语言能够帮助你理解计算机做了什么工作，机器语言级别的程序是通过<code>寄存器</code>来处理的，上面代码中的 <code>eax,ebp</code> 都是表示的寄存器，是 CPU 内部寄存器的名称，所以可以说 CPU 是一系列寄存器的集合体。在内存中的存储通过地址编号来表示，而寄存器的种类则通过名字来区分。</p>
+<p>不同类型的 CPU ，其内部寄存器的种类，数量以及寄存器存储的数值范围都是不同的。不过，根据功能的不同，可以将寄存器划分为下面这几类</p>
+<ul>
+<li><code>累加寄存器</code>	存储运行的数据和运算后的数据。</li>
+<li><code>标志寄存器</code>	用于反应处理器的状态和运算结果的某些特征以及控制指令的执行。</li>
+<li><code>程序计数器</code>	程序计数器是用于存放下一条指令所在单元的地址的地方。</li>
+<li><code>基址寄存器</code>	存储数据内存的起始位置</li>
+<li><code>变址寄存器</code>	存储基址寄存器的相对地址</li>
+<li><code>通用寄存器</code>	存储任意数据</li>
+<li><code>指令寄存器</code>	储存正在被运行的指令，CPU内部使用，程序员无法对该寄存器进行读写</li>
+<li><code>栈寄存器</code>	存储栈区域的起始位置
+其中<strong>程序计数器、累加寄存器、标志寄存器、指令寄存器和栈寄存器</strong>都只有一个，其他寄存器一般有多个。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/642.webp" alt=""></li>
+</ul>
+<hr>
+<h4 id="程序计数器">程序计数器</h4>
+<p><code>程序计数器(Program Counter)</code>是用来存储下一条指令所在单元的地址。</p>
+<p>程序执行时，PC的初值为程序第一条指令的地址，在顺序执行程序时，<code>控制器</code>首先按程序计数器所指出的指令地址从内存中取出一条指令，然后分析和执行该指令，同时将PC的值加1指向下一条要执行的指令。</p>
+<p>我们还是以一个事例为准来详细的看一下程序计数器的执行过程
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/643.webp" alt="">
+这是一段进行相加的操作，程序启动，在经过编译解析后会由操作系统把硬盘中的程序复制到内存中，示例中的程序是将 123 和 456 执行相加操作，并将结果输出到显示器上。由于使用机器语言难以描述，所以这是经过翻译后的结果，实际上每个指令和数据都可能分布在不同的地址上，但为了方便说明，把组成一条指令的内存和数据放在了一个内存地址上。</p>
+<p>地址 <code>0100</code> 是程序运行的起始位置。Windows 等操作系统把程序从硬盘复制到内存后，会将程序计数器作为设定为起始位置 0100，然后执行程序，每执行一条指令后，程序计数器的数值会增加1（或者直接指向下一条指令的地址），然后，CPU 就会根据程序计数器的数值，从内存中读取命令并执行，也就是说，<strong>程序计数器控制着程序的流程。</strong></p>
+<hr>
+<h4 id="条件分支和循环机制">条件分支和循环机制</h4>
+<p>我们都学过高级语言，高级语言中的条件控制流程主要分为三种：<code>顺序执行、条件分支、循环判断</code>三种，顺序执行是按照地址的内容顺序的执行指令。条件分支是根据条件执行任意地址的指令。循环是重复执行同一地址的指令。</p>
+<ul>
+<li>顺序执行的情况比较简单，每执行一条指令程序计数器的值就是 + 1。</li>
+<li>条件和循环分支会使程序计数器的值指向任意的地址，这样一来，程序便可以返回到上一个地址来重复执行同一个指令，或者跳转到任意指令。
+下面以条件分支为例来说明程序的执行过程（循环也很相似）
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/644.jpeg" alt="">
+程序的开始过程和顺序流程是一样的，CPU 从0100处开始执行命令，在0100和0101都是顺序执行，PC 的值顺序+1，执行到0102地址的指令时，判断0106寄存器的数值大于0，跳转（jump）到0104地址的指令，将数值输出到显示器中，然后结束程序，0103 的指令被跳过了，这就和我们程序中的 <code>if()</code> 判断是一样的，在不满足条件的情况下，指令会直接跳过。所以 PC 的执行过程也就没有直接+1，而是下一条指令的地址。</li>
+</ul>
+<hr>
+<h4 id="标志寄存器">标志寄存器</h4>
+<p>条件和循环分支会使用到 <code>jump（跳转指令）</code>，会根据当前的指令来判断是否跳转，上面我们提到了<code>标志寄存器</code>，无论当前累加寄存器的运算结果是正数、负数还是零，标志寄存器都会将其保存（也负责溢出和奇偶校验）</p>
+<blockquote>
+<p>溢出（overflow）：是指运算的结果超过了寄存器的长度范围</p>
+<p>奇偶校验（parity check）：是指检查运算结果的值是偶数还是奇数</p>
+</blockquote>
+<p>CPU 在进行运算时，标志寄存器的数值会根据当前运算的结果自动设定，运算结果的正、负和零三种状态由标志寄存器的三个位表示。标志寄存器的第一个字节位、第二个字节位、第三个字节位各自的结果都为1时，分别代表着正数、零和负数。
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/645.jpeg" alt="">
+CPU 的执行机制比较有意思，假设累加寄存器中存储的 XXX 和通用寄存器中存储的 YYY 做比较，执行比较的背后，CPU 的运算机制就会做减法运算。而无论减法运算的结果是正数、零还是负数，都会保存到标志寄存器中。结果为正表示 XXX 比 YYY 大，结果为零表示 XXX 和 YYY 相等，结果为负表示 XXX 比 YYY 小。程序比较的指令，实际上是在 CPU 内部做<code>减法</code>运算。</p>
+<hr>
+<h4 id="函数调用机制">函数调用机制</h4>
+<p>接下来，我们继续介绍函数调用机制，哪怕是高级语言编写的程序，函数调用处理也是通过把程序计数器的值设定成函数的存储地址来实现的。函数执行跳转指令后，必须进行返回处理，单纯的指令跳转没有意义，下面是一个实现函数跳转的例子
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/646.jpeg" alt="">
+图中将变量 a 和 b 分别赋值为 123 和 456 ，调用 MyFun(a,b) 方法，进行指令跳转。图中的地址是将 C 语言编译成机器语言后运行时的地址，由于1行 C 程序在编译后通常会变为多行机器语言，所以图中的地址是分散的。在执行完 MyFun(a,b)指令后，程序会返回到 MyFun(a,b) 的下一条指令，CPU 继续执行下面的指令。</p>
+<p>函数的调用和返回很重要的两个指令是 <code>call</code> 和 <code>return</code> 指令，再将函数的入口地址设定到程序计数器之前，call 指令会把调用函数后要执行的指令地址存储在名为栈的主存内。函数处理完毕后，再通过函数的出口来执行 return 指令。return 指令的功能是把保存在栈中的地址设定到程序计数器。MyFun 函数在被调用之前，0154 地址保存在栈中，MyFun 函数处理完成后，会把0154的地址保存在程序计数器中。这个调用过程如下
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/647.jpeg" alt="">
+在一些高级语言的条件或者循环语句中，函数调用的处理会转换成 call 指令，函数结束后的处理则会转换成 return 指令。</p>
+<hr>
+<h4 id="通过地址和索引实现数组">通过地址和索引实现数组</h4>
+<p>接下来我们看一下基址寄存器和变址寄存器，通过这两个寄存器，我们可以对主存上的特定区域进行划分，来实现类似数组的操作，首先，我们用十六进制数将计算机内存上的 00000000 - FFFFFFFF 的地址划分出来。那么，凡是该范围的内存地址，只要有一个 32 位的寄存器，便可查看全部地址。但如果想要想数组那样分割特定的内存区域以达到连续查看的目的的话，使用两个寄存器会更加方便。</p>
+<p>例如，我们用两个寄存器（基址寄存器和变址寄存器）来表示内存的值
+<img src="/img/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA/648.jpeg" alt=""></p>
+<p>这种表示方式很类似数组的构造，<code>数组</code>是指同样长度的数据在内存中进行连续排列的数据构造。用数组名表示数组全部的值，通过索引来区分数组的各个数据元素，例如: a[0] - a[4]，[]内的 0 - 4 就是数组的下标。</p>
+<h4 id="cpu-指令执行过程">CPU 指令执行过程</h4>
+<p>那么 CPU 是如何执行一条条的指令的呢？</p>
+<p>几乎所有的冯·诺伊曼型计算机的CPU，其工作都可以分为5个阶段：<strong>取指令、指令译码、执行指令、访存取数、结果写回。</strong></p>
+<ul>
+<li><code>取指令</code>阶段是将内存中的指令读取到 CPU 中寄存器的过程，程序寄存器用于存储下一条指令所在的地址</li>
+<li><code>指令译码</code>阶段，在取指令完成后，立马进入指令译码阶段，在指令译码阶段，指令译码器按照预定的指令格式，对取回的指令进行拆分和解释，识别区分出不同的指令类别以及各种获取操作数的方法。</li>
+<li><code>执行指令</code>阶段，译码完成后，就需要执行这一条指令了，此阶段的任务是完成指令所规定的各种操作，具体实现指令的功能。</li>
+<li><code>访问取数</code>阶段，根据指令的需要，有可能需要从内存中提取数据，此阶段的任务是：根据指令地址码，得到操作数在主存中的地址，并从主存中读取该操作数用于运算。</li>
+<li><code>结果写回</code>阶段，作为最后一个阶段，结果写回（Write Back，WB）阶段把执行指令阶段的运行结果数据“写回”到某种存储形式：结果数据经常被写到CPU的内部寄存器中，以便被后续的指令快速地存取；</li>
+</ul>
+<h3 id="总结">总结</h3>
+<p>本篇文章我们主要讲述了</p>
+<ul>
+<li>CPU 是什么，CPU 的重要性，CPU 执行程序的过程</li>
+<li>还讲述了 CPU 的内部结构，它的组成部分</li>
+<li>提到了汇编语言和高级语言</li>
+<li>提到了CPU 与 寄存器的关系</li>
+<li>提到了主要的寄存器的功能，程序计数器，标志寄存器，基址寄存器和变址寄存器</li>
+<li>还提到了函数调用机制是怎样的。</li>
+<li>CPU 指令的执行过程</li>
+</ul>
+<hr>
+<h4 id="转载于-java建造者-的微信公众号httpsmpweixinqqcoms__bizmzu2ndg0otgymamid2247484585idx1sn0d6c3ccf8cc5bec2fea80eb437213801chksmfc45f95acb32704c7dcc952a803e88e8a9b0e67c86d8c27abf4e6c776e48b1fcd770dd2dcc8dtoken909388294langzh_cnscene21wechat_redirect"><a href="https://mp.weixin.qq.com/s?__biz=MzU2NDg0OTgyMA==&amp;mid=2247484585&amp;idx=1&amp;sn=0d6c3ccf8cc5bec2fea80eb437213801&amp;chksm=fc45f95acb32704c7dcc952a803e88e8a9b0e67c86d8c27abf4e6c776e48b1fcd770dd2dcc8d&amp;token=909388294&amp;lang=zh_CN&amp;scene=21#wechat_redirect">转载于 Java建造者 的微信公众号</a></h4>
+
+                        </div>
+                        
+                        
+                        
+                        
+                        <ul class="pager blog-pager">
+                        
+                        <li class="previous">
+                        <a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%9F%BA%E7%A1%80/" data-toggle="tooltip" data-placement="top" title="计算机之基础">&larr; 上一篇</a>
+                        </li>
+                         
+                        <li class="next">
+                        <a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/" data-toggle="tooltip" data-placement="top" title="计算机之进程与线程">下一篇 &rarr;</a>
+                        </li>
+                        
+                        </ul>
+                        
+                        
+                        
+
+
+                    </div>
+                    
+
+                    
+
+                    
+
+                    <div class="col-md-3">
+
+                        
+
+                        <div class="panel panel-default sidebar-menu">
+     
+    <div class="panel-heading">
+     <h3 class="panel-title">相关文章</h3>
+    </div>
+    <div class="panel-body">
+     <ul class="nav nav-pills nav-stacked">
+        
+        <li><a href="/blog/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B9%8B%E5%9F%BA%E7%A1%80/"><i class="fa fa-link"></i>计算机之基础</a></li>
+         
+        <li><a href="/blog/%E8%87%AA%E5%AD%A6%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%8C%87%E5%8D%97/"><i class="fa fa-link"></i>自学计算机科学指南</a></li>
+         
+     </ul>
+    </div>
+     
+</div>
+
+
+
+
+
+<div class="panel panel-default sidebar-menu">
+
+    <div class="panel-heading">
+      <h3 class="panel-title">分类</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            
+            <li><a href="/categories/gateway"><i class="fa fa-navicon"></i>gateway (4)</a>
+            </li>
+            
+            <li><a href="/categories/guava"><i class="fa fa-navicon"></i>guava (1)</a>
+            </li>
+            
+            <li><a href="/categories/java"><i class="fa fa-navicon"></i>java (7)</a>
+            </li>
+            
+            <li><a href="/categories/jvm"><i class="fa fa-navicon"></i>jvm (2)</a>
+            </li>
+            
+            <li><a href="/categories/resilience4j"><i class="fa fa-navicon"></i>resilience4j (1)</a>
+            </li>
+            
+            <li><a href="/categories/skywalking"><i class="fa fa-navicon"></i>skywalking (2)</a>
+            </li>
+            
+            <li><a href="/categories/spring"><i class="fa fa-navicon"></i>spring (2)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%88%86%e5%b8%83%e5%bc%8f"><i class="fa fa-navicon"></i>分布式 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b"><i class="fa fa-navicon"></i>并发编程 (17)</a>
+            </li>
+            
+            <li><a href="/categories/%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97"><i class="fa fa-navicon"></i>消息队列 (22)</a>
+            </li>
+            
+            <li><a href="/categories/%e7%ae%97%e6%b3%95"><i class="fa fa-navicon"></i>算法 (3)</a>
+            </li>
+            
+            <li><a href="/categories/%e8%ae%a1%e7%ae%97%e6%9c%ba"><i class="fa fa-navicon"></i>计算机 (8)</a>
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+                        
+
+                    </div>
+                    
+
+                    
+
+                </div>
+                
+
+            </div>
+            
+        </div>
+        
+
+        <footer id="footer">
+    <div class="container">
+
+        
+        <div class="col-md-4 col-sm-6">
+            <h4>关于我</h4>
+
+            <p>想当程序员的程序员</p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+            <h4>友情连接</h4>
+
+            <p>&nbsp;<a href="https://www.theyann.xyz:8123/home.html"> theyann</a></p>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+        <div class="col-md-4 col-sm-6">
+
+             
+            <h4>最新博客</h4>
+
+            <div class="blog-entries">
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka Controller 模块（一）概述">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-controller-%E6%A8%A1%E5%9D%97%E4%B8%80%E6%A6%82%E8%BF%B0/">Kafka Controller 模块（一）概述</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">
+                            
+                            <img src="/img/blog/kafka/kafkaLogo.jpg" class="img-responsive" alt="Kafka 副本模块 ReplicaManager">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E5%89%AF%E6%9C%AC%E6%A8%A1%E5%9D%97-replicamanager/">Kafka 副本模块 ReplicaManager</a></h5>
+                    </div>
+                </div>
+                
+                <div class="item same-height-row clearfix">
+                    <div class="image same-height-always">
+                        <a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">
+                            
+                            <img src="/img/blog/banners/0069RVTdgy1fu1i0mvc5yj31ji15ob2b.jpg" class="img-responsive" alt="Kafka 时间轮 Java 版本实现">
+                            
+                        </a>
+                    </div>
+                    <div class="name same-height-always">
+                        <h5><a href="/blog/kafka-%E6%97%B6%E9%97%B4%E8%BD%AE-java-%E7%89%88%E6%9C%AC%E5%AE%9E%E7%8E%B0/">Kafka 时间轮 Java 版本实现</a></h5>
+                    </div>
+                </div>
+                
+            </div>
+
+            <hr class="hidden-md hidden-lg">
+             
+
+        </div>
+        
+
+        
+        <div class="col-md-4 col-sm-6 ">
+
+            <h4>联系</h4>
+
+            <p>个人微信</br>请备注姓名-公司信息</p><p><img src="/img/1.png"></p>
+      
+
+            <a href="/contact" class="btn btn-small btn-template-main">跳到联系页面</a>
+
+            <hr class="hidden-md hidden-lg hidden-sm">
+
+        </div>
+        
+        
+
+    </div>
+    
+</footer>
+
+
+
+
+
+
+
+<div id="copyright">
+    <div class="container">
+        <div class="col-md-12">
+            
+            <p class="pull-left">Copyright ©️ 2020, siran all rights reserved.</p>
+            
+            
+            <p class="pull-left">&nbsp;<a href="http://www.beian.miit.gov.cn/"> 苏ICP备20005919号</a></p>
+            
+            <p class="pull-right">
+                模板来自 <a href="https://bootstrapious.com/p/universal-business-e-commerce-template">Bootstrapious</a>.
+                
+
+                移植到 Hugo 来自 <a href="https://github.com/devcows/hugo-universal-theme">DevCows</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+    </div>
+    
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0/jquery.counterup.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-parallax/1.1.3/jquery-parallax.js"></script>
+<script src="/js/front.js"></script>
+
+
+<script src="/js/owl.carousel.min.js"></script>
+
+<script src="/js/prism.js"></script>
+
+
+<script src="/js/algoliasearch.min.js"></script>
+<script src="/js/autocomplete.min.js"></script>
+
+
+  </body>
+</html>

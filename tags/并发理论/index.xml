@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>并发理论 on 拳拳到肉</title>
+    <link>/tags/%E5%B9%B6%E5%8F%91%E7%90%86%E8%AE%BA/</link>
+    <description>Recent content in 并发理论 on 拳拳到肉</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh</language>
+    <lastBuildDate>Mon, 23 Mar 2020 11:37:42 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E5%B9%B6%E5%8F%91%E7%90%86%E8%AE%BA/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>println、sleep、Integer与线程安全的一些故事</title>
+      <link>/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/</link>
+      <pubDate>Mon, 23 Mar 2020 11:37:42 +0800</pubDate>
+      
+      <guid>/blog/printlnsleepinteger%E4%B8%8E%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E4%B8%80%E4%BA%9B%E6%95%85%E4%BA%8B/</guid>
+      <description>看到一篇文章增加了我对JMM的认知，故做此记录。 设计一个程序定义一个 boolean 型的 flag 并设置为 false。主线程一直循环，直到 flag 变为 true。 子线程休</description>
+    </item>
+    
+    <item>
+      <title>Java内存模型详解</title>
+      <link>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</link>
+      <pubDate>Sun, 08 Mar 2020 16:37:42 +0800</pubDate>
+      
+      <guid>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</guid>
+      <description>操作系统为了方便用户使用对硬件进行抽象，屏蔽各种细节的处理，而Java内存模型是在硬件内存模型上的更高层的抽象，它屏蔽了各种硬件和操作系统访问的差异性，保证了Java程序在各种平台下对内存的访问都能达到一致的效果。</description>
+    </item>
+    
+  </channel>
+</rss>
